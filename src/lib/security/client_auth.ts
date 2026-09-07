@@ -96,16 +96,25 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
   } catch (err: unknown) {
     const errObj = err as { code?: string; message?: string };
     const msg = errObj?.message || String(err);
-    console.warn('signInWithPopup failed:', msg);
-    // If popup fails due to browser restrictions (third-party storage, OperationError, popup blocked)
-    if (
+    const code = errObj?.code || '';
+    console.warn('signInWithPopup failed:', code, msg);
+    
+    // If popup fails due to browser restrictions (cross-origin iframe blocking, network-request-failed,
+    // third-party cookies partitioned, popup blocked, or operation-specific error):
+    const isFallbackCandidate =
+      code === 'auth/network-request-failed' ||
+      code === 'auth/popup-blocked' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/internal-error' ||
+      msg.includes('network-request-failed') ||
       msg.includes('operation-specific') ||
       msg.includes('OperationError') ||
-      errObj?.code === 'auth/popup-blocked' ||
-      errObj?.code === 'auth/cancelled-popup-request'
-    ) {
-      console.info('Switching to signInWithRedirect due to browser popup restrictions...');
+      msg.includes('popup');
+
+    if (isFallbackCandidate) {
+      console.info('Switching to signInWithRedirect due to browser popup/iframe restrictions...');
       await signInWithRedirect(auth, provider);
+      // Keep promise pending while browser navigates to Google
       return new Promise<{ idToken: string; user: User }>(() => {});
     }
     throw err;
@@ -217,6 +226,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
   const targetUrl = url.startsWith('/api') && apiBase ? `${apiBase}${url}` : url;
 
   return fetch(targetUrl, {
+    credentials: 'omit',
     ...options,
     headers,
   });

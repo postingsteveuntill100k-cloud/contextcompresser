@@ -185,7 +185,7 @@ export default function LandingOrAuthPage() {
           Turn months of conversations into searchable, reusable context. Connect your personal Gemini history, recover lost decisions, and create clean context packages for fresh AI workflows.
         </p>
 
-        {/* Auth Error Banner with Instant Bypass */}
+        {/* Auth Error Banner */}
         {error && (
           <div
             style={{
@@ -208,26 +208,10 @@ export default function LandingOrAuthPage() {
               <AlertCircle size={16} style={{ flexShrink: 0 }} />
               <span style={{ fontWeight: 500 }}>
                 {error.includes('operation-specific')
-                  ? 'Browser restricted popup window or third-party cookies.'
+                  ? 'Browser restricted popup window or third-party cookies. Switching to redirect...'
                   : error}
               </span>
             </div>
-            <button
-              onClick={handleDevSignIn}
-              style={{
-                alignSelf: 'flex-start',
-                backgroundColor: 'var(--error)',
-                color: '#ffffff',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Enter Alice Workspace Instantly (Demo Mode) →
-            </button>
           </div>
         )}
 

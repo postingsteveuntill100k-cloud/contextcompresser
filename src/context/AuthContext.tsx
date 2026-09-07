@@ -83,12 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let unsubscribeAuth: (() => void) | null = null;
 
-    // Strict 1000ms safety timeout: NEVER allow app to hang in loading state
+    // Generous 12000ms safety timeout: NEVER prematurely abort real auth handshakes
     const safetyTimer = setTimeout(() => {
       if (mounted) {
         setStatus((curr) => (curr === 'loading' ? 'unauthenticated' : curr));
       }
-    }, 1000);
+    }, 12000);
 
     const initAuth = async () => {
       const existingToken = getStoredToken();
@@ -119,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     `User (${redirectRes.user.uid.slice(0, 8)})`,
                 });
               }
+              clearTimeout(safetyTimer);
               setStatus('authenticated');
               return;
             }
@@ -137,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setToken(idToken);
               const profile = await fetchUserProfile();
               if (mounted) {
+                clearTimeout(safetyTimer);
                 if (profile) {
                   setStatus('authenticated');
                 } else {
