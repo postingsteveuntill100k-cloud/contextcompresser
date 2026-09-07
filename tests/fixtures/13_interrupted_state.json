@@ -1,0 +1,7 @@
+{
+  "jobId": "job-interrupted-001",
+  "status": "processing",
+  "processedCount": 15,
+  "totalCount": 50,
+  "checkpointIndex": 15
+}

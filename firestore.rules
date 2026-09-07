@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Deny access to any collection by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User-scoped data isolation
+    // Every private resource MUST be under /users/{userId}/
+    // Only the authenticated user matching userId has read/write privileges
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Conversations subcollection
+      match /conversations/{conversationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Messages within a conversation
+        match /messages/{messageId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+
+      // Raw imported archives
+      match /imports/{importId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Extracted structured memories (decisions, constraints, specs, failed attempts)
+      match /memories/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Generated context packages (Quick, Full, Dev Handoff)
+      match /context_packages/{packageId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Developer mode AST models & handoff specifications
+      match /dev_handoffs/{handoffId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Persistent retrieval index chunks & embeddings
+      match /retrieval_index/{chunkId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Audit and access logs
+      match /audit_logs/{logId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

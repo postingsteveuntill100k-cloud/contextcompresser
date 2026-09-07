@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+.env.local
+.env*.local
+service-account.json
+*.pem
+*.key
+.storage_data
+tests
+*.md

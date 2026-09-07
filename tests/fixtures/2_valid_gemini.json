@@ -1,0 +1,22 @@
+{
+  "conversations": [
+    {
+      "id": "gemini-convo-101",
+      "title": "Gemini Storage Strategy",
+      "messages": [
+        {
+          "id": "gmsg-1",
+          "role": "user",
+          "content": "Why did we decide against local disk storage for uploaded archives?",
+          "timestamp": 1710001000
+        },
+        {
+          "id": "gmsg-2",
+          "role": "model",
+          "content": "We rejected local disk storage because serverless Cloud Run instances are ephemeral. We selected Google Cloud Storage bucket with CMEK encryption for durability.",
+          "timestamp": 1710001015
+        }
+      ]
+    }
+  ]
+}

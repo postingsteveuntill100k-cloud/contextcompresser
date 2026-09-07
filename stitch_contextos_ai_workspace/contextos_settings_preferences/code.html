@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "outline": "#a38c82",
+          "surface-inset": "#0D0D0C",
+          "terracotta-glow": "#E08354",
+          "primary-fixed": "#ffdbcc",
+          "amber-subtle": "#2A211B",
+          "text-primary": "#F3F1ED",
+          "sage-subtle": "#1B221E",
+          "secondary-fixed": "#ffddb4",
+          "sage-utility": "#768A7E",
+          "tertiary-fixed": "#d2e8da",
+          "secondary-container": "#614009",
+          "primary-container": "#d97746",
+          "surface-container-lowest": "#0e0e0c",
+          "primary": "#ffb694",
+          "surface-container-low": "#1c1c1a",
+          "on-error": "#690005",
+          "hairline-subtle": "#222220",
+          "surface-elevated": "#262624",
+          "on-primary": "#571f00",
+          "secondary": "#efbe7d",
+          "on-primary-container": "#4d1b00",
+          "surface-variant": "#353532",
+          "surface-container-highest": "#353532",
+          "tertiary-container": "#82968a",
+          "on-background": "#e5e2de",
+          "surface-bright": "#3a3937",
+          "on-primary-fixed": "#351000",
+          "on-primary-fixed-variant": "#7a2f01",
+          "text-secondary": "#B5B3AD",
+          "on-tertiary": "#22342b",
+          "on-secondary": "#452b00",
+          "surface-container": "#20201e",
+          "surface-tint": "#ffb694",
+          "outline-variant": "#55433b",
+          "background": "#131312",
+          "tertiary": "#b6ccbe",
+          "surface-canvas": "#141413",
+          "on-secondary-fixed": "#291800",
+          "on-error-container": "#ffdad6",
+          "surface": "#131312",
+          "inverse-surface": "#e5e2de",
+          "surface-dim": "#131312",
+          "secondary-fixed-dim": "#efbe7d",
+          "primary-fixed-dim": "#ffb694",
+          "hairline": "#2C2C29",
+          "on-tertiary-fixed-variant": "#384b41",
+          "inverse-on-surface": "#31302e",
+          "on-surface-variant": "#dbc1b6",
+          "on-secondary-container": "#dcad6e",
+          "text-muted": "#75746E",
+          "error-container": "#93000a",
+          "inverse-primary": "#994619",
+          "on-tertiary-fixed": "#0d1f17",
+          "on-tertiary-container": "#1c2e25",
+          "on-surface": "#e5e2de",
+          "surface-panel": "#1E1E1C",
+          "error": "#ffb4ab",
+          "on-secondary-fixed-variant": "#614009",
+          "surface-container-high": "#2a2a28",
+          "tertiary-fixed-dim": "#b6ccbe",
+          "terracotta-accent": "#D97746"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "context-tray-w": "22rem",
+          "unit-10": "2.5rem",
+          "input-box-max-w": "46rem",
+          "unit-8": "2rem",
+          "unit-20": "5rem",
+          "unit-4": "1rem",
+          "unit-5": "1.25rem",
+          "unit-16": "4rem",
+          "reading-max-w": "48rem",
+          "unit-6": "1.5rem",
+          "unit-2": "0.5rem",
+          "sidebar-w": "16.5rem",
+          "unit-3": "0.75rem",
+          "unit-12": "3rem",
+          "unit-1": "0.25rem"
+        },
+        "fontFamily": {
+          "display-lg-mobile": [
+            "Newsreader"
+          ],
+          "body-lg": [
+            "Hanken Grotesk"
+          ],
+          "body-sm": [
+            "Hanken Grotesk"
+          ],
+          "headline-lg": [
+            "Newsreader"
+          ],
+          "label-sm": [
+            "JetBrains Mono"
+          ],
+          "display-lg": [
+            "Newsreader"
+          ],
+          "label-md": [
+            "JetBrains Mono"
+          ],
+          "code-snippet": [
+            "JetBrains Mono"
+          ],
+          "headline-sm": [
+            "Newsreader"
+          ],
+          "title-lg": [
+            "Hanken Grotesk"
+          ],
+          "body-md": [
+            "Hanken Grotesk"
+          ],
+          "headline-md": [
+            "Newsreader"
+          ],
+          "title-md": [
+            "Hanken Grotesk"
+          ]
+        },
+        "fontSize": {
+          "display-lg-mobile": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "400"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.03em",
+              "fontWeight": "400"
+            }
+          ],
+          "display-lg": [
+            "44px",
+            {
+              "lineHeight": "52px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "500"
+            }
+          ],
+          "code-snippet": [
+            "13px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "500"
+            }
+          ],
+          "title-lg": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "title-md": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-terracotta-accent selection:text-surface-canvas"><aside class="fixed left-0 top-0 h-full w-sidebar-w bg-surface-panel z-50 flex flex-col justify-between p-unit-5 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-unit-6"><div class="flex items-center gap-unit-3 px-unit-2"><img alt="Minimalist modern geometric icon for ContextOS: an elegant stylized open context aperture / layered knowledge prism mark in terracotta amber (#d97746) and warm ivory (#f3f1ee), vector mark, clean lines, high contrast on dark background. Design context: - Primary color: #d97746
+- Font: newsreader
+- Mode: dark
+- Roundness: rounded-md
+. The logo should be visually consistent with these brand tokens." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1X35MWDfgYDKfFsg2rsK4k2Zvym6mosJzxAIktfLge2ZFZZFoqS3AfikQJR4lFKevd99Bqse3HqEvEDghyyS9xaGVVPZLlIAt100vXkpg4LpcmwGUTUrWUfnv-vA2HGV5Q_9RXuAxnOVvITUzYcJio2KexRpUPRwORWBn88EJRWCVUzOnnbgPw9a4zi3qfYdhPFi-52Q03Bmz1oJBYCyZ6YIlsEUc-L4LeNDKCsQmCQo297qkDoiguCTA"/><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">ContextOS</span></div><nav class="flex flex-col gap-unit-1" data-active-classes="bg-surface-elevated text-text-primary font-semibold relative before:content-[''] before:absolute before:left-0 before:top-unit-2 before:bottom-unit-2 before:w-[2px] before:bg-terracotta-accent"><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="home" href="#">Home</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="ask-my-history" href="#">Ask My History</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="conversations" href="#">Conversations</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="projects" href="#">Projects</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="memory" href="#">Memory</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="decisions" href="#">Decisions</a><a aria-current="page" class="flex items-center px-unit-3 py-unit-2 rounded-lg transition-colors bg-surface-elevated text-text-primary font-semibold relative before:content-[''] before:absolute before:left-0 before:top-unit-2 before:bottom-unit-2 before:w-[2px] before:bg-terracotta-accent" data-path="generate-context" href="#">Generate Context</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="context-packages" href="#">Context Packages</a></nav></div><div class="flex flex-col gap-unit-4 pt-unit-4"><nav class="flex flex-col gap-unit-1" data-active-classes="bg-surface-elevated text-text-primary font-semibold"><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="developer-mode" href="#">Developer Mode</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="import-history" href="#">Import History</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="security-and-privacy" href="#">Security &amp; Privacy</a><a class="flex items-center px-unit-3 py-unit-2 rounded-lg text-text-secondary hover:bg-surface-elevated hover:text-text-primary transition-colors" data-path="settings" href="#">Settings</a></nav><div class="flex items-center gap-unit-3 px-unit-3 py-unit-2 rounded-lg bg-surface-canvas"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VjcVZZJYpd8YWxccnWltjGe5oJHMfSzi-ChsxeD38dDvo9-EulnzR6Cb0YWh1VGNs5dw0r5QjsZoeiht3YEhc2IzdOFqLuq-gXLhKTGhHOOt6tkPFsHAA6KsJnCxGFNp8Y9u9_8f_PdQh2IIgf1NBTag826_p2w5nH7ims_rLvT7KQPcvv_rNBVWi3cAyxix3ASw-0tuHQcaWnYi2H5vZt1zeux5umXMeWcolSZ-eLH2aZsBrQhKpueg"/><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md text-text-primary font-medium truncate">Abhinav</span><span class="font-body-sm text-body-sm text-text-muted truncate">Personal Vault</span></div></div></div></aside><div class="pl-sidebar-w min-h-screen flex flex-col"><header class="fixed top-0 left-sidebar-w right-0 h-14 bg-surface-panel/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-unit-8"><div class="flex items-center gap-unit-3 font-body-sm text-body-sm"><span class="text-text-muted">ContextOS</span><span class="text-text-muted">/</span><span class="text-text-primary font-medium">Generate Context</span></div><div class="flex items-center gap-unit-6 font-body-sm text-body-sm"><div class="flex items-center gap-unit-2 text-text-muted"><span class="h-1.5 w-1.5 rounded-full bg-sage-utility"></span><span>All conversations synced</span></div><button aria-label="Theme indicator" class="p-unit-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">dark_mode</span></button></div></header><main class="relative pt-14 w-full flex-1 bg-surface-canvas"><div class="flex flex-col w-full max-w-6xl mx-auto px-unit-8 py-unit-8 space-y-unit-12">
+<!-- Active Sidebar Nav Alignment Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('data-path') === 'settings') {
+          link.classList.add('bg-surface-elevated', 'text-text-primary', 'font-semibold', 'relative', "before:content-['']", 'before:absolute', 'before:left-0', 'before:top-unit-2', 'before:bottom-unit-2', 'before:w-[2px]', 'before:bg-terracotta-accent');
+          link.classList.remove('text-text-secondary');
+        } else {
+          link.classList.remove('bg-surface-elevated', 'text-text-primary', 'font-semibold', 'relative', "before:content-['']", 'before:absolute', 'before:left-0', 'before:top-unit-2', 'before:bottom-unit-2', 'before:w-[2px]', 'before:bg-terracotta-accent');
+        }
+      });
+    });
+  </script>
+<!-- Top Page Header -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-unit-6 pb-unit-8 border-b border-hairline">
+<div class="space-y-unit-2">
+<div class="flex items-center gap-unit-2">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-terracotta-accent animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-terracotta-accent uppercase tracking-widest">Preferences &amp; Configuration</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-text-primary tracking-tight font-normal">Settings</h1>
+<p class="font-body-lg text-body-lg text-text-secondary max-w-2xl leading-relaxed">
+        Configure how ContextOS synthesizes your AI history, formats portable briefings, and preserves your private knowledge vault.
+      </p>
+</div>
+<!-- Header Actions -->
+<div class="flex items-center gap-unit-3 shrink-0">
+<button class="px-unit-4 py-unit-2 rounded-lg bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-all duration-200 text-body-md font-body-md shadow-sm" id="btn-reset-defaults" type="button">
+        Reset to Defaults
+      </button>
+<button class="flex items-center gap-unit-2 px-unit-5 py-unit-2 rounded-lg bg-primary-container text-surface-canvas hover:bg-terracotta-glow transition-all duration-200 font-title-md text-title-md shadow-md" id="btn-save-settings" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Save Changes</span>
+</button>
+</div>
+</header>
+<!-- Save Toast Notification (Hidden by default) -->
+<div class="fixed bottom-unit-6 right-unit-8 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-unit-3 px-unit-5 py-unit-3 bg-surface-elevated rounded-xl shadow-xl text-text-primary" id="save-toast">
+<span class="material-symbols-outlined text-terracotta-accent">task_alt</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-text-primary">Preferences updated</span>
+<span class="font-label-sm text-label-sm text-text-muted">Changes synchronized to local storage vault</span>
+</div>
+</div>
+<div class="space-y-unit-16">
+<!-- Section 1: Tone & Synthesis Preference -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-unit-8 pb-unit-12 border-b border-hairline">
+<div class="lg:col-span-4 space-y-unit-2">
+<div class="flex items-center gap-unit-2 text-sage-utility">
+<span class="material-symbols-outlined text-[20px]">auto_read_play</span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Tone &amp; Synthesis</h2>
+</div>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed">
+          Tune how ContextOS drafts summaries, briefings, and answers to historical queries across deep conversational threads.
+        </p>
+</div>
+<div class="lg:col-span-8 space-y-unit-8">
+<!-- 1a: Voice & Delivery Dropdown -->
+<div class="flex flex-col gap-unit-2">
+<div class="flex justify-between items-baseline">
+<label class="font-title-md text-title-md text-text-primary" for="voice-delivery-btn">Voice &amp; Delivery</label>
+<span class="font-label-sm text-label-sm text-text-muted">NARRATIVE BIAS</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Select the default narrative tone for generated context documents.</p>
+<div class="relative mt-unit-1">
+<button aria-expanded="false" aria-haspopup="listbox" class="w-full flex items-center justify-between px-unit-4 py-unit-3 rounded-lg bg-surface-container-low text-text-primary hover:bg-surface-container transition-colors shadow-sm" id="voice-delivery-btn" type="button">
+<span class="font-body-md text-body-md text-text-primary" id="voice-selected-label">Calm &amp; Editorial (Human-readable executive prose, no jargon)</span>
+<span class="material-symbols-outlined text-text-muted text-[20px] transition-transform duration-200" id="voice-chevron">expand_more</span>
+</button>
+<ul class="hidden absolute z-30 w-full mt-unit-1 bg-surface-panel rounded-lg shadow-2xl py-unit-1 text-body-md font-body-md" id="voice-dropdown-menu" role="listbox">
+<li aria-selected="true" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-primary bg-surface-elevated cursor-pointer transition-colors" data-value="editorial" role="option">
+<span>Calm &amp; Editorial (Human-readable executive prose, no jargon)</span>
+<span class="material-symbols-outlined text-terracotta-accent text-[18px]">done</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="technical" role="option">
+<span>Dense &amp; Architectural (Engineering-first, precise function signatures)</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="socratic" role="option">
+<span>Socratic Dialogue (Preserves exploratory debates &amp; trade-offs)</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="concise" role="option">
+<span>Minimalist Bullet Summary (Key decisions &amp; outcomes only)</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- 1b: Context Compression Depth Slider -->
+<div class="flex flex-col gap-unit-3 pt-unit-2">
+<div class="flex justify-between items-baseline">
+<div>
+<label class="font-title-md text-title-md text-text-primary" for="compression-slider">Context Compression Depth</label>
+<p class="font-body-sm text-body-sm text-text-secondary">Controls how aggressively nuances and exploratory branches are compressed.</p>
+</div>
+<span class="font-label-md text-label-md px-unit-2 py-0.5 rounded bg-surface-container text-terracotta-accent" id="compression-state-badge">Balanced</span>
+</div>
+<div class="space-y-unit-2 pt-unit-2">
+<div class="relative flex items-center">
+<input class="w-full h-1.5 bg-surface-container rounded-full appearance-none cursor-pointer accent-terracotta-accent focus:outline-none" id="compression-slider" max="2" min="0" step="1" type="range" value="1"/>
+</div>
+<div class="flex justify-between text-text-muted font-label-sm text-label-sm pt-unit-1">
+<span class="cursor-pointer hover:text-text-primary" onclick="setCompression(0)">Compact (Essence only)</span>
+<span class="cursor-pointer text-text-primary font-medium" onclick="setCompression(1)">Balanced (Standard)</span>
+<span class="cursor-pointer hover:text-text-primary" onclick="setCompression(2)">Comprehensive (Full Rationale)</span>
+</div>
+</div>
+</div>
+<!-- 1c: Preserve Direct Quotes Toggle -->
+<div class="flex items-center justify-between pt-unit-2">
+<div class="space-y-unit-1 max-w-xl pr-unit-4">
+<span class="font-title-md text-title-md text-text-primary">Include Direct Historical Quotes</span>
+<p class="font-body-sm text-body-sm text-text-secondary">Embed original citations and verbatim dialogue turns in evidence panels.</p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-primary-container p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" id="toggle-quotes" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-canvas shadow-md transition duration-200 ease-in-out translate-x-5"></span>
+</button>
+</div>
+<!-- 1d: Highlight Abandoned Approaches Toggle -->
+<div class="flex items-center justify-between pt-unit-2">
+<div class="space-y-unit-1 max-w-xl pr-unit-4">
+<span class="font-title-md text-title-md text-text-primary">Flag Discarded Experiments &amp; Dead Ends</span>
+<p class="font-body-sm text-body-sm text-text-secondary">Explicitly document what was tried and failed so successor AI models avoid repeating mistakes.</p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-primary-container p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" id="toggle-deadends" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-canvas shadow-md transition duration-200 ease-in-out translate-x-5"></span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 2: Output Format & Export -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-unit-8 pb-unit-12 border-b border-hairline">
+<div class="lg:col-span-4 space-y-unit-2">
+<div class="flex items-center gap-unit-2 text-secondary">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Output &amp; Export</h2>
+</div>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed">
+          Define how portable context packages and prompt directives are structured for handoff to frontier models.
+        </p>
+</div>
+<div class="lg:col-span-8 space-y-unit-8">
+<!-- 2a: Default Export Format Dropdown -->
+<div class="flex flex-col gap-unit-2">
+<div class="flex justify-between items-baseline">
+<label class="font-title-md text-title-md text-text-primary" for="export-format-btn">Handoff Notation Format</label>
+<span class="font-label-sm text-label-sm text-text-muted">CLIPBOARD SYNTAX</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">The format used when copying packages to your clipboard or exporting files.</p>
+<div class="relative mt-unit-1">
+<button aria-expanded="false" aria-haspopup="listbox" class="w-full flex items-center justify-between px-unit-4 py-unit-3 rounded-lg bg-surface-container-low text-text-primary hover:bg-surface-container transition-colors shadow-sm" id="export-format-btn" type="button">
+<span class="font-body-md text-body-md text-text-primary" id="export-selected-label">Standard Markdown (.md) — Universal compatibility</span>
+<span class="material-symbols-outlined text-text-muted text-[20px] transition-transform duration-200" id="export-chevron">expand_more</span>
+</button>
+<ul class="hidden absolute z-30 w-full mt-unit-1 bg-surface-panel rounded-lg shadow-2xl py-unit-1 text-body-md font-body-md" id="export-dropdown-menu" role="listbox">
+<li aria-selected="true" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-primary bg-surface-elevated cursor-pointer transition-colors" data-value="markdown" role="option">
+<span>Standard Markdown (.md) — Universal compatibility</span>
+<span class="material-symbols-outlined text-terracotta-accent text-[18px]">done</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="xml" role="option">
+<span>Structured Anthropic XML (&lt;context&gt; / &lt;instructions&gt;)</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="json" role="option">
+<span>Normalized JSON Schema (LLM tools &amp; REST payloads)</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="plaintext" role="option">
+<span>Raw Clean Text (.txt)</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- 2b: Target Frontier Model Optimization (Segmented selection) -->
+<div class="flex flex-col gap-unit-3 pt-unit-2">
+<div class="flex justify-between items-baseline">
+<span class="font-title-md text-title-md text-text-primary">Model Prompt Tagging</span>
+<span class="font-label-sm text-label-sm text-text-muted">STRUCTURAL OPTIMIZATION</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Applies subtle structural tags tailored to your destination model's context window.</p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-unit-2 pt-unit-1" id="model-tag-group">
+<button class="model-tag-btn flex flex-col items-start p-unit-3 rounded-lg bg-surface-elevated text-text-primary transition-all duration-150 shadow-sm relative before:content-[''] before:absolute before:inset-x-2 before:bottom-0 before:h-[2px] before:bg-terracotta-accent" data-model="claude" type="button">
+<span class="font-title-md text-title-md text-text-primary flex items-center gap-unit-1">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent"></span>
+                Claude 3.5
+              </span>
+<span class="font-label-sm text-label-sm text-text-secondary mt-unit-1">XML Semantic Tagging</span>
+</button>
+<button class="model-tag-btn flex flex-col items-start p-unit-3 rounded-lg bg-surface-container-low text-text-secondary hover:text-text-primary hover:bg-surface-container transition-all duration-150 shadow-sm" data-model="gemini" type="button">
+<span class="font-title-md text-title-md flex items-center gap-unit-1">
+<span class="w-2 h-2 rounded-full bg-sage-utility"></span>
+                Gemini 1.5 Pro
+              </span>
+<span class="font-label-sm text-label-sm text-text-muted mt-unit-1">System Markdown Directives</span>
+</button>
+<button class="model-tag-btn flex flex-col items-start p-unit-3 rounded-lg bg-surface-container-low text-text-secondary hover:text-text-primary hover:bg-surface-container transition-all duration-150 shadow-sm" data-model="openai" type="button">
+<span class="font-title-md text-title-md flex items-center gap-unit-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                OpenAI GPT-4o
+              </span>
+<span class="font-label-sm text-label-sm text-text-muted mt-unit-1">Strict JSON / System Role</span>
+</button>
+</div>
+</div>
+<!-- 2c: Token Budget Slider with Metric Ring Visual -->
+<div class="flex flex-col gap-unit-3 pt-unit-2">
+<div class="flex justify-between items-baseline">
+<div>
+<label class="font-title-md text-title-md text-text-primary" for="token-budget-slider">Context Package Window Ceiling</label>
+<p class="font-body-sm text-body-sm text-text-secondary">Set upper token allowance for one-click context generation handoffs.</p>
+</div>
+<div class="flex items-center gap-unit-3">
+<span class="font-label-md text-label-md text-terracotta-accent bg-amber-subtle px-unit-3 py-1 rounded" id="token-budget-label">2,400 tokens / 30%</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-unit-4 rounded-xl flex items-center gap-unit-6 shadow-sm">
+<!-- Inline SVG Gauge Chart under 2KB -->
+<div class="relative w-14 h-14 shrink-0 flex items-center justify-center">
+<svg class="w-14 h-14 transform -rotate-90" viewbox="0 0 48 48">
+<circle class="text-surface-container-high" cx="24" cy="24" fill="none" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-terracotta-accent transition-all duration-200" cx="24" cy="24" fill="none" id="token-svg-ring" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="87.92" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute font-label-sm text-label-sm font-semibold text-text-primary" id="token-percentage">30%</span>
+</div>
+<div class="flex-1 space-y-unit-2">
+<input class="w-full h-1.5 bg-surface-container rounded-full appearance-none cursor-pointer accent-terracotta-accent focus:outline-none" id="token-budget-slider" max="8000" min="800" step="200" type="range" value="2400"/>
+<div class="flex justify-between text-text-muted font-label-sm text-label-sm">
+<span>800 tokens (Snappy)</span>
+<span>4,000 tokens</span>
+<span>8,000 tokens (Extended)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2d: Auto-Wrap Continuation Directive Toggle -->
+<div class="flex items-center justify-between pt-unit-2">
+<div class="space-y-unit-1 max-w-xl pr-unit-4">
+<span class="font-title-md text-title-md text-text-primary">Pre-pend Model Kickoff Directive</span>
+<p class="font-body-sm text-body-sm text-text-secondary">Automatically inject a calibrated role prompt header at the top of copied briefings.</p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-primary-container p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" id="toggle-kickoff" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-canvas shadow-md transition duration-200 ease-in-out translate-x-5"></span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Privacy & Knowledge Vault -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-unit-8 pb-unit-12 border-b border-hairline">
+<div class="lg:col-span-4 space-y-unit-2">
+<div class="flex items-center gap-unit-2 text-sage-utility">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Privacy &amp; Vault</h2>
+</div>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed">
+          Local-first security and cryptographic sandboxing parameters protecting your ongoing transcripts.
+        </p>
+</div>
+<div class="lg:col-span-8 space-y-unit-8">
+<!-- 3a: Automatic PII & Secret Redaction Toggle -->
+<div class="flex items-center justify-between">
+<div class="space-y-unit-1 max-w-xl pr-unit-4">
+<div class="flex items-center gap-unit-2">
+<span class="font-title-md text-title-md text-text-primary">Sanitize API Keys &amp; Personal Credentials</span>
+<span class="font-label-sm text-label-sm text-sage-utility bg-sage-subtle px-unit-2 py-0.5 rounded">RECOMMENDED</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Locally masks tokens, email addresses, private keys, and passwords before generating export packages.</p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-primary-container p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" id="toggle-pii" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-canvas shadow-md transition duration-200 ease-in-out translate-x-5"></span>
+</button>
+</div>
+<!-- 3b: Offline Vector Processing Toggle -->
+<div class="flex items-center justify-between pt-unit-2">
+<div class="space-y-unit-1 max-w-xl pr-unit-4">
+<span class="font-title-md text-title-md text-text-primary">Client-Side In-Browser Embeddings</span>
+<p class="font-body-sm text-body-sm text-text-secondary">Use local WebAssembly vectors to ensure zero transcript transmission to remote servers during indexing.</p>
+</div>
+<button aria-checked="true" class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full bg-primary-container p-0.5 transition-colors duration-200 ease-in-out focus:outline-none" id="toggle-wasm" role="switch" type="button">
+<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-canvas shadow-md transition duration-200 ease-in-out translate-x-5"></span>
+</button>
+</div>
+<!-- 3c: History Synchronization Interval Dropdown -->
+<div class="flex flex-col gap-unit-2 pt-unit-2">
+<div class="flex justify-between items-baseline">
+<label class="font-title-md text-title-md text-text-primary" for="sync-interval-btn">Background Delta Ingestion</label>
+<span class="font-label-sm text-label-sm text-text-muted">LOCAL DISK CRON</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Frequency ContextOS scans linked chat export folders or browser session data.</p>
+<div class="relative mt-unit-1">
+<button aria-expanded="false" aria-haspopup="listbox" class="w-full flex items-center justify-between px-unit-4 py-unit-3 rounded-lg bg-surface-container-low text-text-primary hover:bg-surface-container transition-colors shadow-sm" id="sync-interval-btn" type="button">
+<div class="flex items-center gap-unit-3">
+<span class="material-symbols-outlined text-sage-utility text-[20px]">sync</span>
+<span class="font-body-md text-body-md text-text-primary" id="sync-selected-label">Every 4 hours (Recommended)</span>
+</div>
+<span class="material-symbols-outlined text-text-muted text-[20px] transition-transform duration-200" id="sync-chevron">expand_more</span>
+</button>
+<ul class="hidden absolute z-30 w-full mt-unit-1 bg-surface-panel rounded-lg shadow-2xl py-unit-1 text-body-md font-body-md" id="sync-dropdown-menu" role="listbox">
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="1h" role="option">
+<span>Every 1 hour (Active development)</span>
+</li>
+<li aria-selected="true" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-primary bg-surface-elevated cursor-pointer transition-colors" data-value="4h" role="option">
+<span>Every 4 hours (Recommended)</span>
+<span class="material-symbols-outlined text-terracotta-accent text-[18px]">done</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="24h" role="option">
+<span>Daily snapshot (Low resource)</span>
+</li>
+<li aria-selected="false" class="px-unit-4 py-unit-3 flex items-center justify-between text-text-secondary hover:text-text-primary hover:bg-surface-elevated cursor-pointer transition-colors" data-value="manual" role="option">
+<span>Manual only (Offline vault)</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Interface & Workspace Theme -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-unit-8 pb-unit-12">
+<div class="lg:col-span-4 space-y-unit-2">
+<div class="flex items-center gap-unit-2 text-text-muted">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+<h2 class="font-headline-md text-headline-md text-text-primary">Interface &amp; Theme</h2>
+</div>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed">
+          Calibrate reading density, typography scale, and chromatic ambiance for prolonged study.
+        </p>
+</div>
+<div class="lg:col-span-8 space-y-unit-8">
+<!-- 4a: Theme Selection (Segmented Control) -->
+<div class="flex flex-col gap-unit-3">
+<div class="flex justify-between items-baseline">
+<span class="font-title-md text-title-md text-text-primary">Workspace Palette</span>
+<span class="font-label-sm text-label-sm text-text-muted">APPEARANCE</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Choose the contrast surface model that matches your working lighting.</p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-unit-3 pt-unit-1" id="theme-group">
+<button class="theme-btn p-unit-4 rounded-xl bg-surface-container-low text-text-secondary hover:text-text-primary hover:bg-surface-container transition-all flex flex-col items-start gap-unit-2 shadow-sm text-left" data-theme="system" type="button">
+<span class="material-symbols-outlined text-[20px]">brightness_auto</span>
+<span class="font-title-md text-title-md text-text-primary">System Default</span>
+<span class="font-label-sm text-label-sm text-text-muted">Matches operating system mode</span>
+</button>
+<button class="theme-btn p-unit-4 rounded-xl bg-surface-elevated text-text-primary transition-all flex flex-col items-start gap-unit-2 shadow-sm relative before:content-[''] before:absolute before:inset-x-3 before:bottom-0 before:h-[2px] before:bg-terracotta-accent text-left" data-theme="dark" type="button">
+<span class="material-symbols-outlined text-terracotta-accent text-[20px]">dark_mode</span>
+<span class="font-title-md text-title-md text-text-primary flex items-center justify-between w-full">
+                Quiet Dark
+                <span class="font-label-sm text-label-sm text-terracotta-accent">ACTIVE</span>
+</span>
+<span class="font-label-sm text-label-sm text-text-secondary">Warm charcoal &amp; terracotta ink</span>
+</button>
+<button class="theme-btn p-unit-4 rounded-xl bg-surface-container-low text-text-secondary hover:text-text-primary hover:bg-surface-container transition-all flex flex-col items-start gap-unit-2 shadow-sm text-left" data-theme="light" type="button">
+<span class="material-symbols-outlined text-[20px]">light_mode</span>
+<span class="font-title-md text-title-md text-text-primary">Warm Paper Light</span>
+<span class="font-label-sm text-label-sm text-text-muted">Limestone high contrast daylight</span>
+</button>
+</div>
+</div>
+<!-- 4b: Typography Scale Slider -->
+<div class="flex flex-col gap-unit-3 pt-unit-2">
+<div class="flex justify-between items-baseline">
+<div>
+<label class="font-title-md text-title-md text-text-primary" for="font-scale-slider">Editorial Typography Scale</label>
+<p class="font-body-sm text-body-sm text-text-secondary">Scale reading fonts for Newsreader editorial headers and Hanken body text.</p>
+</div>
+<span class="font-label-md text-label-md text-terracotta-accent bg-amber-subtle px-unit-2 py-0.5 rounded" id="font-scale-label">Comfortable (16px)</span>
+</div>
+<div class="space-y-unit-2 pt-unit-1">
+<input class="w-full h-1.5 bg-surface-container rounded-full appearance-none cursor-pointer accent-terracotta-accent focus:outline-none" id="font-scale-slider" max="18" min="14" step="1" type="range" value="16"/>
+<div class="flex justify-between text-text-muted font-label-sm text-label-sm">
+<span>Compact (14px)</span>
+<span>Standard (15px)</span>
+<span class="text-text-primary font-medium">Comfortable (16px)</span>
+<span>Expansive (17px)</span>
+<span>Scholarly (18px)</span>
+</div>
+</div>
+</div>
+<!-- Summary Status Row -->
+<div class="p-unit-5 rounded-xl bg-surface-container-low flex flex-col sm:flex-row items-start sm:items-center justify-between gap-unit-4 shadow-sm">
+<div class="flex items-center gap-unit-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-sage-utility shrink-0">
+<span class="material-symbols-outlined text-[22px]">database</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-text-primary">Personal Knowledge Vault Status</span>
+<span class="font-label-sm text-label-sm text-text-muted">4,129 dialogues indexed • 24.2 MB encrypted storage</span>
+</div>
+</div>
+<button class="px-unit-3 py-unit-1.5 rounded-lg bg-surface-container hover:bg-surface-elevated text-text-secondary hover:text-text-primary font-body-sm text-body-sm transition-colors shrink-0" type="button">
+            Audit Local Index
+          </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Interactive Logic for Sliders, Dropdowns, Toggles & Notifications -->
+<script>
+    // --- Toggle Switches ---
+    document.querySelectorAll('.toggle-switch').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const isChecked = toggle.getAttribute('aria-checked') === 'true';
+        const knob = toggle.querySelector('span');
+        if (isChecked) {
+          toggle.setAttribute('aria-checked', 'false');
+          toggle.classList.remove('bg-primary-container');
+          toggle.classList.add('bg-surface-container');
+          knob.classList.remove('translate-x-5');
+          knob.classList.add('translate-x-0');
+        } else {
+          toggle.setAttribute('aria-checked', 'true');
+          toggle.classList.remove('bg-surface-container');
+          toggle.classList.add('bg-primary-container');
+          knob.classList.remove('translate-x-0');
+          knob.classList.add('translate-x-5');
+        }
+      });
+    });
+
+    // --- Compression Slider ---
+    const compressionSlider = document.getElementById('compression-slider');
+    const compressionBadge = document.getElementById('compression-state-badge');
+    const compressionLabels = ['Compact', 'Balanced', 'Comprehensive'];
+
+    window.setCompression = function(val) {
+      compressionSlider.value = val;
+      updateCompressionUI(val);
+    };
+
+    compressionSlider.addEventListener('input', (e) => {
+      updateCompressionUI(e.target.value);
+    });
+
+    function updateCompressionUI(val) {
+      compressionBadge.textContent = compressionLabels[val];
+    }
+
+    // --- Token Budget Slider & SVG Ring ---
+    const tokenSlider = document.getElementById('token-budget-slider');
+    const tokenLabel = document.getElementById('token-budget-label');
+    const tokenPercentage = document.getElementById('token-percentage');
+    const tokenSvgRing = document.getElementById('token-svg-ring');
+    const circumference = 2 * Math.PI * 20; // ~125.66
+
+    tokenSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      const pct = Math.round((val / 8000) * 100);
+      tokenLabel.textContent = `${val.toLocaleString()} tokens / ${pct}%`;
+      tokenPercentage.textContent = `${pct}%`;
+      const offset = circumference - (pct / 100) * circumference;
+      tokenSvgRing.style.strokeDashoffset = offset;
+    });
+
+    // --- Font Scale Slider ---
+    const fontSlider = document.getElementById('font-scale-slider');
+    const fontLabel = document.getElementById('font-scale-label');
+    const fontNames = {
+      14: 'Compact (14px)',
+      15: 'Standard (15px)',
+      16: 'Comfortable (16px)',
+      17: 'Expansive (17px)',
+      18: 'Scholarly (18px)'
+    };
+
+    fontSlider.addEventListener('input', (e) => {
+      fontLabel.textContent = fontNames[e.target.value] || `${e.target.value}px`;
+    });
+
+    // --- Generic Dropdown Factory ---
+    function setupDropdown(btnId, menuId, chevronId, labelId) {
+      const btn = document.getElementById(btnId);
+      const menu = document.getElementById(menuId);
+      const chevron = document.getElementById(chevronId);
+      const label = document.getElementById(labelId);
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = !menu.classList.contains('hidden');
+        closeAllDropdowns();
+        if (!isOpen) {
+          menu.classList.remove('hidden');
+          chevron.classList.add('rotate-180');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      menu.querySelectorAll('li').forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          label.textContent = option.querySelector('span:first-child').textContent;
+          menu.querySelectorAll('li').forEach(el => {
+            el.classList.remove('bg-surface-elevated', 'text-text-primary');
+            el.classList.add('text-text-secondary');
+            const check = el.querySelector('.material-symbols-outlined');
+            if (check) check.remove();
+          });
+          option.classList.add('bg-surface-elevated', 'text-text-primary');
+          option.classList.remove('text-text-secondary');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined text-terracotta-accent text-[18px]';
+          checkIcon.textContent = 'done';
+          option.appendChild(checkIcon);
+          menu.classList.add('hidden');
+          chevron.classList.remove('rotate-180');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
+
+    setupDropdown('voice-delivery-btn', 'voice-dropdown-menu', 'voice-chevron', 'voice-selected-label');
+    setupDropdown('export-format-btn', 'export-dropdown-menu', 'export-chevron', 'export-selected-label');
+    setupDropdown('sync-interval-btn', 'sync-dropdown-menu', 'sync-chevron', 'sync-selected-label');
+
+    function closeAllDropdowns() {
+      ['voice', 'export', 'sync'].forEach(key => {
+        const menu = document.getElementById(`${key}-dropdown-menu`);
+        const chevron = document.getElementById(`${key}-chevron`);
+        const btn = document.getElementById(`${key}-interval-btn`) || document.getElementById(`${key}-format-btn`) || document.getElementById(`${key}-delivery-btn`);
+        if (menu) menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    document.addEventListener('click', closeAllDropdowns);
+
+    // --- Model Tag Segmented Buttons ---
+    const modelButtons = document.querySelectorAll('.model-tag-btn');
+    modelButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modelButtons.forEach(b => {
+          b.classList.remove('bg-surface-elevated', 'text-text-primary', "before:content-['']", 'before:absolute', 'before:inset-x-2', 'before:bottom-0', 'before:h-[2px]', 'before:bg-terracotta-accent');
+          b.classList.add('bg-surface-container-low', 'text-text-secondary');
+        });
+        btn.classList.add('bg-surface-elevated', 'text-text-primary', "before:content-['']", 'before:absolute', 'before:inset-x-2', 'before:bottom-0', 'before:h-[2px]', 'before:bg-terracotta-accent');
+        btn.classList.remove('bg-surface-container-low', 'text-text-secondary');
+      });
+    });
+
+    // --- Theme Segmented Buttons ---
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        themeButtons.forEach(b => {
+          b.classList.remove('bg-surface-elevated', 'text-text-primary', "before:content-['']", 'before:absolute', 'before:inset-x-3', 'before:bottom-0', 'before:h-[2px]', 'before:bg-terracotta-accent');
+          b.classList.add('bg-surface-container-low', 'text-text-secondary');
+          const badge = b.querySelector('.text-terracotta-accent');
+          if (badge && badge.textContent === 'ACTIVE') badge.remove();
+        });
+        btn.classList.add('bg-surface-elevated', 'text-text-primary', "before:content-['']", 'before:absolute', 'before:inset-x-3', 'before:bottom-0', 'before:h-[2px]', 'before:bg-terracotta-accent');
+        btn.classList.remove('bg-surface-container-low', 'text-text-secondary');
+        
+        const titleRow = btn.querySelector('.font-title-md');
+        if (titleRow && !titleRow.querySelector('.text-terracotta-accent')) {
+          const badge = document.createElement('span');
+          badge.className = 'font-label-sm text-label-sm text-terracotta-accent';
+          badge.textContent = 'ACTIVE';
+          titleRow.appendChild(badge);
+        }
+      });
+    });
+
+    // --- Save and Reset Toast Feedback ---
+    const saveBtn = document.getElementById('btn-save-settings');
+    const resetBtn = document.getElementById('btn-reset-defaults');
+    const toast = document.getElementById('save-toast');
+
+    function showToast(message) {
+      toast.querySelector('.font-title-md').textContent = message;
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    saveBtn.addEventListener('click', () => {
+      showToast('Preferences updated');
+    });
+
+    resetBtn.addEventListener('click', () => {
+      // Revert values to initial state
+      tokenSlider.value = 2400;
+      tokenSlider.dispatchEvent(new Event('input'));
+      compressionSlider.value = 1;
+      updateCompressionUI(1);
+      fontSlider.value = 16;
+      fontSlider.dispatchEvent(new Event('input'));
+      showToast('Settings restored to defaults');
+    });
+  </script>
+</div></main></div></body></html>

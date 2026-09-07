@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-on-surface": "#31302e", "surface-container-high": "#2a2a28", "on-primary-fixed-variant": "#7a2f01", "surface-container-highest": "#353532", "hairline-subtle": "#222220", "on-tertiary": "#22342b", "on-background": "#e5e2de", "background": "#131312", "secondary-fixed-dim": "#efbe7d", "secondary": "#efbe7d", "on-tertiary-fixed": "#0d1f17", "outline-variant": "#55433b", "inverse-surface": "#e5e2de", "on-secondary-container": "#dcad6e", "surface-elevated": "#262624", "tertiary-fixed-dim": "#b6ccbe", "error-container": "#93000a", "on-error": "#690005", "sage-utility": "#768A7E", "primary-container": "#d97746", "secondary-fixed": "#ffddb4", "primary": "#ffb694", "surface": "#131312", "surface-container-lowest": "#0e0e0c", "on-primary-container": "#4d1b00", "terracotta-accent": "#D97746", "tertiary": "#b6ccbe", "sage-subtle": "#1B221E", "surface-dim": "#131312", "on-primary-fixed": "#351000", "tertiary-container": "#82968a", "terracotta-glow": "#E08354", "on-primary": "#571f00", "surface-container": "#20201e", "on-secondary": "#452b00", "tertiary-fixed": "#d2e8da", "surface-inset": "#0D0D0C", "surface-variant": "#353532", "hairline": "#2C2C29", "error": "#ffb4ab", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#384b41", "on-secondary-fixed-variant": "#614009", "amber-subtle": "#2A211B", "on-secondary-fixed": "#291800", "text-primary": "#F3F1ED", "inverse-primary": "#994619", "primary-fixed-dim": "#ffb694", "text-secondary": "#B5B3AD", "on-tertiary-container": "#1c2e25", "outline": "#a38c82", "surface-tint": "#ffb694", "surface-bright": "#3a3937", "primary-fixed": "#ffdbcc", "surface-container-low": "#1c1c1a", "text-muted": "#75746E", "secondary-container": "#614009", "on-surface": "#e5e2de", "surface-panel": "#1E1E1C", "surface-canvas": "#141413", "on-surface-variant": "#dbc1b6" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "input-box-max-w": "46rem", "unit-1": "0.25rem", "unit-2": "0.5rem", "unit-4": "1rem", "context-tray-w": "22rem", "reading-max-w": "48rem", "unit-3": "0.75rem", "unit-5": "1.25rem", "unit-8": "2rem", "sidebar-w": "16.5rem", "unit-10": "2.5rem", "unit-6": "1.5rem", "unit-20": "5rem", "unit-12": "3rem", "unit-16": "4rem" }, "fontFamily": { "display-lg-mobile": ["Newsreader"], "display-lg": ["Newsreader"], "headline-lg": ["Newsreader"], "title-md": ["Hanken Grotesk"], "body-sm": ["Hanken Grotesk"], "body-lg": ["Hanken Grotesk"], "headline-sm": ["Newsreader"], "label-md": ["JetBrains Mono"], "title-lg": ["Hanken Grotesk"], "headline-md": ["Newsreader"], "body-md": ["Hanken Grotesk"], "label-sm": ["JetBrains Mono"], "code-snippet": ["JetBrains Mono"] }, "fontSize": { "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "400" }], "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "400" }], "code-snippet": ["13px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-amber-subtle selection:text-primary"><aside class="fixed left-0 top-0 h-full w-sidebar-w bg-surface-panel z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto px-unit-4 pt-unit-5"><div class="flex items-center justify-between pb-unit-5 px-unit-1"><div class="flex items-center gap-unit-2"><img alt="ContextOS Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP3LCC4McywsqzeohV4xPFZTmXLqaGq33tkRdDFbFS0QAxpJyrmw-X19G9dHORaR4FEA1CTlUqhPWKj7pidHwdvqkt8D_UJ8JcqTDYu7ukMZZTEyDwrHY2BMbU_RdHAv6S1rKZDWTHOfTXvr6EdKJLH9-1bp0ZijgMUthzVHkxf4618l--UGrALH-sf2MhDv305wF7t2y2wNMzGGYTNFSwFF5Qg0b4KBegS7gdJnQvkmrmJz99lgs"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">ContextOS</span><span class="font-label-sm text-label-sm text-text-muted mt-unit-1">Personal Context</span></div></div><span class="font-label-sm text-label-sm bg-surface-container px-unit-2 py-unit-1 rounded text-secondary">v1.2</span></div><div class="pb-unit-4"><button class="w-full flex items-center justify-between px-unit-3 py-unit-2 bg-surface-container-low hover:bg-surface-elevated text-on-surface-variant hover:text-on-surface rounded-lg transition-colors group"><span class="flex items-center gap-unit-2 font-body-sm text-body-sm text-text-secondary group-hover:text-on-surface"><span class="material-symbols-outlined text-[16px]">search</span>Jump to or ask...</span><kbd class="font-label-sm text-label-sm px-unit-1 bg-surface-container rounded text-text-muted">⌘K</kbd></button></div><nav class="flex-1 flex flex-col gap-unit-5" data-active-classes="bg-surface-elevated text-on-surface border-l-2 border-terracotta-accent font-title-md"><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">CONTEXTOS</span><a aria-current="page" class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded transition-colors bg-surface-elevated text-on-surface border-l-2 border-terracotta-accent font-title-md" data-path="home" href="#"><span class="material-symbols-outlined text-[18px]">home</span><span class="font-body-sm text-body-sm">Home</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">ASK</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="ask-my-history" href="#"><span class="material-symbols-outlined text-[18px]">neurology</span><span class="font-body-sm text-body-sm">Ask My History</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">KNOWLEDGE</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="conversations" href="#"><span class="material-symbols-outlined text-[18px]">forum</span><span class="font-body-sm text-body-sm">Conversations</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="projects" href="#"><span class="material-symbols-outlined text-[18px]">folder_open</span><span class="font-body-sm text-body-sm">Projects</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="memory" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span class="font-body-sm text-body-sm">Memory</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="decisions" href="#"><span class="material-symbols-outlined text-[18px]">balance</span><span class="font-body-sm text-body-sm">Decisions</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">CONTEXT</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="generate-context" href="#"><span class="material-symbols-outlined text-[18px]">file_download</span><span class="font-body-sm text-body-sm">Generate Context</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="context-packages" href="#"><span class="material-symbols-outlined text-[18px]">layers</span><span class="font-body-sm text-body-sm">Context Packages</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">DEVELOPER</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="developer-mode" href="#"><span class="material-symbols-outlined text-[18px]">terminal</span><span class="font-body-sm text-body-sm">Developer Mode</span></a></div><div class="flex flex-col gap-unit-1 pb-unit-4"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">SYSTEM</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="import-history" href="#"><span class="material-symbols-outlined text-[18px]">cloud_download</span><span class="font-body-sm text-body-sm">Import History</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="security-and-privacy" href="#"><span class="material-symbols-outlined text-[18px]">verified_user</span><span class="font-body-sm text-body-sm">Security &amp; Privacy</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-sm text-body-sm">Settings</span></a></div></nav></div><div class="p-unit-3 bg-surface-container-low/60 flex items-center justify-between"><div class="flex items-center gap-unit-3"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkY3b54dWvtJrDm3ZgB4LpkrhLFCBMcswxa1xJMpXSUkSh2w5ZEBX142U3wpIBC7486oCrWzNLDknlyjtMnhRu37PL9ebE78m-GHaN3YLGkuNm2Oo1RxE0trQwwWWqoGSsoXfFth9NdAp-aGOGrKGTum4mdNo6J-OYTPC40qzVrbT7aet0r-pH-gpzYIf8CCdL6eBtk1PzZnqHAejz5BF4XqoqGvm34refnZwzntQdmZ6qovqywyU"/><span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-sage-utility ring-2 ring-surface-panel"></span></div><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface leading-tight">Abhinav</span><span class="font-label-sm text-label-sm text-secondary-fixed-dim leading-tight">Pro Knowledge</span></div></div><button class="p-unit-1 text-text-muted hover:text-on-surface hover:bg-surface-elevated rounded transition-colors" title="Toggle Dark / Light Theme"><span class="material-symbols-outlined text-[18px]">dark_mode</span></button></div></aside><div class="pl-sidebar-w"><header class="fixed top-0 left-sidebar-w right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-unit-8"><div class="flex items-center gap-unit-6"><div class="flex items-center gap-unit-2 text-text-muted font-body-sm text-body-sm"><span class="text-on-surface-variant hover:text-on-surface transition-colors">ContextOS</span><span class="text-text-muted">/</span><span class="text-on-surface font-title-md text-title-md font-medium">Home</span></div><span class="hidden lg:inline-flex items-center gap-unit-2 px-unit-3 py-unit-1 rounded-full bg-surface-container-low text-text-secondary font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-terracotta-accent"></span>1,842 conversations indexed · 38 decisions tracked</span></div><div class="flex items-center gap-unit-3"><button class="flex items-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors"><span class="material-symbols-outlined text-[16px]">cloud_download</span>Import History</button><button class="flex items-center gap-unit-2 px-unit-4 py-unit-2 rounded-lg bg-primary-container text-on-primary-container hover:bg-terracotta-glow font-title-md text-title-md transition-colors shadow-sm"><span class="material-symbols-outlined text-[16px]">add</span>New Question</button><div class="h-4 w-[1px] bg-surface-container mx-unit-1"></div><button class="p-unit-2 rounded-lg text-text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Theme Toggle"><span class="material-symbols-outlined text-[18px]">contrast</span></button></div></header><main class="relative pt-16 bg-surface min-h-screen px-unit-8 py-unit-6"><div class="max-w-reading-max-w mx-auto w-full"><div class="flex flex-col w-full">
+<!-- Interactive Knowledge & Projects Graph Screen -->
+<div class="flex flex-col gap-unit-6 w-full pb-unit-12">
+<!-- Top Filter & Command Bar -->
+<section class="flex flex-col gap-unit-4 bg-surface-panel p-unit-5 rounded-xl shadow-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-unit-4">
+<div>
+<div class="flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-terracotta-accent tracking-wider uppercase">Semantic Knowledge Graph</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-text-primary tracking-tight mt-unit-1">Projects &amp; Architectural Memory</h1>
+</div>
+<!-- Graph Metrics & Physics Status -->
+<div class="flex items-center gap-unit-3 flex-wrap">
+<div class="flex items-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container-low text-text-secondary font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-sage-utility text-[16px]">bubble_chart</span>
+<span>Nodes: <strong class="text-text-primary font-medium">10</strong></span>
+<span class="text-text-muted">|</span>
+<span>Edges: <strong class="text-text-primary font-medium">14</strong></span>
+</div>
+<div class="flex items-center gap-unit-1 bg-surface-container-low rounded-lg p-unit-1 shadow-sm">
+<button class="p-unit-2 text-text-secondary hover:text-text-primary hover:bg-surface-elevated rounded transition-colors" id="zoom-in-btn" title="Zoom In">
+<span class="material-symbols-outlined text-[16px]">zoom_in</span>
+</button>
+<button class="p-unit-2 text-text-secondary hover:text-text-primary hover:bg-surface-elevated rounded transition-colors" id="zoom-out-btn" title="Zoom Out">
+<span class="material-symbols-outlined text-[16px]">zoom_out</span>
+</button>
+<button class="px-unit-2 py-unit-1 text-text-secondary hover:text-text-primary hover:bg-surface-elevated rounded font-label-sm text-label-sm transition-colors" id="zoom-reset-btn" title="Reset View">
+              Reset
+            </button>
+</div>
+<div class="flex items-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container-low text-text-secondary font-label-sm text-label-sm shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-sage-utility"></span>
+<span>Physics: Gentle Float</span>
+</div>
+</div>
+</div>
+<!-- Search Input and Clusters Filters -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-unit-3">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-unit-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+<input class="w-full pl-unit-10 pr-unit-4 py-unit-2 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted font-body-sm text-body-sm focus:outline-none focus:bg-surface-inset shadow-inner transition-colors" id="graph-search" placeholder="Filter graph by topic, tag, architecture, or decision..." type="text"/>
+</div>
+<div class="flex items-center gap-unit-2 overflow-x-auto pb-unit-1 lg:pb-0 scrollbar-none">
+<button class="filter-pill active px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary-container shadow-sm transition-all whitespace-nowrap" data-filter="all">
+            All Clusters
+          </button>
+<button class="filter-pill px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated shadow-sm transition-all whitespace-nowrap" data-filter="core">
+            Core Architecture
+          </button>
+<button class="filter-pill px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated shadow-sm transition-all whitespace-nowrap" data-filter="storage">
+            Data &amp; Persistence
+          </button>
+<button class="filter-pill px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated shadow-sm transition-all whitespace-nowrap" data-filter="security">
+            Auth &amp; Security
+          </button>
+<button class="filter-pill px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated shadow-sm transition-all whitespace-nowrap" data-filter="search">
+            Protocols &amp; Sync
+          </button>
+<button class="filter-pill px-unit-3 py-unit-1.5 rounded-full font-label-sm text-label-sm bg-surface-container text-text-secondary hover:text-text-primary hover:bg-surface-elevated shadow-sm transition-all whitespace-nowrap" data-filter="editorial">
+            UI &amp; Editorial Design
+          </button>
+</div>
+</div>
+</section>
+<!-- Main Interactive Graph & Inspector Split Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-unit-6 items-start">
+<!-- Interactive Graph Canvas Frame (8 cols on XL) -->
+<section class="xl:col-span-7 2xl:col-span-8 flex flex-col bg-surface-panel rounded-xl overflow-hidden shadow-xl relative min-h-[640px]">
+<!-- Canvas Context Bar -->
+<div class="absolute top-unit-4 left-unit-4 z-20 flex items-center gap-unit-2">
+<div class="px-unit-3 py-unit-1 rounded-md bg-surface-canvas/90 backdrop-blur-md text-text-muted font-label-sm text-label-sm shadow-sm flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent"></span>
+<span>Cluster: ContextOS Runtime</span>
+</div>
+<span class="px-unit-2 py-unit-1 rounded-md bg-surface-canvas/90 backdrop-blur-md text-secondary-fixed-dim font-label-sm text-label-sm">
+            Semantic Proximity: Cosine 0.82
+          </span>
+</div>
+<!-- Legend Ribbon in Canvas -->
+<div class="absolute bottom-unit-4 left-unit-4 z-20 flex items-center gap-unit-4 bg-surface-canvas/80 backdrop-blur-md px-unit-3 py-unit-2 rounded-lg font-label-sm text-label-sm text-text-muted shadow-sm">
+<div class="flex items-center gap-unit-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-terracotta-accent"></span>
+<span class="text-text-secondary">Core Anchor</span>
+</div>
+<div class="flex items-center gap-unit-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-sage-utility"></span>
+<span class="text-text-secondary">Ratified Module</span>
+</div>
+<div class="flex items-center gap-unit-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-variant"></span>
+<span class="text-text-muted">Pruned / Dead End</span>
+</div>
+</div>
+<!-- SVG Visual Canvas Container -->
+<div class="relative w-full h-[660px] bg-surface-canvas overflow-hidden cursor-grab active:cursor-grabbing select-none" id="canvas-stage">
+<!-- Ambient Decorative Radial Glow behind Core -->
+<div class="absolute left-[38%] top-[36%] -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute left-[70%] top-[65%] -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-sage-utility/10 rounded-full blur-2xl pointer-events-none"></div>
+<!-- Dynamic SVG Edges Layer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" id="graph-edges" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="edge-core-storage" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#D97746" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#768A7E" stop-opacity="0.4"></stop>
+</lineargradient>
+<lineargradient id="edge-core-crypto" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#D97746" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#efbe7d" stop-opacity="0.5"></stop>
+</lineargradient>
+<lineargradient id="edge-subtle" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#768A7E" stop-opacity="0.6"></stop>
+<stop offset="100%" stop-color="#55433b" stop-opacity="0.3"></stop>
+</lineargradient>
+</defs>
+<!-- Curvilinear Connections between Nodes -->
+<!-- Core (Node 1) to SQLite-WASM (Node 2) -->
+<path class="transition-all duration-300" d="M 330 250 C 310 170, 240 140, 165 140" fill="none" stroke="url(#edge-core-storage)" stroke-dasharray="4,4" stroke-width="2"></path>
+<text class="font-label-sm text-[10px] tracking-widest select-none" fill="#B5B3AD" text-anchor="middle" x="235" y="180">PRIMARY STORAGE</text>
+<!-- Core (Node 1) to SubtleCrypto Auth (Node 3) -->
+<path class="transition-all duration-300" d="M 385 220 C 420 160, 480 130, 540 135" fill="none" stroke="url(#edge-core-crypto)" stroke-width="2"></path>
+<text class="font-label-sm text-[10px] tracking-widest select-none" fill="#efbe7d" text-anchor="middle" x="475" y="165">ZERO-TRUST</text>
+<!-- Core (Node 1) to Hybrid Retrieval (Node 4) -->
+<path class="transition-all duration-300" d="M 395 285 C 470 300, 520 270, 580 290" fill="none" stroke="#D97746" stroke-opacity="0.6" stroke-width="2"></path>
+<text class="font-label-sm text-[10px] tracking-widest select-none" fill="#B5B3AD" text-anchor="middle" x="490" y="278">HYBRID RETRIEVAL</text>
+<!-- Core (Node 1) to Editorial Packaging (Node 6) -->
+<path class="transition-all duration-300" d="M 335 320 C 310 400, 270 430, 205 450" fill="none" stroke="url(#edge-subtle)" stroke-width="2"></path>
+<text class="font-label-sm text-[10px] tracking-widest select-none" fill="#768A7E" text-anchor="middle" x="245" y="390">EXPORT TARGET</text>
+<!-- SQLite-WASM (Node 2) to Gemini Ingestion (Node 5) -->
+<path d="M 120 180 C 110 240, 95 310, 110 350" fill="none" stroke="#768A7E" stroke-dasharray="3,3" stroke-opacity="0.4" stroke-width="1.5"></path>
+<text class="font-label-sm text-[9px] tracking-widest select-none" fill="#75746E" text-anchor="middle" x="135" y="270">SYNC PIPELINE</text>
+<!-- SQLite-WASM (Node 2) to WebLocks Concurrency (Node 7) -->
+<path d="M 170 110 C 230 80, 290 70, 340 75" fill="none" stroke="#768A7E" stroke-opacity="0.5" stroke-width="1.5"></path>
+<text class="font-label-sm text-[9px] tracking-widest select-none" fill="#75746E" text-anchor="middle" x="255" y="76">MULTI-TAB CONSENSUS</text>
+<!-- Hybrid Retrieval (Node 4) to Local ONNX Embedding Worker (Node 8) -->
+<path d="M 620 325 C 625 390, 580 440, 530 470" fill="none" stroke="#efbe7d" stroke-opacity="0.5" stroke-width="1.5"></path>
+<text class="font-label-sm text-[9px] tracking-widest select-none" fill="#efbe7d" text-anchor="middle" x="600" y="415">CLIENT INFERENCE</text>
+<!-- Gemini Ingestion (Node 5) to Takeout Normalizer (Node 9) -->
+<path d="M 145 395 C 190 440, 260 495, 330 520" fill="none" stroke="#768A7E" stroke-opacity="0.35" stroke-width="1.5"></path>
+<text class="font-label-sm text-[9px] tracking-widest select-none" fill="#75746E" text-anchor="middle" x="220" y="475">PARSER DELEGATE</text>
+<!-- Core (Node 1) to Supabase Proxy (Node 10 - Abandoned) -->
+<path d="M 370 320 C 390 410, 410 460, 420 500" fill="none" stroke="#93000a" stroke-dasharray="6,4" stroke-opacity="0.4" stroke-width="1.5"></path>
+<text class="font-label-sm text-[9px] tracking-wider select-none" fill="#ffb4ab" text-anchor="middle" x="430" y="420">PRUNED BRANCH</text>
+</svg>
+<!-- Floating Node Elements -->
+<div class="relative w-full h-full" id="nodes-container">
+<!-- Node 1: Central Core Architecture (Hub) -->
+<div class="node-card absolute left-[345px] top-[265px] -translate-x-1/2 -translate-y-1/2 p-unit-4 rounded-2xl bg-surface-panel shadow-2xl cursor-pointer transition-all duration-300 group hover:scale-105" data-category="core" data-node-id="node-1">
+<div class="flex items-center gap-unit-3">
+<div class="w-10 h-10 rounded-xl bg-terracotta-accent/20 flex items-center justify-center text-terracotta-accent shadow-inner">
+<span class="material-symbols-outlined text-[24px]">hub</span>
+</div>
+<div>
+<div class="flex items-center gap-unit-2">
+<span class="font-label-sm text-label-sm text-terracotta-accent uppercase">Core Hub</span>
+<span class="w-1.5 h-1.5 rounded-full bg-terracotta-accent animate-ping"></span>
+</div>
+<h3 class="font-title-md text-title-md text-text-primary group-hover:text-primary transition-colors">ContextOS Core Architecture</h3>
+</div>
+</div>
+<div class="flex items-center gap-unit-3 mt-unit-3 pt-unit-2 bg-surface-container-low/70 px-unit-3 py-unit-1.5 rounded-lg">
+<span class="font-label-sm text-label-sm text-text-secondary">142 convos</span>
+<span class="text-text-muted font-label-sm">·</span>
+<span class="font-label-sm text-label-sm text-secondary">12 decisions</span>
+<span class="text-text-muted font-label-sm">·</span>
+<span class="font-label-sm text-label-sm text-sage-utility">v1.2 Active</span>
+</div>
+</div>
+<!-- Node 2: SQLite-WASM & OPFS Storage -->
+<div class="node-card absolute left-[135px] top-[140px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 group hover:scale-105" data-category="storage" data-node-id="node-2">
+<div class="flex items-center gap-unit-2">
+<div class="w-8 h-8 rounded-lg bg-sage-subtle flex items-center justify-center text-sage-utility">
+<span class="material-symbols-outlined text-[18px]">database</span>
+</div>
+<div>
+<span class="font-label-sm text-[10px] text-sage-utility uppercase block">Primary Engine</span>
+<h4 class="font-title-md text-body-md text-text-primary group-hover:text-tertiary">SQLite-WASM &amp; OPFS</h4>
+</div>
+</div>
+<div class="flex items-center gap-unit-2 mt-unit-2 font-label-sm text-label-sm text-text-muted">
+<span>68 convos</span>
+<span>·</span>
+<span class="text-sage-utility">4 ratified</span>
+</div>
+</div>
+<!-- Node 3: SubtleCrypto Auth & Enclave -->
+<div class="node-card absolute left-[550px] top-[130px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 group hover:scale-105" data-category="security" data-node-id="node-3">
+<div class="flex items-center gap-unit-2">
+<div class="w-8 h-8 rounded-lg bg-amber-subtle flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div>
+<span class="font-label-sm text-[10px] text-secondary uppercase block">Zero-Knowledge</span>
+<h4 class="font-title-md text-body-md text-text-primary group-hover:text-secondary-fixed">SubtleCrypto &amp; Enclave</h4>
+</div>
+</div>
+<div class="flex items-center gap-unit-2 mt-unit-2 font-label-sm text-label-sm text-text-muted">
+<span>31 convos</span>
+<span>·</span>
+<span class="text-secondary">AES-GCM-256</span>
+</div>
+</div>
+<!-- Node 4: Hybrid Vector + BM25 RRF -->
+<div class="node-card absolute left-[595px] top-[280px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 group hover:scale-105" data-category="search" data-node-id="node-4">
+<div class="flex items-center gap-unit-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">manage_search</span>
+</div>
+<div>
+<span class="font-label-sm text-[10px] text-primary uppercase block">Retrieval Engine</span>
+<h4 class="font-title-md text-body-md text-text-primary group-hover:text-primary">Hybrid Vector + BM25 RRF</h4>
+</div>
+</div>
+<div class="flex items-center gap-unit-2 mt-unit-2 font-label-sm text-label-sm text-text-muted">
+<span>54 convos</span>
+<span>·</span>
+<span class="text-primary">Reciprocal Rank</span>
+</div>
+</div>
+<!-- Node 5: Gemini Archive Ingestion -->
+<div class="node-card absolute left-[95px] top-[365px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 group hover:scale-105" data-category="storage" data-node-id="node-5">
+<div class="flex items-center gap-unit-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md text-text-primary group-hover:text-primary">Gemini Archive Ingestion</h4>
+</div>
+</div>
+<div class="mt-unit-1 font-label-sm text-[11px] text-text-muted">
+                378k tokens ingested
+              </div>
+</div>
+<!-- Node 6: Editorial Context Packaging -->
+<div class="node-card absolute left-[180px] top-[460px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 group hover:scale-105" data-category="editorial" data-node-id="node-6">
+<div class="flex items-center gap-unit-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-terracotta-accent">
+<span class="material-symbols-outlined text-[16px]">layers</span>
+</div>
+<div>
+<h4 class="font-title-md text-body-md text-text-primary group-hover:text-terracotta-glow">Editorial Packaging</h4>
+</div>
+</div>
+<div class="mt-unit-1 font-label-sm text-[11px] text-sage-utility">
+                Markdown / Claude Artifact
+              </div>
+</div>
+<!-- Node 7: WebLocks & Tab Concurrency -->
+<div class="node-card absolute left-[350px] top-[60px] -translate-x-1/2 -translate-y-1/2 p-unit-2.5 rounded-lg bg-surface-panel shadow-sm cursor-pointer transition-all duration-300 hover:scale-105" data-category="core" data-node-id="node-7">
+<div class="flex items-center gap-unit-2">
+<span class="material-symbols-outlined text-[16px] text-text-secondary">lock_clock</span>
+<span class="font-body-sm text-body-sm text-text-primary">WebLocks Concurrency</span>
+</div>
+</div>
+<!-- Node 8: Local ONNX Embedding Worker -->
+<div class="node-card absolute left-[510px] top-[480px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-panel shadow-md cursor-pointer transition-all duration-300 hover:scale-105" data-category="search" data-node-id="node-8">
+<div class="flex items-center gap-unit-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">memory</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md text-text-primary">Local ONNX Worker</h4>
+<span class="font-label-sm text-[10px] text-text-muted">bge-small-en-v1.5</span>
+</div>
+</div>
+</div>
+<!-- Node 9: Takeout JSON Normalizer -->
+<div class="node-card absolute left-[340px] top-[530px] -translate-x-1/2 -translate-y-1/2 p-unit-2.5 rounded-lg bg-surface-panel shadow-sm cursor-pointer transition-all duration-300 hover:scale-105" data-category="storage" data-node-id="node-9">
+<div class="flex items-center gap-unit-2">
+<span class="material-symbols-outlined text-[16px] text-text-muted">data_object</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Takeout JSON Normalizer</span>
+</div>
+</div>
+<!-- Node 10: Supabase Proxy (Abandoned / Pruned Branch) -->
+<div class="node-card opacity-60 hover:opacity-100 absolute left-[420px] top-[520px] -translate-x-1/2 -translate-y-1/2 p-unit-3 rounded-xl bg-surface-container-lowest shadow-none cursor-pointer transition-all duration-300 hover:scale-105" data-category="core" data-node-id="node-10">
+<div class="flex items-center gap-unit-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-text-muted">
+<span class="material-symbols-outlined text-[16px]">cloud_off</span>
+</div>
+<div>
+<div class="flex items-center gap-unit-1">
+<span class="font-label-sm text-[10px] text-error uppercase">Pruned Branch</span>
+</div>
+<h4 class="font-body-md text-body-md text-text-muted line-through">Supabase Cloud Proxy</h4>
+</div>
+</div>
+<div class="mt-unit-1 font-label-sm text-[11px] text-error/80">
+                Rejected for zero-knowledge model
+              </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Detail Inspector Sidebar (5 cols on XL, dynamic updates) -->
+<section class="xl:col-span-5 2xl:col-span-4 flex flex-col gap-unit-5 bg-surface-panel p-unit-6 rounded-xl shadow-xl transition-all duration-300" id="node-inspector">
+<!-- Inspector Top Header & Status -->
+<div class="flex flex-col gap-unit-2 pb-unit-4 bg-surface-container-low/50 p-unit-4 rounded-lg">
+<div class="flex items-center justify-between">
+<span class="px-unit-2 py-unit-0.5 rounded font-label-sm text-label-sm bg-terracotta-accent/20 text-terracotta-accent" id="inspector-badge">
+              Active Core Hub
+            </span>
+<span class="font-label-sm text-label-sm text-text-muted" id="inspector-updated">
+              Last synced 2h ago
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary tracking-tight" id="inspector-title">
+            ContextOS Core Architecture
+          </h2>
+<div class="flex items-center gap-unit-3 text-text-secondary font-label-sm text-label-sm">
+<span id="inspector-convo-count">142 conversations linked</span>
+<span>·</span>
+<span class="text-secondary" id="inspector-decision-count">12 ratified decisions</span>
+</div>
+</div>
+<!-- Synthesized Summary Section -->
+<div class="flex flex-col gap-unit-2">
+<div class="flex items-center gap-unit-2">
+<span class="material-symbols-outlined text-terracotta-accent text-[18px]">auto_awesome</span>
+<h3 class="font-title-md text-title-md text-text-primary">Synthesized Knowledge Overview</h3>
+</div>
+<p class="font-body-md text-body-md text-text-secondary leading-relaxed bg-surface-canvas/60 p-unit-4 rounded-lg shadow-inner" id="inspector-overview">
+            Primary browser-native runtime orchestrating client-side vector search, local SQLite storage via Origin Private File System (OPFS), and zero-knowledge encryption enclaves. All conversation histories and user prompts distill here before packaging into portable LLM bundles.
+          </p>
+</div>
+<!-- Ratified Architectural Decisions -->
+<div class="flex flex-col gap-unit-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-unit-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">balance</span>
+<h3 class="font-title-md text-title-md text-text-primary">Ratified Decisions</h3>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Filtered by Node</span>
+</div>
+<div class="flex flex-col gap-unit-2" id="inspector-decisions">
+<div class="p-unit-3 rounded-lg bg-surface-container-low shadow-sm hover:bg-surface-elevated transition-colors">
+<div class="flex items-center justify-between mb-unit-1">
+<span class="font-label-sm text-label-sm text-secondary">DEC-084 · Architectural</span>
+<span class="font-label-sm text-[11px] text-text-muted">May 14, 2024</span>
+</div>
+<h4 class="font-title-md text-body-md text-text-primary">Browser-Isolated Memory Architecture</h4>
+<p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">
+                Rejected remote database synchronizers to guarantee complete zero-knowledge security on public model inference.
+              </p>
+</div>
+<div class="p-unit-3 rounded-lg bg-surface-container-low shadow-sm hover:bg-surface-elevated transition-colors">
+<div class="flex items-center justify-between mb-unit-1">
+<span class="font-label-sm text-label-sm text-sage-utility">DEC-079 · Consensus</span>
+<span class="font-label-sm text-[11px] text-text-muted">Apr 29, 2024</span>
+</div>
+<h4 class="font-title-md text-body-md text-text-primary">Reciprocal Rank Fusion (k=60)</h4>
+<p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">
+                Combines sparse BM25 keyword hits with 384-dimensional dense semantic vector similarity.
+              </p>
+</div>
+</div>
+</div>
+<!-- Connected Nodes & Provenance -->
+<div class="flex flex-col gap-unit-2">
+<div class="flex items-center justify-between">
+<h3 class="font-title-md text-title-md text-text-primary">Connected Clusters</h3>
+<span class="font-label-sm text-label-sm text-text-muted">Topology</span>
+</div>
+<div class="grid grid-cols-2 gap-unit-2" id="inspector-relations">
+<div class="p-unit-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-sage-utility"></span>
+<span class="font-body-sm text-body-sm text-text-primary truncate">SQLite-WASM</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Strong</span>
+</div>
+<div class="p-unit-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm text-text-primary truncate">SubtleCrypto</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Direct</span>
+</div>
+<div class="p-unit-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent"></span>
+<span class="font-body-sm text-body-sm text-text-primary truncate">Hybrid Retrieval</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Core</span>
+</div>
+<div class="p-unit-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-text-muted"></span>
+<span class="font-body-sm text-body-sm text-text-primary truncate">WebLocks</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Sync</span>
+</div>
+</div>
+</div>
+<!-- Action Tray -->
+<div class="flex flex-col gap-unit-2 pt-unit-3">
+<button class="w-full flex items-center justify-center gap-unit-2 px-unit-4 py-unit-3 rounded-lg bg-primary-container text-on-primary-container hover:bg-terracotta-glow font-title-md text-title-md transition-all shadow-md">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+            Generate Context from this Cluster
+          </button>
+<div class="grid grid-cols-2 gap-unit-2">
+<button class="flex items-center justify-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container hover:bg-surface-elevated text-text-primary font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">neurology</span>
+              Ask My History
+            </button>
+<button class="flex items-center justify-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container hover:bg-surface-elevated text-text-primary font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">forum</span>
+              View Convos (142)
+            </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom Contextual Intelligence Callout: Cross-Project Insights -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-unit-4 bg-surface-panel p-unit-5 rounded-xl shadow-md">
+<div class="flex items-start gap-unit-3 p-unit-3 rounded-lg bg-surface-container-low">
+<div class="p-unit-2 rounded bg-terracotta-accent/15 text-terracotta-accent">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+</div>
+<div>
+<h4 class="font-title-md text-body-md text-text-primary">Cluster Density</h4>
+<p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">
+            "Core Architecture" contains 42% of all ratified decisions and acts as the central hub for local RAG retrieval.
+          </p>
+</div>
+</div>
+<div class="flex items-start gap-unit-3 p-unit-3 rounded-lg bg-surface-container-low">
+<div class="p-unit-2 rounded bg-sage-subtle text-sage-utility">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<div>
+<h4 class="font-title-md text-body-md text-text-primary">Zero-Trust Isolation</h4>
+<p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">
+            No cloud telemetry is connected. All tokens in "Takeout JSON Normalizer" resolve strictly inside OPFS memory space.
+          </p>
+</div>
+</div>
+<div class="flex items-start gap-unit-3 p-unit-3 rounded-lg bg-surface-container-low">
+<div class="p-unit-2 rounded bg-amber-subtle text-secondary">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+</div>
+<div>
+<h4 class="font-title-md text-body-md text-text-primary">Pruned Pathways</h4>
+<p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">
+            Supabase Cloud Proxy was retired in session #104 in favor of WebLocks concurrency to preserve 100% offline portability.
+          </p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Inline Interactive Script for Dynamic Graph Selection & Filtering -->
+<script>
+  (function initContextGraph() {
+    const nodeData = {
+      'node-1': {
+        title: 'ContextOS Core Architecture',
+        badge: 'Active Core Hub',
+        badgeClass: 'bg-terracotta-accent/20 text-terracotta-accent',
+        updated: 'Last synced 2h ago',
+        convos: '142 conversations linked',
+        decisions: '12 ratified decisions',
+        overview: 'Primary browser-native runtime orchestrating client-side vector search, local SQLite storage via Origin Private File System (OPFS), and zero-knowledge encryption enclaves. All conversation histories and user prompts distill here before packaging into portable LLM bundles.',
+        decisionsList: [
+          { code: 'DEC-084 · Architectural', date: 'May 14, 2024', title: 'Browser-Isolated Memory Architecture', text: 'Rejected remote database synchronizers to guarantee complete zero-knowledge security on public model inference.' },
+          { code: 'DEC-079 · Consensus', date: 'Apr 29, 2024', title: 'Reciprocal Rank Fusion (k=60)', text: 'Combines sparse BM25 keyword hits with 384-dimensional dense semantic vector similarity.' }
+        ],
+        relations: [
+          { name: 'SQLite-WASM', type: 'Strong', dot: 'bg-sage-utility' },
+          { name: 'SubtleCrypto', type: 'Direct', dot: 'bg-secondary' },
+          { name: 'Hybrid Retrieval', type: 'Core', dot: 'bg-terracotta-accent' },
+          { name: 'WebLocks', type: 'Sync', dot: 'bg-text-muted' }
+        ]
+      },
+      'node-2': {
+        title: 'SQLite-WASM & OPFS Storage',
+        badge: 'Ratified Persistence Engine',
+        badgeClass: 'bg-sage-subtle text-sage-utility',
+        updated: 'Last synced 1d ago',
+        convos: '68 conversations linked',
+        decisions: '4 ratified decisions',
+        overview: 'Embedded WebAssembly build of SQLite compiling directly to the browser with WebAssembly Origin Private File System (OPFS) for microsecond query response times without server communication.',
+        decisionsList: [
+          { code: 'DEC-071 · Storage', date: 'Mar 11, 2024', title: 'Adoption of VFS-OPFS Sync Handler', text: 'Enabled atomic SQLite writes inside Dedicated Web Workers to prevent UI frame stutter.' },
+          { code: 'DEC-063 · Schema', date: 'Feb 18, 2024', title: 'Virtual Table FTS5 Tokenizer', text: 'Standardized on porter stemming tokenizer for cross-lingual code-snippet discovery.' }
+        ],
+        relations: [
+          { name: 'Core Hub', type: 'Host', dot: 'bg-terracotta-accent' },
+          { name: 'WebLocks', type: 'Mutex', dot: 'bg-text-muted' },
+          { name: 'Gemini Ingest', type: 'Sink', dot: 'bg-secondary' }
+        ]
+      },
+      'node-3': {
+        title: 'SubtleCrypto Auth & Enclave',
+        badge: 'Zero-Knowledge Security',
+        badgeClass: 'bg-amber-subtle text-secondary',
+        updated: 'Last synced 3d ago',
+        convos: '31 conversations linked',
+        decisions: '3 ratified decisions',
+        overview: 'Client-side key derivation (PBKDF2 with 310,000 rounds) generating AES-GCM-256 session keys. Raw context tokens and API keys remain unextractable from the local origin scope.',
+        decisionsList: [
+          { code: 'DEC-058 · Security', date: 'Jan 22, 2024', title: 'Zero Server Key Custody', text: 'No user encryption keys or salt values may traverse remote proxy layers under any deployment state.' }
+        ],
+        relations: [
+          { name: 'Core Hub', type: 'Direct', dot: 'bg-terracotta-accent' },
+          { name: 'Export Packaging', type: 'Signer', dot: 'bg-sage-utility' }
+        ]
+      },
+      'node-4': {
+        title: 'Hybrid Vector + BM25 RRF',
+        badge: 'Search & Retrieval Engine',
+        badgeClass: 'bg-surface-container text-primary',
+        updated: 'Last synced 5h ago',
+        convos: '54 conversations linked',
+        decisions: '5 ratified decisions',
+        overview: 'Reciprocal Rank Fusion pipeline unifying BM25 sparse keyword searches with local dense vector proximity matches, delivering context packages that balance exact identifier recall with abstract reasoning.',
+        decisionsList: [
+          { code: 'DEC-092 · Ranking', date: 'Jun 02, 2024', title: 'RRF Coefficient Constant k=60', text: 'Proved optimal balance avoiding high-norm vector domination on concise programming queries.' }
+        ],
+        relations: [
+          { name: 'Core Hub', type: 'Parent', dot: 'bg-terracotta-accent' },
+          { name: 'ONNX Worker', type: 'Producer', dot: 'bg-secondary' }
+        ]
+      },
+      'node-10': {
+        title: 'Supabase Cloud Proxy (Retired)',
+        badge: 'Pruned Branch · Abandoned',
+        badgeClass: 'bg-error-container/30 text-error',
+        updated: 'Retired on Session #104',
+        convos: '14 conversations linked',
+        decisions: '1 superseding decision',
+        overview: 'Initial prototype exploring centralized Postgres + pgvector synchronization. Formally rejected and pruned to preserve absolute client-side offline autonomy and guarantee confidential memory storage.',
+        decisionsList: [
+          { code: 'DEC-041 · Retirement', date: 'Dec 05, 2023', title: 'Decommission Cloud Database Proxy', text: 'Latency and privacy tradeoffs did not justify remote synchronization complexity.' }
+        ],
+        relations: [
+          { name: 'Core Hub', type: 'Severed', dot: 'bg-error' }
+        ]
+      }
+    };
+
+    const nodeElements = document.querySelectorAll('.node-card');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const searchInput = document.getElementById('graph-search');
+
+    function selectNode(id) {
+      const data = nodeData[id];
+      if (!data) return;
+
+      // Update Inspector Sidebar
+      const titleEl = document.getElementById('inspector-title');
+      const badgeEl = document.getElementById('inspector-badge');
+      const updatedEl = document.getElementById('inspector-updated');
+      const convoEl = document.getElementById('inspector-convo-count');
+      const decisionEl = document.getElementById('inspector-decision-count');
+      const overviewEl = document.getElementById('inspector-overview');
+      const decisionsListEl = document.getElementById('inspector-decisions');
+      const relationsEl = document.getElementById('inspector-relations');
+
+      if (titleEl) titleEl.textContent = data.title;
+      if (badgeEl) {
+        badgeEl.textContent = data.badge;
+        badgeEl.className = 'px-unit-2 py-unit-0.5 rounded font-label-sm text-label-sm ' + data.badgeClass;
+      }
+      if (updatedEl) updatedEl.textContent = data.updated;
+      if (convoEl) convoEl.textContent = data.convos;
+      if (decisionEl) decisionEl.textContent = data.decisions;
+      if (overviewEl) overviewEl.textContent = data.overview;
+
+      // Render decisions
+      if (decisionsListEl && data.decisionsList) {
+        decisionsListEl.innerHTML = data.decisionsList.map(item => `
+          <div class="p-unit-3 rounded-lg bg-surface-container-low shadow-sm hover:bg-surface-elevated transition-colors">
+            <div class="flex items-center justify-between mb-unit-1">
+              <span class="font-label-sm text-label-sm text-secondary">${item.code}</span>
+              <span class="font-label-sm text-[11px] text-text-muted">${item.date}</span>
+            </div>
+            <h4 class="font-title-md text-body-md text-text-primary">${item.title}</h4>
+            <p class="font-body-sm text-body-sm text-text-secondary mt-unit-1">${item.text}</p>
+          </div>
+        `).join('');
+      }
+
+      // Render relations
+      if (relationsEl && data.relations) {
+        relationsEl.innerHTML = data.relations.map(rel => `
+          <div class="p-unit-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-unit-2">
+              <span class="w-2 h-2 rounded-full ${rel.dot}"></span>
+              <span class="font-body-sm text-body-sm text-text-primary truncate">${rel.name}</span>
+            </div>
+            <span class="font-label-sm text-label-sm text-text-muted">${rel.type}</span>
+          </div>
+        `).join('');
+      }
+
+      // Highlight active node card
+      nodeElements.forEach(n => {
+        n.classList.remove('ring-2', 'ring-terracotta-accent', 'bg-surface-elevated');
+      });
+      const activeCard = document.querySelector(`[data-node-id="${id}"]`);
+      if (activeCard) {
+        activeCard.classList.add('bg-surface-elevated');
+      }
+    }
+
+    // Node click handlers
+    nodeElements.forEach(card => {
+      card.addEventListener('click', () => {
+        const nodeId = card.getAttribute('data-node-id');
+        selectNode(nodeId);
+      });
+    });
+
+    // Filter pill handlers
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => {
+          p.classList.remove('bg-primary-container', 'text-on-primary-container');
+          p.classList.add('bg-surface-container', 'text-text-secondary');
+        });
+        pill.classList.remove('bg-surface-container', 'text-text-secondary');
+        pill.classList.add('bg-primary-container', 'text-on-primary-container');
+
+        const filter = pill.getAttribute('data-filter');
+        nodeElements.forEach(card => {
+          const category = card.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            card.style.opacity = '1';
+            card.style.pointerEvents = 'auto';
+          } else {
+            card.style.opacity = '0.2';
+            card.style.pointerEvents = 'none';
+          }
+        });
+      });
+    });
+
+    // Search input filter
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        nodeElements.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          if (!query || text.includes(query)) {
+            card.style.opacity = '1';
+          } else {
+            card.style.opacity = '0.25';
+          }
+        });
+      });
+    }
+
+    // Gentle zoom control handlers
+    let currentScale = 1;
+    const canvasStage = document.getElementById('canvas-stage');
+    const nodesContainer = document.getElementById('nodes-container');
+    const edgesSvg = document.getElementById('graph-edges');
+
+    function applyZoom(scale) {
+      currentScale = Math.min(Math.max(scale, 0.75), 1.35);
+      if (nodesContainer) nodesContainer.style.transform = `scale(${currentScale})`;
+      if (nodesContainer) nodesContainer.style.transformOrigin = 'center center';
+      if (edgesSvg) edgesSvg.style.transform = `scale(${currentScale})`;
+      if (edgesSvg) edgesSvg.style.transformOrigin = 'center center';
+    }
+
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const zoomResetBtn = document.getElementById('zoom-reset-btn');
+
+    if (zoomInBtn) zoomInBtn.addEventListener('click', () => applyZoom(currentScale + 0.1));
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => applyZoom(currentScale - 0.1));
+    if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => applyZoom(1));
+
+    // Default select Node 1 on load
+    selectNode('node-1');
+  })();
+</script></div></main></div></body></html>

@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  /* ContextOS Warm Charcoal & Terracotta Token Matrix */
+  --surface: #131312;
+  --surface-dim: #131312;
+  --surface-bright: #3a3938;
+  --surface-container-lowest: #0e0e0d;
+  --surface-container-low: #1c1c1a;
+  --surface-container: #20201e;
+  --surface-container-high: #2a2a29;
+  --surface-container-highest: #353533;
+  
+  --on-surface: #e5e2e0;
+  --on-surface-variant: #dbc1b6;
+  --text-secondary: #b5b3ad;
+  --text-muted: #75746e;
+  
+  --primary: #ffb694;
+  --primary-container: #d97746;
+  --on-primary-container: #4d1b00;
+  --primary-hover: #e08354;
+  --primary-fixed-dim: #ffb694;
+  
+  --secondary: #c8c6c0;
+  --secondary-container: #474742;
+  --on-secondary-container: #b7b5af;
+  
+  --outline: #a38c82;
+  --outline-variant: #55433b;
+  --hairline: #2a2a29;
+  --hairline-subtle: #222220;
+  
+  --error: #ffb4ab;
+  --error-container: #93000a;
+  --success: #768a7e;
+
+  /* Typography tokens */
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overscroll-behavior: none;
+}
+
+::selection {
+  background-color: var(--primary-container);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-lowest);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-container-high);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-container-highest);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Typography Utility Classes matching Stitch */
+.font-display {
+  font-family: var(--font-sans);
+  font-size: 40px;
+  line-height: 48px;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+@media (min-width: 768px) {
+  .font-display {
+    font-size: 48px;
+    line-height: 56px;
+    letter-spacing: -0.03em;
+  }
+}
+
+.font-serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.font-headline-lg {
+  font-size: 28px;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+@media (min-width: 768px) {
+  .font-headline-lg {
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+.font-headline-md {
+  font-size: 22px;
+  line-height: 30px;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+@media (min-width: 768px) {
+  .font-headline-md {
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
+
+.font-headline-sm {
+  font-size: 19px;
+  line-height: 26px;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+@media (min-width: 768px) {
+  .font-headline-sm {
+    font-size: 20px;
+    line-height: 28px;
+  }
+}
+
+.font-title {
+  font-size: 15px;
+  line-height: 22px;
+  letter-spacing: 0.005em;
+  font-weight: 600;
+}
+@media (min-width: 768px) {
+  .font-title {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+.font-body-lg {
+  font-size: 16px;
+  line-height: 26px;
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .font-body-lg {
+    font-size: 17px;
+    line-height: 28px;
+  }
+}
+
+.font-body-md {
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0em;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .font-body-md {
+    font-size: 15px;
+    line-height: 24px;
+  }
+}
+
+.font-body-sm {
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: 0.005em;
+  font-weight: 400;
+}
+
+.font-label-md {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.font-label-sm {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Restrained Layout Containers */
+.panel-base {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-xl);
+}
+
+.panel-card {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.panel-card:hover {
+  background-color: var(--surface-container);
+  border-color: rgba(217, 119, 70, 0.3);
+}
+
+/* Primary Terracotta Action Buttons */
+.btn-primary {
+  background-color: var(--primary-container);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+.btn-primary:active {
+  transform: scale(0.99);
+}
+
+.btn-secondary {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.btn-secondary:hover {
+  background-color: var(--surface-container-high);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.prompt-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.prompt-chip:hover {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  border-color: rgba(217, 119, 70, 0.4);
+}

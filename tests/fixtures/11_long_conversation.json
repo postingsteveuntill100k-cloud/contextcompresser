@@ -1,0 +1,370 @@
+{
+  "conversations": [
+    {
+      "id": "long-dialogue-001",
+      "title": "Extensive Database Migration Planning",
+      "messages": [
+        {
+          "id": "long-msg-0",
+          "role": "user",
+          "content": "Turn 1: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000000
+        },
+        {
+          "id": "long-msg-1",
+          "role": "model",
+          "content": "Turn 2: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000060
+        },
+        {
+          "id": "long-msg-2",
+          "role": "user",
+          "content": "Turn 3: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000120
+        },
+        {
+          "id": "long-msg-3",
+          "role": "model",
+          "content": "Turn 4: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000180
+        },
+        {
+          "id": "long-msg-4",
+          "role": "user",
+          "content": "Turn 5: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000240
+        },
+        {
+          "id": "long-msg-5",
+          "role": "model",
+          "content": "Turn 6: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000300
+        },
+        {
+          "id": "long-msg-6",
+          "role": "user",
+          "content": "Turn 7: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000360
+        },
+        {
+          "id": "long-msg-7",
+          "role": "model",
+          "content": "Turn 8: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000420
+        },
+        {
+          "id": "long-msg-8",
+          "role": "user",
+          "content": "Turn 9: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000480
+        },
+        {
+          "id": "long-msg-9",
+          "role": "model",
+          "content": "Turn 10: Detailed step analysis for shard migration phase 0. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000540
+        },
+        {
+          "id": "long-msg-10",
+          "role": "user",
+          "content": "Turn 11: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000600
+        },
+        {
+          "id": "long-msg-11",
+          "role": "model",
+          "content": "Turn 12: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000660
+        },
+        {
+          "id": "long-msg-12",
+          "role": "user",
+          "content": "Turn 13: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000720
+        },
+        {
+          "id": "long-msg-13",
+          "role": "model",
+          "content": "Turn 14: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000780
+        },
+        {
+          "id": "long-msg-14",
+          "role": "user",
+          "content": "Turn 15: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000840
+        },
+        {
+          "id": "long-msg-15",
+          "role": "model",
+          "content": "Turn 16: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000900
+        },
+        {
+          "id": "long-msg-16",
+          "role": "user",
+          "content": "Turn 17: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710000960
+        },
+        {
+          "id": "long-msg-17",
+          "role": "model",
+          "content": "Turn 18: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001020
+        },
+        {
+          "id": "long-msg-18",
+          "role": "user",
+          "content": "Turn 19: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001080
+        },
+        {
+          "id": "long-msg-19",
+          "role": "model",
+          "content": "Turn 20: Detailed step analysis for shard migration phase 1. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001140
+        },
+        {
+          "id": "long-msg-20",
+          "role": "user",
+          "content": "Turn 21: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001200
+        },
+        {
+          "id": "long-msg-21",
+          "role": "model",
+          "content": "Turn 22: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001260
+        },
+        {
+          "id": "long-msg-22",
+          "role": "user",
+          "content": "Turn 23: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001320
+        },
+        {
+          "id": "long-msg-23",
+          "role": "model",
+          "content": "Turn 24: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001380
+        },
+        {
+          "id": "long-msg-24",
+          "role": "user",
+          "content": "Turn 25: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001440
+        },
+        {
+          "id": "long-msg-25",
+          "role": "model",
+          "content": "Turn 26: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001500
+        },
+        {
+          "id": "long-msg-26",
+          "role": "user",
+          "content": "Turn 27: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001560
+        },
+        {
+          "id": "long-msg-27",
+          "role": "model",
+          "content": "Turn 28: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001620
+        },
+        {
+          "id": "long-msg-28",
+          "role": "user",
+          "content": "Turn 29: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001680
+        },
+        {
+          "id": "long-msg-29",
+          "role": "model",
+          "content": "Turn 30: Detailed step analysis for shard migration phase 2. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001740
+        },
+        {
+          "id": "long-msg-30",
+          "role": "user",
+          "content": "Turn 31: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001800
+        },
+        {
+          "id": "long-msg-31",
+          "role": "model",
+          "content": "Turn 32: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001860
+        },
+        {
+          "id": "long-msg-32",
+          "role": "user",
+          "content": "Turn 33: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001920
+        },
+        {
+          "id": "long-msg-33",
+          "role": "model",
+          "content": "Turn 34: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710001980
+        },
+        {
+          "id": "long-msg-34",
+          "role": "user",
+          "content": "Turn 35: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002040
+        },
+        {
+          "id": "long-msg-35",
+          "role": "model",
+          "content": "Turn 36: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002100
+        },
+        {
+          "id": "long-msg-36",
+          "role": "user",
+          "content": "Turn 37: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002160
+        },
+        {
+          "id": "long-msg-37",
+          "role": "model",
+          "content": "Turn 38: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002220
+        },
+        {
+          "id": "long-msg-38",
+          "role": "user",
+          "content": "Turn 39: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002280
+        },
+        {
+          "id": "long-msg-39",
+          "role": "model",
+          "content": "Turn 40: Detailed step analysis for shard migration phase 3. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002340
+        },
+        {
+          "id": "long-msg-40",
+          "role": "user",
+          "content": "Turn 41: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002400
+        },
+        {
+          "id": "long-msg-41",
+          "role": "model",
+          "content": "Turn 42: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002460
+        },
+        {
+          "id": "long-msg-42",
+          "role": "user",
+          "content": "Turn 43: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002520
+        },
+        {
+          "id": "long-msg-43",
+          "role": "model",
+          "content": "Turn 44: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002580
+        },
+        {
+          "id": "long-msg-44",
+          "role": "user",
+          "content": "Turn 45: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002640
+        },
+        {
+          "id": "long-msg-45",
+          "role": "model",
+          "content": "Turn 46: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002700
+        },
+        {
+          "id": "long-msg-46",
+          "role": "user",
+          "content": "Turn 47: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002760
+        },
+        {
+          "id": "long-msg-47",
+          "role": "model",
+          "content": "Turn 48: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002820
+        },
+        {
+          "id": "long-msg-48",
+          "role": "user",
+          "content": "Turn 49: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002880
+        },
+        {
+          "id": "long-msg-49",
+          "role": "model",
+          "content": "Turn 50: Detailed step analysis for shard migration phase 4. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710002940
+        },
+        {
+          "id": "long-msg-50",
+          "role": "user",
+          "content": "Turn 51: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003000
+        },
+        {
+          "id": "long-msg-51",
+          "role": "model",
+          "content": "Turn 52: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003060
+        },
+        {
+          "id": "long-msg-52",
+          "role": "user",
+          "content": "Turn 53: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003120
+        },
+        {
+          "id": "long-msg-53",
+          "role": "model",
+          "content": "Turn 54: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003180
+        },
+        {
+          "id": "long-msg-54",
+          "role": "user",
+          "content": "Turn 55: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003240
+        },
+        {
+          "id": "long-msg-55",
+          "role": "model",
+          "content": "Turn 56: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003300
+        },
+        {
+          "id": "long-msg-56",
+          "role": "user",
+          "content": "Turn 57: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003360
+        },
+        {
+          "id": "long-msg-57",
+          "role": "model",
+          "content": "Turn 58: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003420
+        },
+        {
+          "id": "long-msg-58",
+          "role": "user",
+          "content": "Turn 59: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003480
+        },
+        {
+          "id": "long-msg-59",
+          "role": "model",
+          "content": "Turn 60: Detailed step analysis for shard migration phase 5. Ensuring zero downtime and monotonic replication stream checkpoints.",
+          "timestamp": 1710003540
+        }
+      ]
+    }
+  ]
+}

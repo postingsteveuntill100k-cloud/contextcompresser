@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Takeout Architecture Discussion",
+    "create_time": 1710000000,
+    "mapping": {
+      "node-1": {
+        "id": "node-1",
+        "parent": null,
+        "message": {
+          "id": "msg-1",
+          "author": {
+            "role": "user"
+          },
+          "create_time": 1710000000,
+          "content": {
+            "parts": [
+              "We decided to migrate our caching layer to Redis cluster because memory limits on single instances were causing OOM errors in production."
+            ]
+          }
+        }
+      },
+      "node-2": {
+        "id": "node-2",
+        "parent": "node-1",
+        "message": {
+          "id": "msg-2",
+          "author": {
+            "role": "assistant"
+          },
+          "create_time": 1710000010,
+          "content": {
+            "parts": [
+              "Acknowledged. We ratified Redis Cluster with 3 shards and replication. Memcached was evaluated but rejected due to lack of persistence."
+            ]
+          }
+        }
+      }
+    }
+  }
+]

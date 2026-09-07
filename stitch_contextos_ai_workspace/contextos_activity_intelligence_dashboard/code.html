@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; } .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-on-surface": "#31302e", "surface-container-high": "#2a2a28", "on-primary-fixed-variant": "#7a2f01", "surface-container-highest": "#353532", "hairline-subtle": "#222220", "on-tertiary": "#22342b", "on-background": "#e5e2de", "background": "#131312", "secondary-fixed-dim": "#efbe7d", "secondary": "#efbe7d", "on-tertiary-fixed": "#0d1f17", "outline-variant": "#55433b", "inverse-surface": "#e5e2de", "on-secondary-container": "#dcad6e", "surface-elevated": "#262624", "tertiary-fixed-dim": "#b6ccbe", "error-container": "#93000a", "on-error": "#690005", "sage-utility": "#768A7E", "primary-container": "#d97746", "secondary-fixed": "#ffddb4", "primary": "#ffb694", "surface": "#131312", "surface-container-lowest": "#0e0e0c", "on-primary-container": "#4d1b00", "terracotta-accent": "#D97746", "tertiary": "#b6ccbe", "sage-subtle": "#1B221E", "surface-dim": "#131312", "on-primary-fixed": "#351000", "tertiary-container": "#82968a", "terracotta-glow": "#E08354", "on-primary": "#571f00", "surface-container": "#20201e", "on-secondary": "#452b00", "tertiary-fixed": "#d2e8da", "surface-inset": "#0D0D0C", "surface-variant": "#353532", "hairline": "#2C2C29", "error": "#ffb4ab", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#384b41", "on-secondary-fixed-variant": "#614009", "amber-subtle": "#2A211B", "on-secondary-fixed": "#291800", "text-primary": "#F3F1ED", "inverse-primary": "#994619", "primary-fixed-dim": "#ffb694", "text-secondary": "#B5B3AD", "on-tertiary-container": "#1c2e25", "outline": "#a38c82", "surface-tint": "#ffb694", "surface-bright": "#3a3937", "primary-fixed": "#ffdbcc", "surface-container-low": "#1c1c1a", "text-muted": "#75746E", "secondary-container": "#614009", "on-surface": "#e5e2de", "surface-panel": "#1E1E1C", "surface-canvas": "#141413", "on-surface-variant": "#dbc1b6" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "input-box-max-w": "46rem", "unit-1": "0.25rem", "unit-2": "0.5rem", "unit-4": "1rem", "context-tray-w": "22rem", "reading-max-w": "48rem", "unit-3": "0.75rem", "unit-5": "1.25rem", "unit-8": "2rem", "sidebar-w": "16.5rem", "unit-10": "2.5rem", "unit-6": "1.5rem", "unit-20": "5rem", "unit-12": "3rem", "unit-16": "4rem" }, "fontFamily": { "display-lg-mobile": ["Newsreader"], "display-lg": ["Newsreader"], "headline-lg": ["Newsreader"], "title-md": ["Hanken Grotesk"], "body-sm": ["Hanken Grotesk"], "body-lg": ["Hanken Grotesk"], "headline-sm": ["Newsreader"], "label-md": ["JetBrains Mono"], "title-lg": ["Hanken Grotesk"], "headline-md": ["Newsreader"], "body-md": ["Hanken Grotesk"], "label-sm": ["JetBrains Mono"], "code-snippet": ["JetBrains Mono"] }, "fontSize": { "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "400" }], "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "400" }], "code-snippet": ["13px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-amber-subtle selection:text-primary"><aside class="fixed left-0 top-0 h-full w-sidebar-w bg-surface-panel z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto px-unit-4 pt-unit-5"><div class="flex items-center justify-between pb-unit-5 px-unit-1"><div class="flex items-center gap-unit-2"><img alt="ContextOS Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP3LCC4McywsqzeohV4xPFZTmXLqaGq33tkRdDFbFS0QAxpJyrmw-X19G9dHORaR4FEA1CTlUqhPWKj7pidHwdvqkt8D_UJ8JcqTDYu7ukMZZTEyDwrHY2BMbU_RdHAv6S1rKZDWTHOfTXvr6EdKJLH9-1bp0ZijgMUthzVHkxf4618l--UGrALH-sf2MhDv305wF7t2y2wNMzGGYTNFSwFF5Qg0b4KBegS7gdJnQvkmrmJz99lgs"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">ContextOS</span><span class="font-label-sm text-label-sm text-text-muted mt-unit-1">Personal Context</span></div></div><span class="font-label-sm text-label-sm bg-surface-container px-unit-2 py-unit-1 rounded text-secondary">v1.2</span></div><div class="pb-unit-4"><button class="w-full flex items-center justify-between px-unit-3 py-unit-2 bg-surface-container-low hover:bg-surface-elevated text-on-surface-variant hover:text-on-surface rounded-lg transition-colors group"><span class="flex items-center gap-unit-2 font-body-sm text-body-sm text-text-secondary group-hover:text-on-surface"><span class="material-symbols-outlined text-[16px]">search</span>Jump to or ask...</span><kbd class="font-label-sm text-label-sm px-unit-1 bg-surface-container rounded text-text-muted">⌘K</kbd></button></div><nav class="flex-1 flex flex-col gap-unit-5" data-active-classes="bg-surface-elevated text-on-surface border-l-2 border-terracotta-accent font-title-md"><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">CONTEXTOS</span><a aria-current="page" class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded transition-colors bg-surface-elevated text-on-surface border-l-2 border-terracotta-accent font-title-md" data-path="home" href="#"><span class="material-symbols-outlined text-[18px]">home</span><span class="font-body-sm text-body-sm">Home</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">ASK</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="ask-my-history" href="#"><span class="material-symbols-outlined text-[18px]">neurology</span><span class="font-body-sm text-body-sm">Ask My History</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">KNOWLEDGE</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="conversations" href="#"><span class="material-symbols-outlined text-[18px]">forum</span><span class="font-body-sm text-body-sm">Conversations</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="projects" href="#"><span class="material-symbols-outlined text-[18px]">folder_open</span><span class="font-body-sm text-body-sm">Projects</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="memory" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span class="font-body-sm text-body-sm">Memory</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="decisions" href="#"><span class="material-symbols-outlined text-[18px]">balance</span><span class="font-body-sm text-body-sm">Decisions</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">CONTEXT</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="generate-context" href="#"><span class="material-symbols-outlined text-[18px]">file_download</span><span class="font-body-sm text-body-sm">Generate Context</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="context-packages" href="#"><span class="material-symbols-outlined text-[18px]">layers</span><span class="font-body-sm text-body-sm">Context Packages</span></a></div><div class="flex flex-col gap-unit-1"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">DEVELOPER</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="developer-mode" href="#"><span class="material-symbols-outlined text-[18px]">terminal</span><span class="font-body-sm text-body-sm">Developer Mode</span></a></div><div class="flex flex-col gap-unit-1 pb-unit-4"><span class="font-label-sm text-label-sm text-text-muted px-unit-2 tracking-wider uppercase">SYSTEM</span><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="import-history" href="#"><span class="material-symbols-outlined text-[18px]">cloud_download</span><span class="font-body-sm text-body-sm">Import History</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="security-and-privacy" href="#"><span class="material-symbols-outlined text-[18px]">verified_user</span><span class="font-body-sm text-body-sm">Security &amp; Privacy</span></a><a class="flex items-center gap-unit-3 px-unit-2 py-unit-2 rounded text-on-surface-variant hover:bg-surface-elevated hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-sm text-body-sm">Settings</span></a></div></nav></div><div class="p-unit-3 bg-surface-container-low/60 flex items-center justify-between"><div class="flex items-center gap-unit-3"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkY3b54dWvtJrDm3ZgB4LpkrhLFCBMcswxa1xJMpXSUkSh2w5ZEBX142U3wpIBC7486oCrWzNLDknlyjtMnhRu37PL9ebE78m-GHaN3YLGkuNm2Oo1RxE0trQwwWWqoGSsoXfFth9NdAp-aGOGrKGTum4mdNo6J-OYTPC40qzVrbT7aet0r-pH-gpzYIf8CCdL6eBtk1PzZnqHAejz5BF4XqoqGvm34refnZwzntQdmZ6qovqywyU"/><span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-sage-utility ring-2 ring-surface-panel"></span></div><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface leading-tight">Abhinav</span><span class="font-label-sm text-label-sm text-secondary-fixed-dim leading-tight">Pro Knowledge</span></div></div><button class="p-unit-1 text-text-muted hover:text-on-surface hover:bg-surface-elevated rounded transition-colors" title="Toggle Dark / Light Theme"><span class="material-symbols-outlined text-[18px]">dark_mode</span></button></div></aside><div class="pl-sidebar-w"><header class="fixed top-0 left-sidebar-w right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-unit-8"><div class="flex items-center gap-unit-6"><div class="flex items-center gap-unit-2 text-text-muted font-body-sm text-body-sm"><span class="text-on-surface-variant hover:text-on-surface transition-colors">ContextOS</span><span class="text-text-muted">/</span><span class="text-on-surface font-title-md text-title-md font-medium">Home</span></div><span class="hidden lg:inline-flex items-center gap-unit-2 px-unit-3 py-unit-1 rounded-full bg-surface-container-low text-text-secondary font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-terracotta-accent"></span>1,842 conversations indexed · 38 decisions tracked</span></div><div class="flex items-center gap-unit-3"><button class="flex items-center gap-unit-2 px-unit-3 py-unit-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors"><span class="material-symbols-outlined text-[16px]">cloud_download</span>Import History</button><button class="flex items-center gap-unit-2 px-unit-4 py-unit-2 rounded-lg bg-primary-container text-on-primary-container hover:bg-terracotta-glow font-title-md text-title-md transition-colors shadow-sm"><span class="material-symbols-outlined text-[16px]">add</span>New Question</button><div class="h-4 w-[1px] bg-surface-container mx-unit-1"></div><button class="p-unit-2 rounded-lg text-text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Theme Toggle"><span class="material-symbols-outlined text-[18px]">contrast</span></button></div></header><main class="relative pt-16 bg-surface min-h-screen px-unit-8 py-unit-6"><div class="max-w-reading-max-w mx-auto w-full"><div class="flex flex-col w-full pb-unit-12">
+<!-- Top Navigation Subhead & Period Filter -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-unit-4 pb-unit-6 border-b border-hairline">
+<div class="flex flex-col gap-unit-1">
+<div class="flex items-center gap-unit-2 text-text-muted font-label-sm text-label-sm uppercase tracking-wider">
+<span>ContextOS</span>
+<span class="text-text-muted/60">/</span>
+<span class="text-secondary">Analytics &amp; Activity</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Intelligence &amp; Activity Insights</h1>
+<p class="font-body-md text-body-md text-text-secondary max-w-xl">Synthesized trends, document reuse velocity, and knowledge retrieval across your personal vault.</p>
+</div>
+<!-- Period Selector Pill Group -->
+<div class="flex flex-wrap items-center gap-unit-2 self-start md:self-auto">
+<div class="inline-flex p-1 bg-surface-panel rounded-xl border border-hairline text-text-muted font-body-sm text-body-sm shadow-sm">
+<button class="px-unit-3 py-1 rounded-lg hover:text-text-primary transition-colors">7D</button>
+<button class="px-unit-3 py-1 rounded-lg bg-surface-elevated text-text-primary shadow-sm font-medium">30D</button>
+<button class="px-unit-3 py-1 rounded-lg hover:text-text-primary transition-colors">90D</button>
+<button class="px-unit-3 py-1 rounded-lg hover:text-text-primary transition-colors">All Time</button>
+</div>
+<div class="hidden sm:flex items-center gap-unit-2 px-unit-3 py-unit-2 bg-surface-container-low rounded-xl border border-hairline-subtle text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px] text-terracotta-accent">calendar_today</span>
+<span>Aug 01 – Aug 30, 2024</span>
+</div>
+</div>
+</div>
+<!-- Key Metrics Row (4 Minimalist Bento Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-unit-4 mt-unit-6">
+<!-- Card 1 -->
+<div class="group relative flex flex-col justify-between p-unit-5 rounded-2xl bg-surface-panel border border-hairline hover:border-outline-variant/60 transition-all shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Active Ingestions</span>
+<span class="material-symbols-outlined text-[18px] text-terracotta-accent/80">sync_alt</span>
+</div>
+<div class="mt-unit-4 flex items-baseline gap-unit-2">
+<span class="font-headline-lg text-headline-lg text-text-primary font-normal">2,842</span>
+<span class="inline-flex items-center text-label-sm font-label-sm text-tertiary font-medium">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>14%
+        </span>
+</div>
+<div class="mt-unit-2 flex items-center justify-between font-body-sm text-body-sm text-text-muted">
+<span>+342 vs prior 30 days</span>
+<span class="w-2 h-2 rounded-full bg-terracotta-accent/60"></span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex flex-col justify-between p-unit-5 rounded-2xl bg-surface-panel border border-hairline hover:border-outline-variant/60 transition-all shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Decisions Ratified</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">balance</span>
+</div>
+<div class="mt-unit-4 flex items-baseline gap-unit-2">
+<span class="font-headline-lg text-headline-lg text-text-primary font-normal">38</span>
+<span class="font-label-sm text-label-sm text-text-secondary bg-surface-container px-unit-2 py-0.5 rounded">3 pending</span>
+</div>
+<div class="mt-unit-2 flex items-center justify-between font-body-sm text-body-sm text-text-muted">
+<span>Zero unresolved conflicts</span>
+<span class="w-2 h-2 rounded-full bg-secondary/60"></span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative flex flex-col justify-between p-unit-5 rounded-2xl bg-surface-panel border border-hairline hover:border-outline-variant/60 transition-all shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Packages Reused</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary">layers</span>
+</div>
+<div class="mt-unit-4 flex items-baseline gap-unit-2">
+<span class="font-headline-lg text-headline-lg text-text-primary font-normal">184</span>
+<span class="font-label-sm text-label-sm text-text-secondary">times</span>
+</div>
+<div class="mt-unit-2 flex items-center justify-between font-body-sm text-body-sm text-text-muted">
+<span>Saved ~42.6h context prep</span>
+<span class="w-2 h-2 rounded-full bg-tertiary/60"></span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative flex flex-col justify-between p-unit-5 rounded-2xl bg-surface-panel border border-hairline hover:border-outline-variant/60 transition-all shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Token Efficiency</span>
+<span class="material-symbols-outlined text-[18px] text-primary">speed</span>
+</div>
+<div class="mt-unit-4 flex items-baseline gap-unit-2">
+<span class="font-headline-lg text-headline-lg text-text-primary font-normal">99.4%</span>
+<span class="font-label-sm text-label-sm text-tertiary">Optimal</span>
+</div>
+<div class="mt-unit-2 flex items-center justify-between font-body-sm text-body-sm text-text-muted">
+<span>Zero telemetry payload</span>
+<span class="w-2 h-2 rounded-full bg-primary/60"></span>
+</div>
+</div>
+</div>
+<!-- Primary Activity Trend Visualization (High-Fidelity Area Chart) -->
+<div class="mt-unit-8 flex flex-col p-unit-6 rounded-2xl bg-surface-panel border border-hairline shadow-md relative overflow-hidden">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-unit-4 pb-unit-6 border-b border-hairline-subtle">
+<div class="flex flex-col">
+<div class="flex items-center gap-unit-2">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Knowledge Synthesis &amp; Query Activity</h2>
+<span class="px-unit-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-text-muted">30-Day Trajectory</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Ingestion volume versus retrieval invocations into external LLM prompts</p>
+</div>
+<!-- Chart Legend & Stat Summary -->
+<div class="flex items-center gap-unit-5 font-label-sm text-label-sm">
+<div class="flex items-center gap-unit-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-terracotta-accent inline-block"></span>
+<span class="text-text-secondary">Conversation Ingestion</span>
+</div>
+<div class="flex items-center gap-unit-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-tertiary inline-block"></span>
+<span class="text-text-secondary">History Retrieval Queries</span>
+</div>
+</div>
+</div>
+<!-- Responsive SVG Chart Stage -->
+<div class="relative w-full h-72 sm:h-80 pt-unit-6">
+<svg class="w-full h-full overflow-visible" fill="none" preserveaspectratio="none" viewbox="0 0 740 240">
+<defs>
+<lineargradient id="terracottaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#D97746" stop-opacity="0.28"></stop>
+<stop offset="100%" stop-color="#D97746" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="sageGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#768A7E" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#768A7E" stop-opacity="0.0"></stop>
+</lineargradient>
+<filter height="140%" id="glow-terracotta" width="140%" x="-20%" y="-20%">
+<fedropshadow dx="0" dy="2" flood-color="#D97746" flood-opacity="0.3" stddeviation="3"></fedropshadow>
+</filter>
+</defs>
+<!-- Subtle Horizontal Grid Lines -->
+<g stroke="#2C2C29" stroke-dasharray="3 3" stroke-width="1">
+<line x1="0" x2="740" y1="40" y2="40"></line>
+<line x1="0" x2="740" y1="90" y2="90"></line>
+<line x1="0" x2="740" y1="140" y2="140"></line>
+<line x1="0" x2="740" y1="190" y2="190"></line>
+</g>
+<!-- Area Fills -->
+<!-- Sage Area (Queries) -->
+<path d="M0,170 C40,165 70,140 120,135 C170,130 210,150 260,120 C310,90 350,110 400,95 C450,80 490,105 540,75 C590,45 630,70 680,50 C710,38 730,42 740,35 L740,210 L0,210 Z" fill="url(#sageGrad)"></path>
+<!-- Terracotta Area (Ingestion) -->
+<path d="M0,195 C45,185 85,170 130,150 C180,128 220,135 270,105 C320,75 360,92 410,65 C460,38 500,55 550,42 C600,28 640,48 690,25 C715,15 730,22 740,18 L740,210 L0,210 Z" fill="url(#terracottaGrad)"></path>
+<!-- Line Paths -->
+<!-- Sage Line (Queries) -->
+<path d="M0,170 C40,165 70,140 120,135 C170,130 210,150 260,120 C310,90 350,110 400,95 C450,80 490,105 540,75 C590,45 630,70 680,50 C710,38 730,42 740,35" fill="none" stroke="#82968a" stroke-linecap="round" stroke-width="2"></path>
+<!-- Terracotta Line (Ingestions) -->
+<path d="M0,195 C45,185 85,170 130,150 C180,128 220,135 270,105 C320,75 360,92 410,65 C460,38 500,55 550,42 C600,28 640,48 690,25 C715,15 730,22 740,18" fill="none" filter="url(#glow-terracotta)" stroke="#D97746" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Highlight Node (Aug 21) -->
+<g transform="translate(520, 0)">
+<!-- Vertical Marker Guideline -->
+<line opacity="0.6" stroke="#55433b" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="0" y1="15" y2="210"></line>
+<!-- Query Node -->
+<circle cx="0" cy="80" fill="#141413" r="4.5" stroke="#82968a" stroke-width="2"></circle>
+<!-- Ingestion Node -->
+<circle cx="0" cy="48" fill="#D97746" r="5" stroke="#141413" stroke-width="2"></circle>
+</g>
+</svg>
+<!-- Floating Tooltip Card positioned at Aug 21 node -->
+<div class="absolute left-2/3 top-4 -translate-x-1/2 p-unit-3 rounded-xl bg-surface-elevated/95 backdrop-blur-md border border-hairline shadow-xl flex flex-col gap-1 z-10 w-48 pointer-events-none">
+<div class="flex items-center justify-between pb-1 border-b border-hairline-subtle">
+<span class="font-label-sm text-label-sm font-semibold text-text-primary">Wednesday, Aug 21</span>
+<span class="w-1.5 h-1.5 rounded-full bg-terracotta-accent"></span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm mt-1">
+<span class="text-text-muted flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-terracotta-accent"></span> Ingestions</span>
+<span class="text-text-primary font-medium">94 docs</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-muted flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Hist. Queries</span>
+<span class="text-text-primary font-medium">42 calls</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm pt-1 border-t border-hairline-subtle text-secondary">
+<span>Decisions Ratified</span>
+<span class="font-medium">+1 proven</span>
+</div>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between items-center pt-unit-3 font-label-sm text-label-sm text-text-muted border-t border-hairline">
+<span>Aug 01</span>
+<span>Aug 08</span>
+<span>Aug 15</span>
+<span class="text-secondary font-medium">Aug 21 (Peak)</span>
+<span>Aug 25</span>
+<span>Aug 30</span>
+</div>
+</div>
+</div>
+<!-- Section 3: Most Reused Context Documents & Packages -->
+<div class="mt-unit-8 flex flex-col p-unit-6 rounded-2xl bg-surface-panel border border-hairline shadow-md">
+<div class="flex flex-col sm:flex-row sm:items-baseline justify-between pb-unit-5 border-b border-hairline-subtle gap-unit-2">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Most Reused Context Documents &amp; Packages</h2>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Frequency of curated context handoffs injected into external AI workspace sessions</p>
+</div>
+<button class="self-start sm:self-auto flex items-center gap-unit-2 text-text-muted hover:text-text-primary font-body-sm text-body-sm transition-colors">
+<span>Export manifest</span>
+<span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+</div>
+<!-- Ranked Context List / Horizontal Bars -->
+<div class="flex flex-col divide-y divide-hairline-subtle mt-unit-2">
+<!-- Item 1 -->
+<div class="py-unit-4 flex flex-col gap-unit-2 group">
+<div class="flex items-center justify-between gap-unit-4">
+<div class="flex items-center gap-unit-3 min-w-0">
+<span class="font-label-sm text-label-sm text-terracotta-accent font-medium">01</span>
+<div class="flex items-center gap-unit-2 min-w-0">
+<span class="font-title-md text-title-md text-text-primary truncate">ContextOS Architecture &amp; Core Decisions</span>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-text-muted shrink-0">System Vault</span>
+</div>
+</div>
+<div class="flex items-center gap-unit-4 shrink-0">
+<div class="hidden md:flex flex-col items-end text-right">
+<span class="font-label-sm text-label-sm text-text-primary font-medium">342 reuses</span>
+<span class="font-label-sm text-label-sm text-text-muted">88% token retention</span>
+</div>
+<button class="p-unit-1.5 rounded-lg bg-surface-container-low hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</div>
+<!-- Progress track -->
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden flex">
+<div class="bg-gradient-to-r from-terracotta-accent to-terracotta-glow h-full rounded-full transition-all" style="width: 94%;"></div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="py-unit-4 flex flex-col gap-unit-2 group">
+<div class="flex items-center justify-between gap-unit-4">
+<div class="flex items-center gap-unit-3 min-w-0">
+<span class="font-label-sm text-label-sm text-secondary font-medium">02</span>
+<div class="flex items-center gap-unit-2 min-w-0">
+<span class="font-title-md text-title-md text-text-primary truncate">Firebase vs Local SQLite Auth Specification</span>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-text-muted shrink-0">Security &amp; Auth</span>
+</div>
+</div>
+<div class="flex items-center gap-unit-4 shrink-0">
+<div class="hidden md:flex flex-col items-end text-right">
+<span class="font-label-sm text-label-sm text-text-primary font-medium">218 reuses</span>
+<span class="font-label-sm text-label-sm text-text-muted">94% token retention</span>
+</div>
+<button class="p-unit-1.5 rounded-lg bg-surface-container-low hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden flex">
+<div class="bg-gradient-to-r from-secondary-container to-secondary h-full rounded-full transition-all" style="width: 72%;"></div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="py-unit-4 flex flex-col gap-unit-2 group">
+<div class="flex items-center justify-between gap-unit-4">
+<div class="flex items-center gap-unit-3 min-w-0">
+<span class="font-label-sm text-label-sm text-tertiary font-medium">03</span>
+<div class="flex items-center gap-unit-2 min-w-0">
+<span class="font-title-md text-title-md text-text-primary truncate">Gemini Importer &amp; JSON Schema Normalizer</span>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-text-muted shrink-0">Data Pipelines</span>
+</div>
+</div>
+<div class="flex items-center gap-unit-4 shrink-0">
+<div class="hidden md:flex flex-col items-end text-right">
+<span class="font-label-sm text-label-sm text-text-primary font-medium">175 reuses</span>
+<span class="font-label-sm text-label-sm text-text-muted">91% token retention</span>
+</div>
+<button class="p-unit-1.5 rounded-lg bg-surface-container-low hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden flex">
+<div class="bg-gradient-to-r from-sage-utility to-tertiary-fixed-dim h-full rounded-full transition-all" style="width: 58%;"></div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="py-unit-4 flex flex-col gap-unit-2 group">
+<div class="flex items-center justify-between gap-unit-4">
+<div class="flex items-center gap-unit-3 min-w-0">
+<span class="font-label-sm text-label-sm text-text-secondary font-medium">04</span>
+<div class="flex items-center gap-unit-2 min-w-0">
+<span class="font-title-md text-title-md text-text-primary truncate">Client-Side Zero-Knowledge Vault Blueprint</span>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-text-muted shrink-0">Cryptography</span>
+</div>
+</div>
+<div class="flex items-center gap-unit-4 shrink-0">
+<div class="hidden md:flex flex-col items-end text-right">
+<span class="font-label-sm text-label-sm text-text-primary font-medium">124 reuses</span>
+<span class="font-label-sm text-label-sm text-text-muted">96% token retention</span>
+</div>
+<button class="p-unit-1.5 rounded-lg bg-surface-container-low hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden flex">
+<div class="bg-text-secondary/70 h-full rounded-full transition-all" style="width: 44%;"></div>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="py-unit-4 flex flex-col gap-unit-2 group">
+<div class="flex items-center justify-between gap-unit-4">
+<div class="flex items-center gap-unit-3 min-w-0">
+<span class="font-label-sm text-label-sm text-text-muted font-medium">05</span>
+<div class="flex items-center gap-unit-2 min-w-0">
+<span class="font-title-md text-title-md text-text-primary truncate">Mobile Companion &amp; WebAssembly IndexedDB Bridge</span>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-text-muted shrink-0">Platform</span>
+</div>
+</div>
+<div class="flex items-center gap-unit-4 shrink-0">
+<div class="hidden md:flex flex-col items-end text-right">
+<span class="font-label-sm text-label-sm text-text-primary font-medium">89 reuses</span>
+<span class="font-label-sm text-label-sm text-text-muted">84% token retention</span>
+</div>
+<button class="p-unit-1.5 rounded-lg bg-surface-container-low hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden flex">
+<div class="bg-text-muted/60 h-full rounded-full transition-all" style="width: 31%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Supporting Insights 2-Column Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-unit-6 mt-unit-8">
+<!-- Left Bento: Decision Velocity & Topic Breakdown -->
+<div class="flex flex-col p-unit-6 rounded-2xl bg-surface-panel border border-hairline shadow-md">
+<div class="flex items-center justify-between pb-unit-4 border-b border-hairline-subtle">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Decision Velocity &amp; Topics</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Categorical distribution across 38 ratified decisions</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-terracotta-accent">pie_chart</span>
+</div>
+<!-- Segmented Stack Bar -->
+<div class="mt-unit-5 flex flex-col gap-unit-3">
+<div class="w-full h-3 rounded-full bg-surface-inset overflow-hidden flex gap-0.5">
+<div class="bg-terracotta-accent h-full" style="width: 38%;" title="Database Architecture (38%)"></div>
+<div class="bg-secondary h-full" style="width: 28%;" title="Auth &amp; Security (28%)"></div>
+<div class="bg-tertiary h-full" style="width: 22%;" title="Typography &amp; UX (22%)"></div>
+<div class="bg-text-muted h-full" style="width: 12%;" title="Importers (12%)"></div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-unit-2 pt-unit-1 font-label-sm text-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent"></span>
+<span class="text-text-secondary truncate">DB Arch (38%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-text-secondary truncate">Security (28%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-text-secondary truncate">UI / UX (22%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-text-muted"></span>
+<span class="text-text-secondary truncate">Importers (12%)</span>
+</div>
+</div>
+</div>
+<!-- Mini Feed: Recent Ratified Decisions -->
+<div class="mt-unit-6 flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted mb-unit-3">Recently Ratified Directives</span>
+<div class="flex flex-col divide-y divide-hairline-subtle">
+<div class="py-unit-3 flex items-start justify-between gap-unit-3">
+<div class="flex items-start gap-unit-3">
+<span class="material-symbols-outlined text-[18px] text-terracotta-accent mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Adopt DuckDB for in-browser OLAP queries</span>
+<span class="font-label-sm text-label-sm text-text-muted">Aug 21 · Source: Conversation #849</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-tertiary">Active</span>
+</div>
+<div class="py-unit-3 flex items-start justify-between gap-unit-3">
+<div class="flex items-start gap-unit-3">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Standardize export schema on JSON-LD 1.1</span>
+<span class="font-label-sm text-label-sm text-text-muted">Aug 18 · Source: Conversation #812</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-surface-container text-tertiary">Active</span>
+</div>
+<div class="py-unit-3 flex items-start justify-between gap-unit-3">
+<div class="flex items-start gap-unit-3">
+<span class="material-symbols-outlined text-[18px] text-text-muted mt-0.5">pending</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Migrate session memory to vector cosine metric</span>
+<span class="font-label-sm text-label-sm text-text-muted">Aug 15 · Awaiting bench results</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-unit-2 py-0.5 rounded bg-amber-subtle text-secondary">Review</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Bento: Model Hand-off Destinations & Export Formats -->
+<div class="flex flex-col p-unit-6 rounded-2xl bg-surface-panel border border-hairline shadow-md">
+<div class="flex items-center justify-between pb-unit-4 border-b border-hairline-subtle">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">Model Hand-off Destinations</h2>
+<p class="font-body-sm text-body-sm text-text-secondary">Distribution of target LLMs receiving ContextOS bundles</p>
+</div>
+<span class="material-symbols-outlined text-[20px] text-tertiary">send_to_mobile</span>
+</div>
+<!-- Model Share Bars -->
+<div class="mt-unit-5 flex flex-col gap-unit-4">
+<!-- Claude 3.5 Sonnet -->
+<div class="flex flex-col gap-unit-1.5">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="font-medium text-text-primary flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-terracotta-accent"></span>
+              Claude 3.5 Sonnet
+            </span>
+<span class="font-label-sm text-label-sm text-text-primary font-semibold">54% <span class="text-text-muted font-normal">(99 handoffs)</span></span>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden">
+<div class="bg-terracotta-accent h-full rounded-full" style="width: 54%;"></div>
+</div>
+</div>
+<!-- GPT-4o -->
+<div class="flex flex-col gap-unit-1.5">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="font-medium text-text-primary flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+              GPT-4o
+            </span>
+<span class="font-label-sm text-label-sm text-text-primary font-semibold">28% <span class="text-text-muted font-normal">(52 handoffs)</span></span>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 28%;"></div>
+</div>
+</div>
+<!-- Gemini 1.5 Pro -->
+<div class="flex flex-col gap-unit-1.5">
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="font-medium text-text-primary flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+              Gemini 1.5 Pro
+            </span>
+<span class="font-label-sm text-label-sm text-text-primary font-semibold">18% <span class="text-text-muted font-normal">(33 handoffs)</span></span>
+</div>
+<div class="w-full bg-surface-inset h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 18%;"></div>
+</div>
+</div>
+</div>
+<!-- Export Payload Preference Box -->
+<div class="mt-unit-6 p-unit-4 rounded-xl bg-surface-container-low border border-hairline-subtle flex flex-col gap-unit-3">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Export Format Preference</span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">99.8% Markdown Dominance</span>
+</div>
+<div class="flex items-center gap-unit-4">
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-text-secondary">Editorial Markdown</span>
+<span class="text-text-primary">74%</span>
+</div>
+<div class="w-full bg-surface-inset h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 74%;"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-text-secondary">Structured AST / JSON</span>
+<span class="text-text-primary">26%</span>
+</div>
+<div class="w-full bg-surface-inset h-1.5 rounded-full overflow-hidden">
+<div class="bg-sage-utility h-full rounded-full" style="width: 26%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Vault Privacy & Zero-Knowledge Status Banner -->
+<div class="mt-unit-8 flex items-center justify-between p-unit-4 rounded-xl bg-surface-panel border border-hairline text-text-secondary">
+<div class="flex items-center gap-unit-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-text-primary font-medium">Private Cryptographic Analytics</span>
+<span class="font-label-sm text-label-sm text-text-muted">All telemetry and metrics computed strictly client-side via SQLite-WASM. Zero remote tracking or external telemetry servers.</span>
+</div>
+</div>
+<div class="hidden sm:flex items-center gap-unit-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm text-tertiary">Encrypted Local Ledger</span>
+</div>
+</div>
+</div></div></main></div></body></html>

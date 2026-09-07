@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "site": "compresscontext",
+    "public": ".firebase/compresscontext/hosting",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": [
+    {
+      "database": "ai-studio-75bf52e5-ed24-4c6b-9fc6-068f9fc80e3a",
+      "rules": "firestore.rules"
+    }
+  ]
+}
