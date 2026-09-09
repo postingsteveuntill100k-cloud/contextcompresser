@@ -9,13 +9,8 @@ import {
   Search,
   MessageSquare,
   Folder,
-  Brain,
-  Scale,
-  FileText,
   Layers,
-  Terminal,
   Download,
-  ShieldCheck,
   Settings,
   LogOut,
   User,
@@ -33,44 +28,18 @@ export default function Navigation({ convoCount = 0, isOpen = false, onCloseMobi
 
   const navGroups = [
     {
-      label: 'ContextOS',
+      label: 'Workspace',
       items: [
         { href: '/home', label: 'Home', icon: Home, id: 'nav-home' },
-      ],
-    },
-    {
-      label: 'Ask',
-      items: [
-        { href: '/ask', label: 'Ask My History', icon: Search, id: 'nav-ask' },
-      ],
-    },
-    {
-      label: 'Knowledge',
-      items: [
+        { href: '/ask', label: 'Ask', icon: Search, id: 'nav-ask' },
         { href: '/conversations', label: 'Conversations', icon: MessageSquare, id: 'nav-conversations', count: convoCount },
         { href: '/projects', label: 'Projects', icon: Folder, id: 'nav-projects' },
-        { href: '/memory', label: 'Memory', icon: Brain, id: 'nav-memory' },
-        { href: '/decisions', label: 'Decisions', icon: Scale, id: 'nav-decisions' },
-      ],
-    },
-    {
-      label: 'Context',
-      items: [
-        { href: '/generate', label: 'Generate Context', icon: FileText, id: 'nav-generate' },
-        { href: '/packages', label: 'Context Packages', icon: Layers, id: 'nav-packages' },
-      ],
-    },
-    {
-      label: 'Developer',
-      items: [
-        { href: '/developer', label: 'Developer Mode', icon: Terminal, id: 'nav-developer' },
       ],
     },
     {
       label: 'System',
       items: [
         { href: '/import', label: 'Import History', icon: Download, id: 'nav-import' },
-        { href: '/security', label: 'Security & Privacy', icon: ShieldCheck, id: 'nav-security' },
         { href: '/settings', label: 'Settings', icon: Settings, id: 'nav-settings' },
       ],
     },

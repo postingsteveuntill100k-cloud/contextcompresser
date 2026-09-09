@@ -14,9 +14,7 @@ async function runDiagnostic() {
     stdio: ['ignore', 'pipe', 'pipe']
   });
 
-  ff.stderr.on('data', (d) => {
-    // console.log('[FF STDERR]', d.toString());
-  });
+  ff.stderr.on('data', () => {});
 
   // Wait for BiDi to be ready
   await new Promise((resolve) => setTimeout(resolve, 2500));

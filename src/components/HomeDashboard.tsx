@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CanonicalConversation, ContextPackage, StructuredMemory } from '@/types';
 import Link from 'next/link';
+import { CanonicalConversation, ContextPackage, StructuredMemory } from '@/types';
 import {
   Search,
-  Upload,
+  ArrowRight,
   ArrowUpRight,
   MessageSquare,
-  Copy,
-  Check,
-  Brain,
   FileText,
-  Layers,
+  Upload,
 } from 'lucide-react';
 
 interface HomeDashboardProps {
@@ -20,22 +17,17 @@ interface HomeDashboardProps {
   packages?: ContextPackage[];
   memory?: StructuredMemory | null;
   onAskQuery: (query: string) => void;
-  onSelectProject: (projectName: string) => void;
-  onOpenPackage: (packageName: string) => void;
+  onSelectProject?: (projectName: string) => void;
+  onOpenPackage?: (packageName: string) => void;
   onNavigateToImport?: () => void;
 }
 
 export default function HomeDashboard({
-  conversations,
-  packages = [],
-  memory,
+  conversations = [],
   onAskQuery,
-  onSelectProject,
-  onOpenPackage,
   onNavigateToImport,
 }: HomeDashboardProps) {
   const [queryInput, setQueryInput] = useState('');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && queryInput.trim()) {
@@ -43,338 +35,68 @@ export default function HomeDashboard({
     }
   };
 
-  const handleCopyPackage = (id: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleAsk = () => {
+    if (queryInput.trim()) {
+      onAskQuery(queryInput.trim());
+    }
   };
 
-  const convoCount = conversations.length;
-  const decisionsCount = memory?.decisions?.length || 0;
-  const packagesCount = packages.length;
+  // Sort conversations by most recent
+  const sortedConversations = [...conversations].sort((a, b) => {
+    const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
 
-  // FIRST-TIME EXPERIENCE: When user has 0 conversations, show intentional empty state
-  if (convoCount === 0) {
-    return (
-      <div
-        style={{
-          maxWidth: '860px',
-          margin: '0 auto',
-          padding: '64px 24px 80px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-        }}
-      >
-        {/* Subtle decorative aperture mark */}
-        <div
-          style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #d97746 0%, #b85d30 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(217, 119, 70, 0.35)',
-            marginBottom: '28px',
-          }}
-        >
-          <Layers size={28} color="#ffffff" strokeWidth={2.4} />
-        </div>
+  const recentConversations = sortedConversations.slice(0, 4);
 
-        <h1
-          className="font-headline-lg"
-          style={{
-            fontSize: '40px',
-            color: 'var(--on-surface)',
-            letterSpacing: '-0.025em',
-            margin: '0 0 16px 0',
-            lineHeight: 1.2,
-            fontWeight: 400,
-          }}
-        >
-          Your AI history, <span className="font-serif-italic" style={{ color: 'var(--primary)' }}>understood</span>.
-        </h1>
-
-        <p
-          className="font-body-lg"
-          style={{
-            fontSize: '17px',
-            color: 'var(--text-secondary)',
-            maxWidth: '580px',
-            lineHeight: 1.6,
-            margin: '0 0 32px 0',
-          }}
-        >
-          Bring your Gemini history into ContextOS and turn months of conversations into searchable, reusable context.
-        </p>
-
-        {/* Primary CTA */}
-        {onNavigateToImport ? (
-          <button
-            id="cta-import-gemini"
-            onClick={onNavigateToImport}
-            className="btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 24px',
-              fontSize: '15px',
-              fontWeight: 600,
-              borderRadius: 'var(--radius-md)',
-              boxShadow: '0 4px 16px rgba(217, 119, 70, 0.3)',
-              cursor: 'pointer',
-            }}
-          >
-            <Upload size={18} />
-            <span>Import Gemini History</span>
-          </button>
-        ) : (
-          <Link
-            id="cta-import-gemini-link"
-            href="/import"
-            className="btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 24px',
-              fontSize: '15px',
-              fontWeight: 600,
-              borderRadius: 'var(--radius-md)',
-              boxShadow: '0 4px 16px rgba(217, 119, 70, 0.3)',
-              textDecoration: 'none',
-            }}
-          >
-            <Upload size={18} />
-            <span>Import Gemini History</span>
-          </Link>
-        )}
-
-        {/* How It Works Section */}
-        <div
-          style={{
-            marginTop: '72px',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-            <div style={{ height: '1px', flex: 1, backgroundColor: 'var(--hairline)' }} />
-            <span
-              style={{
-                fontSize: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--text-muted)',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: 600,
-              }}
-            >
-              How it works
-            </span>
-            <div style={{ height: '1px', flex: 1, backgroundColor: 'var(--hairline)' }} />
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '16px',
-              textAlign: 'left',
-            }}
-          >
-            <div
-              style={{
-                padding: '20px',
-                backgroundColor: 'var(--surface-container-low)',
-                border: '1px solid var(--hairline)',
-                borderRadius: 'var(--radius-lg)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-container)' }}>
-                <Upload size={16} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)' }}>1. Import</span>
-              </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                Export your Gemini activity from Google Takeout and drop the archive here.
-              </p>
-            </div>
-
-            <div
-              style={{
-                padding: '20px',
-                backgroundColor: 'var(--surface-container-low)',
-                border: '1px solid var(--hairline)',
-                borderRadius: 'var(--radius-lg)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-container)' }}>
-                <Brain size={16} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)' }}>2. Understand</span>
-              </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                ContextOS parses discussions, extracted decisions, and project milestones automatically.
-              </p>
-            </div>
-
-            <div
-              style={{
-                padding: '20px',
-                backgroundColor: 'var(--surface-container-low)',
-                border: '1px solid var(--hairline)',
-                borderRadius: 'var(--radius-lg)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-container)' }}>
-                <Search size={16} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)' }}>3. Ask</span>
-              </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                Search across all your past AI conversations with transparent, verified source citations.
-              </p>
-            </div>
-
-            <div
-              style={{
-                padding: '20px',
-                backgroundColor: 'var(--surface-container-low)',
-                border: '1px solid var(--hairline)',
-                borderRadius: 'var(--radius-lg)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-container)' }}>
-                <FileText size={16} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)' }}>4. Generate Context</span>
-              </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                Produce concise context packages ready to copy and inject into fresh chats.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ACTIVE DASHBOARD: When user has imported conversations
-  // Dynamically cluster conversations into active topics
-  const projectMap = new Map<string, { title: string; sessions: number; lastActive: string; sampleTopic: string }>();
-  for (const c of conversations) {
-    const key = c.projectTag || c.topics?.[0] || c.title.split(/[:\-–]/)[0].trim() || 'General Discussions';
-    const existing = projectMap.get(key);
-    if (existing) {
-      existing.sessions += 1;
-      if (new Date(c.updatedAt || c.createdAt) > new Date(existing.lastActive)) {
-        existing.lastActive = c.updatedAt || c.createdAt;
-      }
-    } else {
-      projectMap.set(key, {
-        title: key,
-        sessions: 1,
-        lastActive: c.updatedAt || c.createdAt || new Date().toISOString(),
-        sampleTopic: c.title,
-      });
-    }
-  }
-  const activeProjects = Array.from(projectMap.values()).slice(0, 6);
+  const suggestedQueries = [
+    'What architectural decisions did I make?',
+    'Which approaches failed and why?',
+    'What unresolved questions remain?',
+  ];
 
   return (
-    <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '36px 24px 64px', display: 'flex', flexDirection: 'column', gap: '44px' }}>
-      
-      {/* Hero Section */}
-      <section
-        style={{
-          maxWidth: '740px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          paddingTop: '8px',
-        }}
-      >
-        {/* Real Data Telemetry Badge */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '5px 14px',
-            borderRadius: 'var(--radius-full)',
-            backgroundColor: 'var(--surface-container-high)',
-            color: 'var(--text-secondary)',
-            fontSize: '12px',
-            fontWeight: 500,
-            marginBottom: '20px',
-            border: '1px solid var(--hairline)',
-          }}
-        >
-          <span
+    <div
+      style={{
+        maxWidth: '780px',
+        margin: '0 auto',
+        padding: '48px 24px 80px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '40px',
+      }}
+    >
+      {/* 1. PRIMARY ACTION: ASK */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <h1
+            className="font-headline-lg"
             style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--success)',
-              display: 'inline-block',
+              fontSize: '32px',
+              fontWeight: 500,
+              color: 'var(--on-surface)',
+              letterSpacing: '-0.02em',
+              margin: '0 0 8px 0',
             }}
-          />
-          <span style={{ fontFamily: 'var(--font-mono)' }}>
-            {`${convoCount.toLocaleString()} conversations · ${decisionsCount} decisions · ${packagesCount} packages`}
-          </span>
+          >
+            What do you want to find?
+          </h1>
+          <p
+            style={{
+              fontSize: '15px',
+              color: 'var(--text-secondary)',
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
+            Search your past conversations, recall decisions, or compile context for your next prompt.
+          </p>
         </div>
 
-        {/* Editorial Headline */}
-        <h1
-          className="font-headline-lg"
-          style={{
-            color: 'var(--on-surface)',
-            fontSize: '38px',
-            letterSpacing: '-0.025em',
-            margin: '0 0 14px 0',
-            lineHeight: 1.2,
-            fontWeight: 400,
-          }}
-        >
-          Your AI history, <span className="font-serif-italic" style={{ color: 'var(--primary)' }}>understood</span>.
-        </h1>
-
-        <p
-          className="font-body-lg"
-          style={{
-            color: 'var(--text-secondary)',
-            margin: '0 0 28px 0',
-            lineHeight: 1.6,
-            maxWidth: '600px',
-            fontSize: '15.5px',
-          }}
-        >
-          Search your past conversations, recover lost decisions, and turn months of AI dialogue into durable context.
-        </p>
-
-        {/* Omni-Search Box */}
+        {/* Focused Search Input */}
         <div
           style={{
-            width: '100%',
-            maxWidth: '660px',
-            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             backgroundColor: 'var(--surface-container-low)',
@@ -382,19 +104,18 @@ export default function HomeDashboard({
             borderRadius: 'var(--radius-xl)',
             padding: '8px 12px 8px 18px',
             gap: '12px',
-            boxShadow: '0 8px 24px -4px rgba(0,0,0,0.35)',
+            boxShadow: '0 4px 20px -2px rgba(0,0,0,0.25)',
             transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           }}
         >
-          <Search size={20} color="var(--primary-container)" style={{ flexShrink: 0 }} />
-
+          <Search size={19} color="var(--primary-container)" style={{ flexShrink: 0 }} />
           <input
             id="home-omni-input"
             type="text"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask anything about your past thoughts, decisions, or code..."
+            placeholder="Ask anything about your AI history..."
             style={{
               flex: 1,
               backgroundColor: 'transparent',
@@ -405,42 +126,40 @@ export default function HomeDashboard({
               fontFamily: 'var(--font-sans)',
             }}
           />
-
           <button
             id="btn-ask-history-hero"
-            onClick={() => queryInput.trim() && onAskQuery(queryInput.trim())}
+            onClick={handleAsk}
             className="btn-primary"
-            style={{ padding: '7px 16px', fontSize: '13px' }}
+            style={{
+              padding: '8px 18px',
+              fontSize: '13.5px',
+              fontWeight: 500,
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+            }}
           >
-            Ask History
+            Ask
           </button>
         </div>
 
-        {/* Suggested prompt chips */}
+        {/* Quiet Suggested Queries */}
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             gap: '8px',
-            justifyContent: 'center',
-            marginTop: '16px',
+            alignItems: 'center',
           }}
         >
-          {[
-            'What database did I select, and why?',
-            'What approaches failed during testing?',
-            'What are my unresolved architecture questions?',
-            'What security invariants did I define?',
-          ].map((promptText) => (
+          {suggestedQueries.map((queryText) => (
             <button
-              key={promptText}
-              className="prompt-chip"
-              onClick={() => onAskQuery(promptText)}
+              key={queryText}
+              onClick={() => onAskQuery(queryText)}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 12px',
+                padding: '5px 12px',
                 borderRadius: 'var(--radius-md)',
                 backgroundColor: 'var(--surface-container)',
                 border: '1px solid var(--hairline)',
@@ -449,212 +168,289 @@ export default function HomeDashboard({
                 cursor: 'pointer',
                 transition: 'color 0.15s ease, background-color 0.15s ease',
               }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--on-surface)';
+                e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+              }}
             >
-              <ArrowUpRight size={13} color="var(--primary)" />
-              <span>{promptText}</span>
+              <ArrowUpRight size={13} color="var(--primary-container)" />
+              <span>{queryText}</span>
             </button>
           ))}
         </div>
       </section>
 
-      {/* Main Grid: Real Project Clusters & Context Packages */}
-      <div
+      {/* 2. SECONDARY ACTION: GENERATE CONTEXT */}
+      <section
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          gap: '32px',
-          alignItems: 'start',
+          padding: '24px 26px',
+          borderRadius: 'var(--radius-lg)',
+          backgroundColor: 'var(--surface-container-low)',
+          border: '1px solid var(--hairline)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px',
         }}
       >
-        {/* Left Column: Real Active Project Clusters */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--surface-container-high)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--primary-container)',
+            }}
+          >
+            <FileText size={17} />
+          </div>
           <div>
-            <span
-              className="font-label-sm"
+            <h2
+              className="font-title"
               style={{
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--primary)',
+                fontSize: '16px',
                 fontWeight: 600,
+                color: 'var(--on-surface)',
+                margin: 0,
               }}
             >
-              Historical Clusters
-            </span>
-            <h2 className="font-headline-sm" style={{ color: 'var(--on-surface)', marginTop: '2px', fontSize: '20px' }}>
-              Active Project Contexts
+              Generate Context
             </h2>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {activeProjects.map((proj) => (
-              <div
-                key={proj.title}
-                className="panel-card"
-                onClick={() => onSelectProject(proj.title)}
-                style={{
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                  padding: '16px 18px',
-                  backgroundColor: 'var(--surface-container-low)',
-                  border: '1px solid var(--hairline)',
-                  borderRadius: 'var(--radius-lg)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--primary-container)',
-                      }}
-                    />
-                    <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: 0, fontSize: '15px' }}>
-                      {proj.title}
-                    </h3>
-                  </div>
-                  <span className="font-label-sm" style={{ color: 'var(--text-muted)' }}>
-                    {new Date(proj.lastActive).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-                <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5, fontSize: '13px' }}>
-                  {proj.sampleTopic}
-                </p>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontSize: '12px',
-                    color: 'var(--text-muted)',
-                    paddingTop: '6px',
-                    borderTop: '1px solid var(--hairline)',
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <MessageSquare size={13} />
-                    {proj.sessions} {proj.sessions === 1 ? 'conversation' : 'conversations'}
-                  </span>
-                </div>
-              </div>
-            ))}
+            <p
+              style={{
+                fontSize: '13px',
+                color: 'var(--text-muted)',
+                margin: '2px 0 0 0',
+              }}
+            >
+              Turn your AI history into context you can reuse.
+            </p>
           </div>
         </div>
 
-        {/* Right Column: Real Context Packages */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <span
-              className="font-label-sm"
+        <p
+          style={{
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+            margin: 0,
+          }}
+        >
+          Extract key decisions, architecture, and current state from your conversations into a prompt-ready context package.
+        </p>
+
+        <div>
+          <Link
+            id="btn-generate-context"
+            href="/generate"
+            className="btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 18px',
+              fontSize: '13.5px',
+              fontWeight: 500,
+              borderRadius: 'var(--radius-md)',
+              textDecoration: 'none',
+            }}
+          >
+            <span>Generate Context</span>
+            <ArrowRight size={15} />
+          </Link>
+        </div>
+      </section>
+
+      {/* 3. EXPLORE: RECENT HISTORY */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <h2
+            className="font-title"
+            style={{
+              fontSize: '16px',
+              fontWeight: 600,
+              color: 'var(--on-surface)',
+              margin: 0,
+            }}
+          >
+            Recent History
+          </h2>
+          {conversations.length > 0 && (
+            <Link
+              href="/conversations"
               style={{
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--text-muted)',
-                fontWeight: 600,
+                fontSize: '13px',
+                color: 'var(--primary-container)',
+                textDecoration: 'none',
+                fontWeight: 500,
               }}
             >
-              Ready to Inject
-            </span>
-            <h2 className="font-headline-sm" style={{ color: 'var(--on-surface)', marginTop: '2px', fontSize: '20px' }}>
-              Context Packages
-            </h2>
-          </div>
+              View all ({conversations.length}) &rarr;
+            </Link>
+          )}
+        </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {packages.length > 0 ? (
-              packages.map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="panel-card"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    padding: '16px 18px',
-                    backgroundColor: 'var(--surface-container-low)',
-                    border: '1px solid var(--hairline)',
-                    borderRadius: 'var(--radius-lg)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                    <div>
-                      <span className="font-label-sm" style={{ color: 'var(--primary)', fontSize: '11px' }}>
-                        {pkg.mode.toUpperCase()} · {pkg.tokenCount?.toLocaleString() || 0} tokens
-                      </span>
-                      <h4
-                        className="font-title"
-                        style={{ color: 'var(--on-surface)', margin: '2px 0 0 0', cursor: 'pointer', fontSize: '15px' }}
-                        onClick={() => onOpenPackage(pkg.projectTitle)}
-                      >
-                        {pkg.projectTitle}
-                      </h4>
-                    </div>
-                    <button
-                      className="btn-ghost"
-                      onClick={() => handleCopyPackage(pkg.id, pkg.markdownContent)}
+        {recentConversations.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {recentConversations.map((conv) => (
+              <Link
+                key={conv.id}
+                href={`/conversations?id=${encodeURIComponent(conv.id)}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  backgroundColor: 'var(--surface-container-low)',
+                  border: '1px solid var(--hairline)',
+                  borderRadius: 'var(--radius-md)',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+                  e.currentTarget.style.borderColor = 'var(--hairline-strong)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-container-low)';
+                  e.currentTarget.style.borderColor = 'var(--hairline)';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                  <MessageSquare
+                    size={16}
+                    color="var(--text-muted)"
+                    style={{ flexShrink: 0 }}
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
                       style={{
-                        padding: '4px 10px',
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        cursor: 'pointer',
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'var(--surface-container-high)',
-                        border: '1px solid var(--hairline)',
+                        fontSize: '14px',
+                        fontWeight: 500,
                         color: 'var(--on-surface)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
                       }}
                     >
-                      {copiedId === pkg.id ? (
-                        <>
-                          <Check size={13} color="var(--success)" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={13} />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+                      {conv.title || 'Untitled Conversation'}
+                    </div>
+                    {conv.topics?.[0] && (
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: 'var(--text-muted)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          marginTop: '2px',
+                        }}
+                      >
+                        {conv.topics[0]}
+                      </div>
+                    )}
                   </div>
-                  <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4, fontSize: '12.5px' }}>
-                    {pkg.objective || 'Synthesized decisions and technical context.'}
-                  </p>
                 </div>
-              ))
-            ) : (
-              <div
-                style={{
-                  padding: '28px 20px',
-                  backgroundColor: 'var(--surface-container-low)',
-                  border: '1px solid var(--hairline)',
-                  borderRadius: 'var(--radius-lg)',
-                  textAlign: 'center',
-                  color: 'var(--text-muted)',
-                  fontSize: '13px',
-                }}
-              >
-                <p style={{ margin: '0 0 12px 0' }}>No context packages generated yet.</p>
-                <Link
-                  href="/generate"
+
+                <div
                   style={{
-                    color: 'var(--primary)',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    fontSize: '12.5px',
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    marginLeft: '16px',
+                    flexShrink: 0,
                   }}
                 >
-                  Generate your first package &rarr;
-                </Link>
-              </div>
+                  {(conv.updatedAt || conv.createdAt)
+                    ? new Date(conv.updatedAt || conv.createdAt!).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    : ''}
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: '32px 24px',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'var(--surface-container-low)',
+              border: '1px dashed var(--hairline)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              gap: '12px',
+            }}
+          >
+            <p
+              style={{
+                fontSize: '14px',
+                color: 'var(--text-secondary)',
+                margin: 0,
+                maxWidth: '440px',
+                lineHeight: 1.5,
+              }}
+            >
+              No conversations imported yet. Import your Gemini history from Google Takeout to search and generate context.
+            </p>
+            {onNavigateToImport ? (
+              <button
+                id="cta-import-gemini"
+                onClick={onNavigateToImport}
+                className="btn-primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  fontSize: '13.5px',
+                  fontWeight: 500,
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                }}
+              >
+                <Upload size={15} />
+                <span>Import Gemini History</span>
+              </button>
+            ) : (
+              <Link
+                id="cta-import-gemini-link"
+                href="/import"
+                className="btn-primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  fontSize: '13.5px',
+                  fontWeight: 500,
+                  borderRadius: 'var(--radius-md)',
+                  textDecoration: 'none',
+                }}
+              >
+                <Upload size={15} />
+                <span>Import Gemini History</span>
+              </Link>
             )}
           </div>
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   );
 }

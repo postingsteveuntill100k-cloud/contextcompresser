@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Save, Check, Brain, Database, ShieldCheck } from 'lucide-react';
+import { Save, Check, Brain, Database, ShieldCheck, FileText, Layers, Scale, Terminal, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SettingsView() {
   const [model, setModel] = useState<'gemini-3.5-flash-lite' | 'gemini-3.5-flash'>('gemini-3.5-flash-lite');
@@ -303,6 +304,85 @@ export default function SettingsView() {
               Verified Google Token
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Section 4: Advanced Workspace Tools */}
+      <section
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          padding: '24px',
+          borderRadius: 'var(--radius-xl)',
+          backgroundColor: 'var(--surface-container-low)',
+          border: '1px solid var(--hairline)',
+        }}
+      >
+        <div>
+          <h2 className="font-title" style={{ color: 'var(--on-surface)', margin: 0 }}>
+            Advanced Workspace Tools
+          </h2>
+          <p className="font-body-sm" style={{ color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+            Specialized views for memory synthesis, decision tracking, prompt packages, and security audits.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px',
+          }}
+        >
+          {[
+            { href: '/generate', label: 'Generate Context', desc: 'Synthesize reusable prompt dossiers', icon: FileText },
+            { href: '/packages', label: 'Context Packages', desc: 'Saved prompt-ready packages', icon: Layers },
+            { href: '/memory', label: 'Memory Synthesis', desc: 'Core facts, constraints & patterns', icon: Brain },
+            { href: '/decisions', label: 'Decisions Log', desc: 'Chronological pivots & rationale', icon: Scale },
+            { href: '/security', label: 'Security & Privacy', desc: 'Tenant isolation & prompt firewalls', icon: ShieldCheck },
+            { href: '/developer', label: 'Developer Mode', desc: 'Raw telemetry & vector sharding', icon: Terminal },
+          ].map((tool) => {
+            const ToolIcon = tool.icon;
+            return (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  padding: '14px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--surface-container)',
+                  border: '1px solid var(--hairline)',
+                  textDecoration: 'none',
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
+                  e.currentTarget.style.borderColor = 'var(--hairline-strong)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-container)';
+                  e.currentTarget.style.borderColor = 'var(--hairline)';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ToolIcon size={16} color="var(--primary-container)" />
+                    <span style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--on-surface)' }}>
+                      {tool.label}
+                    </span>
+                  </div>
+                  <ArrowUpRight size={14} color="var(--text-muted)" />
+                </div>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  {tool.desc}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
