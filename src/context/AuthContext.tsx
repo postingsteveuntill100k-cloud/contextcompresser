@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = useCallback(async (): Promise<AuthUser | null> => {
     try {
+      console.log('[Auth Lifecycle] fetchUserProfile: fetching profile from /api/auth...');
       const res = await fetchWithAuth('/api/auth');
       if (res.ok) {
         const data = await res.json();
@@ -61,16 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           setUser(authUser);
           setStoredUser(authUser.id);
+          console.log('[Auth Lifecycle] fetchUserProfile: profile synced for user', authUser.id);
           return authUser;
         }
-      } else if (res.status === 401 || res.status === 403) {
-        clearStoredAuth();
-        setUser(null);
-        setToken(null);
-        setStatus('unauthenticated');
       }
     } catch (err) {
-      console.warn('Could not fetch user profile:', err);
+      console.warn('[Auth Lifecycle] fetchUserProfile notice (non-fatal):', err);
     }
     return null;
   }, []);
@@ -83,10 +80,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let unsubscribeAuth: (() => void) | null = null;
 
-    // Generous 12000ms safety timeout: NEVER prematurely abort real auth handshakes
+    console.log('[Auth Lifecycle] AuthProvider mounted, initializing auth listeners...');
+
+    // Safety timeout: only fallback to unauthenticated if still loading after 12s
     const safetyTimer = setTimeout(() => {
       if (mounted) {
-        setStatus((curr) => (curr === 'loading' ? 'unauthenticated' : curr));
+        setStatus((curr) => {
+          if (curr === 'loading') {
+            console.warn('[Auth Lifecycle] Safety timer expired while loading; setting unauthenticated');
+            return 'unauthenticated';
+          }
+          return curr;
+        });
       }
     }, 12000);
 
@@ -94,68 +99,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const existingToken = getStoredToken();
       const existingUser = getStoredUser();
 
-      // Check Firebase Client SDK auth state
       const auth = getClientAuth();
       if (auth) {
-        // Check if user is returning from a Google redirect sign-in
-        try {
-          const redirectRes = await getRedirectResult(auth);
-          if (redirectRes && redirectRes.user) {
-            const idToken = await redirectRes.user.getIdToken();
-            setStoredToken(idToken);
-            setStoredUser(redirectRes.user.uid);
-            setToken(idToken);
-            const profile = await fetchUserProfile();
-            if (mounted) {
-              if (profile) {
-                setUser(profile);
-              } else {
-                setUser({
-                  id: redirectRes.user.uid,
-                  email: redirectRes.user.email || '',
-                  displayName:
-                    redirectRes.user.displayName ||
-                    redirectRes.user.email?.split('@')[0] ||
-                    `User (${redirectRes.user.uid.slice(0, 8)})`,
-                });
-              }
-              clearTimeout(safetyTimer);
-              setStatus('authenticated');
-              return;
-            }
-          }
-        } catch (redirectErr) {
-          console.warn('getRedirectResult notice:', redirectErr);
-        }
-
+        // 1. Immediately register onAuthStateChanged listener (official Firebase primary mechanism)
         const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
           if (!mounted) return;
+          console.log('[Auth Lifecycle] onAuthStateChanged fired, fbUser =', fbUser ? fbUser.uid : 'null');
           if (fbUser) {
             try {
               const idToken = await fbUser.getIdToken();
+              if (!mounted) return;
               setStoredToken(idToken);
               setStoredUser(fbUser.uid);
               setToken(idToken);
-              const profile = await fetchUserProfile();
-              if (mounted) {
-                clearTimeout(safetyTimer);
-                if (profile) {
-                  setStatus('authenticated');
-                } else {
-                  setUser({
-                    id: fbUser.uid,
-                    email: fbUser.email || '',
-                    displayName: fbUser.displayName || fbUser.email?.split('@')[0] || `User (${fbUser.uid.slice(0, 8)})`,
-                  });
-                  setStatus('authenticated');
-                }
-              }
+              const authUser: AuthUser = {
+                id: fbUser.uid,
+                email: fbUser.email || '',
+                displayName: fbUser.displayName || fbUser.email?.split('@')[0] || `User (${fbUser.uid.slice(0, 8)})`,
+              };
+              setUser(authUser);
+              setStatus('authenticated');
+              clearTimeout(safetyTimer);
+              console.log('[Auth Lifecycle] onAuthStateChanged: authenticated state active for', fbUser.uid);
+              // Asynchronously enrich user profile in background
+              void fetchUserProfile();
             } catch (err: unknown) {
-              console.error('Error establishing Firebase session:', err);
+              console.error('[Auth Lifecycle] Error extracting Firebase token in listener:', err);
               if (mounted) setStatus('unauthenticated');
             }
           } else if (existingToken && existingUser) {
-            // Verify with /api/auth
+            // Check stored token validity via /api/auth
             try {
               const res = await fetchWithAuth('/api/auth');
               if (res.ok && mounted) {
@@ -167,10 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
                 setToken(existingToken);
                 setStatus('authenticated');
+                clearTimeout(safetyTimer);
+                console.log('[Auth Lifecycle] Stored session validated via API for', data.user.id);
                 return;
               }
             } catch {
-              // fallback below
+              // Ignore failure, fall through to unauthenticated
             }
             if (mounted) {
               clearStoredAuth();
@@ -183,6 +158,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         });
         unsubscribeAuth = unsubscribe;
+
+        // 2. In parallel, inspect getRedirectResult without blocking onAuthStateChanged
+        getRedirectResult(auth)
+          .then(async (redirectRes) => {
+            if (!mounted) return;
+            if (redirectRes && redirectRes.user) {
+              console.log('[Auth Lifecycle] getRedirectResult: resolved user', redirectRes.user.uid);
+              const idToken = await redirectRes.user.getIdToken();
+              if (!mounted) return;
+              setStoredToken(idToken);
+              setStoredUser(redirectRes.user.uid);
+              setToken(idToken);
+              const authUser: AuthUser = {
+                id: redirectRes.user.uid,
+                email: redirectRes.user.email || '',
+                displayName:
+                  redirectRes.user.displayName ||
+                  redirectRes.user.email?.split('@')[0] ||
+                  `User (${redirectRes.user.uid.slice(0, 8)})`,
+              };
+              setUser(authUser);
+              setStatus('authenticated');
+              clearTimeout(safetyTimer);
+              void fetchUserProfile();
+            }
+          })
+          .catch((redirectErr) => {
+            console.warn('[Auth Lifecycle] getRedirectResult notice:', redirectErr?.message || redirectErr);
+          });
+        return;
       }
 
       // If no client Firebase SDK configured, check stored credentials
@@ -198,6 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
             setToken(existingToken);
             setStatus('authenticated');
+            clearTimeout(safetyTimer);
             return;
           }
         } catch {
@@ -210,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    initAuth();
+    void initAuth();
 
     return () => {
       mounted = false;
@@ -221,28 +227,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async () => {
     try {
+      console.log('[Auth Lifecycle] AuthContext: loginWithGoogle called');
       setError(null);
       setStatus('loading');
       const res = await signInWithGooglePopup();
-      if (!res || !res.idToken) {
-        // Redirect navigation may be in progress
+      if (!res || !res.idToken || !res.user) {
+        console.warn('[Auth Lifecycle] AuthContext: signInWithGooglePopup returned incomplete result');
         return;
       }
       const { idToken, user: fbUser } = res;
+      console.log('[Auth Lifecycle] AuthContext: popup completed, setting authenticated user', fbUser.uid);
       setToken(idToken);
-      const profile = await fetchUserProfile();
-      if (profile) {
-        setUser(profile);
-      } else {
-        setUser({
-          id: fbUser.uid,
-          email: fbUser.email || '',
-          displayName: fbUser.displayName || fbUser.email?.split('@')[0] || `User (${fbUser.uid.slice(0, 8)})`,
-        });
-      }
+      const authUser: AuthUser = {
+        id: fbUser.uid,
+        email: fbUser.email || '',
+        displayName: fbUser.displayName || fbUser.email?.split('@')[0] || `User (${fbUser.uid.slice(0, 8)})`,
+      };
+      setUser(authUser);
       setStatus('authenticated');
+      console.log('[Auth Lifecycle] AuthContext: status set to authenticated for user', authUser.id);
+      // Enrich profile asynchronously without blocking UI navigation
+      void fetchUserProfile();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[Auth Lifecycle] AuthContext: loginWithGoogle failed:', msg);
       setError(msg);
       setStatus('unauthenticated');
       throw err;

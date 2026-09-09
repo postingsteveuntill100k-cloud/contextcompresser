@@ -47,6 +47,8 @@ export default function AuthenticatedAppLayout({ children }: { children: React.R
   const { status, loginAsDevUser } = useAuth();
   const [devUserChoice, setDevUserChoice] = useState('victim_user_alice_001');
 
+  console.log('[Auth Lifecycle] AppLayout: current status =', status);
+
   if (status === 'loading') {
     return (
       <div

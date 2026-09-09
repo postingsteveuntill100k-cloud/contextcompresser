@@ -83,13 +83,19 @@ export function clearStoredAuth(): void {
 }
 
 export async function signInWithGooglePopup(): Promise<{ idToken: string; user: User }> {
+  console.log('[Auth Lifecycle] signInWithGooglePopup: initiating Google popup...');
   const auth = getClientAuth();
-  if (!auth) throw new Error('Firebase Auth is not initialized.');
+  if (!auth) {
+    console.error('[Auth Lifecycle] signInWithGooglePopup: Firebase Auth is not initialized');
+    throw new Error('Firebase Auth is not initialized.');
+  }
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   try {
     const result = await signInWithPopup(auth, provider);
+    console.log('[Auth Lifecycle] signInWithPopup: popup resolved successfully for uid:', result.user.uid);
     const idToken = await result.user.getIdToken();
+    console.log('[Auth Lifecycle] getIdToken: ID token acquired');
     setStoredToken(idToken);
     setStoredUser(result.user.uid);
     return { idToken, user: result.user };
@@ -97,33 +103,25 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
     const errObj = err as { code?: string; message?: string };
     const msg = errObj?.message || String(err);
     const code = errObj?.code || '';
-    console.warn('signInWithPopup failed:', code, msg);
-    
-    // If popup fails due to browser restrictions (cross-origin iframe blocking, network-request-failed,
-    // third-party cookies partitioned, popup blocked, or operation-specific error):
-    const isFallbackCandidate =
-      code === 'auth/network-request-failed' ||
-      code === 'auth/popup-blocked' ||
-      code === 'auth/cancelled-popup-request' ||
-      code === 'auth/internal-error' ||
-      msg.includes('network-request-failed') ||
-      msg.includes('operation-specific') ||
-      msg.includes('OperationError') ||
-      msg.includes('popup');
+    console.warn('[Auth Lifecycle] signInWithPopup caught error: code =', code, 'message =', msg);
 
-    if (isFallbackCandidate) {
-      console.info('Switching to signInWithRedirect due to browser popup/iframe restrictions...');
-      await signInWithRedirect(auth, provider);
-      // Keep promise pending while browser navigates to Google
-      return new Promise<{ idToken: string; user: User }>(() => {});
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      throw new Error('Sign-in was cancelled: Google account window was closed before completing.');
+    }
+    if (code === 'auth/popup-blocked') {
+      throw new Error('Sign-in popup was blocked by browser. Please enable popups for this site and try again.');
     }
     throw err;
   }
 }
 
 export async function signInWithGoogleRedirect(): Promise<void> {
+  console.log('[Auth Lifecycle] signInWithGoogleRedirect: initiating full-page redirect...');
   const auth = getClientAuth();
-  if (!auth) throw new Error('Firebase Auth is not initialized.');
+  if (!auth) {
+    console.error('[Auth Lifecycle] signInWithGoogleRedirect: Firebase Auth is not initialized');
+    throw new Error('Firebase Auth is not initialized.');
+  }
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   await signInWithRedirect(auth, provider);

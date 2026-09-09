@@ -23,30 +23,39 @@ export default function LandingOrAuthPage() {
   const [devUserId, setDevUserId] = useState('victim_user_alice_001');
 
   useEffect(() => {
+    console.log('[Auth Lifecycle] Page: status changed to:', status);
     if (status === 'authenticated') {
-      router.replace('/home');
+      if (typeof window !== 'undefined' && window.location.pathname === '/') {
+        console.log('[Auth Lifecycle] Page: status is authenticated and on root path, redirecting to /home');
+        router.replace('/home');
+      }
     }
   }, [status, router]);
 
   const handleGoogleSignIn = async () => {
+    console.log('[Auth Lifecycle] Page: handleGoogleSignIn clicked');
     try {
       setSigningIn(true);
       await loginWithGoogle();
+      console.log('[Auth Lifecycle] Page: loginWithGoogle finished, invoking router.replace(/home)');
       router.replace('/home');
-    } catch {
-      // Error is set in AuthContext
+    } catch (err) {
+      console.warn('[Auth Lifecycle] Page: Google sign-in did not complete:', err instanceof Error ? err.message : err);
     } finally {
+      console.log('[Auth Lifecycle] Page: reset signingIn = false');
       setSigningIn(false);
     }
   };
 
   const handleDevSignIn = async () => {
+    console.log('[Auth Lifecycle] Page: handleDevSignIn clicked for', devUserId);
     try {
       setSigningIn(true);
       await loginAsDevUser(devUserId);
+      console.log('[Auth Lifecycle] Page: dev sign-in finished, redirecting to /home');
       router.replace('/home');
-    } catch {
-      // Error is set in AuthContext
+    } catch (err) {
+      console.warn('[Auth Lifecycle] Page: dev sign-in failed:', err);
     } finally {
       setSigningIn(false);
     }
@@ -232,6 +241,7 @@ export default function LandingOrAuthPage() {
         >
           <button
             id="btn-google-sign-in"
+            type="button"
             onClick={handleGoogleSignIn}
             disabled={signingIn}
             style={{

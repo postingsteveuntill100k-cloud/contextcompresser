@@ -2,6 +2,7 @@
   "hosting": {
     "site": "compresscontext",
     "public": ".firebase/compresscontext/hosting",
+    "cleanUrls": true,
     "rewrites": [
       {
         "source": "**",
