@@ -5,6 +5,7 @@ const ALLOWED_ORIGINS = [
   'https://compresscontext.firebaseapp.com',
   'https://gen-lang-client-0175818220.web.app',
   'https://gen-lang-client-0175818220.firebaseapp.com',
+  'https://contextos-izseyvxihq-uc.a.run.app',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
 ];

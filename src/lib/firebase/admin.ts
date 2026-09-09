@@ -63,13 +63,14 @@ export function initializeFirebaseAdmin(): App | null {
     }
   }
 
+  const currentDir = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
   const candidatePaths = [
     process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
     process.env.GOOGLE_APPLICATION_CREDENTIALS,
     path.join(process.cwd(), 'service-account.json'),
     path.resolve(process.cwd(), '..', '..', 'service-account.json'),
-    path.resolve(__dirname, '..', '..', 'service-account.json'),
-    path.resolve(__dirname, 'service-account.json'),
+    path.resolve(currentDir, '..', '..', 'service-account.json'),
+    path.resolve(currentDir, 'service-account.json'),
   ].filter(Boolean) as string[];
 
   for (const candPath of candidatePaths) {
