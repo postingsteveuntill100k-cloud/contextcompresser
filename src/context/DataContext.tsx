@@ -32,32 +32,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // 1. Conversations
-      const convRes = await fetchWithAuth('/api/conversations');
-      if (convRes.ok) {
-        const convData = await convRes.json();
-        setConversations(convData.conversations || []);
-      }
+      const [convResult, impResult, memResult, pkgResult] = await Promise.allSettled([
+        fetchWithAuth('/api/conversations').then((res) => (res.ok ? res.json() : null)),
+        fetchWithAuth('/api/import').then((res) => (res.ok ? res.json() : null)),
+        fetchWithAuth('/api/memory').then((res) => (res.ok ? res.json() : null)),
+        fetchWithAuth('/api/generate-context').then((res) => (res.ok ? res.json() : null)),
+      ]);
 
-      // 2. Raw Imports
-      const impRes = await fetchWithAuth('/api/import');
-      if (impRes.ok) {
-        const impData = await impRes.json();
-        setRawImports(impData.imports || []);
+      if (convResult.status === 'fulfilled' && convResult.value) {
+        setConversations(convResult.value.conversations || []);
       }
-
-      // 3. Memory
-      const memRes = await fetchWithAuth('/api/memory');
-      if (memRes.ok) {
-        const memData = await memRes.json();
-        setMemory(memData.memory || null);
+      if (impResult.status === 'fulfilled' && impResult.value) {
+        setRawImports(impResult.value.imports || []);
       }
-
-      // 4. Packages
-      const pkgRes = await fetchWithAuth('/api/generate-context');
-      if (pkgRes.ok) {
-        const pkgData = await pkgRes.json();
-        setPackages(pkgData.packages || []);
+      if (memResult.status === 'fulfilled' && memResult.value) {
+        setMemory(memResult.value.memory || null);
+      }
+      if (pkgResult.status === 'fulfilled' && pkgResult.value) {
+        setPackages(pkgResult.value.packages || []);
       }
     } catch (err: unknown) {
       console.error('Failed to load user workspace data:', err);

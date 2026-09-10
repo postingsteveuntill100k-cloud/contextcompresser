@@ -28,6 +28,7 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
   const [query, setQuery] = useState(initialQuery);
   const [activeQuery, setActiveQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState('Finding relevant conversations...');
   const [response, setResponse] = useState<AskResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [selectedSourceIndex, setSelectedSourceIndex] = useState<number | null>(null);
@@ -39,8 +40,12 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
 
     setActiveQuery(q);
     setLoading(true);
+    setLoadingStage('Finding relevant conversations...');
     setResponse(null);
     setSelectedSourceIndex(null);
+
+    const t1 = setTimeout(() => setLoadingStage('Checking decisions and previous attempts...'), 1200);
+    const t2 = setTimeout(() => setLoadingStage('Synthesizing grounded answer with Gemini...'), 2800);
 
     try {
       const res = await fetchWithAuth('/api/ask', {
@@ -54,7 +59,7 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
       } else {
         const err = await res.json().catch(() => ({}));
         setResponse({
-          answer: `Error: ${err.error || 'Failed to query historical context.'}`,
+          answer: `We couldn't finish that request. Your history is safe. Please try again. (${err.error || 'Request unsuccessful'})`,
           citations: [],
           mode: searchMode,
           grounded: false,
@@ -65,7 +70,7 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setResponse({
-        answer: `Network/Server Error: ${msg}`,
+        answer: `We couldn't finish that request. Your history is safe. Please try again. (${msg})`,
         citations: [],
         mode: searchMode,
         grounded: false,
@@ -73,6 +78,8 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
         executionMs: 0,
       });
     } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
       setLoading(false);
     }
   }, [query, searchMode]);
@@ -249,8 +256,11 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
               }}
             >
               <Loader2 size={28} className="animate-spin" color="var(--primary)" />
-              <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Synthesizing history across verified conversations and architectural decisions...
+              <p className="font-body-md" style={{ color: 'var(--on-surface)', margin: 0, fontWeight: 500 }}>
+                {loadingStage}
+              </p>
+              <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                Searching verified conversation index and architectural records...
               </p>
             </div>
           ) : response ? (

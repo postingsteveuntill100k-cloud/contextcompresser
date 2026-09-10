@@ -2,7 +2,60 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
-  /* ContextOS Warm Charcoal & Terracotta Token Matrix */
+  /* ContextOS Professional Clean White & Subtle Neutral Palette (Light Mode Default) */
+  --surface: #ffffff;
+  --surface-dim: #fafaf9;
+  --surface-bright: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f9f9f8;
+  --surface-container: #f3f2ef;
+  --surface-container-high: #eae8e3;
+  --surface-container-highest: #e0ded8;
+  
+  --on-surface: #191817;
+  --on-surface-variant: #494744;
+  --text-secondary: #575551;
+  --text-muted: #84827c;
+  
+  --primary: #c85a2b;
+  --primary-container: #c85a2b;
+  --on-primary-container: #ffffff;
+  --primary-hover: #b34d20;
+  --primary-fixed-dim: #fbeee7;
+  
+  --secondary: #4a4844;
+  --secondary-container: #eae8e3;
+  --on-secondary-container: #191817;
+  
+  --outline: #d6d3cc;
+  --outline-variant: #e8e5df;
+  --hairline: #e6e3dc;
+  --hairline-subtle: #f0ede6;
+  --hairline-strong: #cac6bd;
+  
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --success: #206c49;
+
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Typography tokens */
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+}
+
+html.dark,
+[data-theme='dark'] {
+  /* ContextOS Intentional Warm Charcoal Dark Mode */
   --surface: #131312;
   --surface-dim: #131312;
   --surface-bright: #3a3938;
@@ -31,22 +84,14 @@
   --outline-variant: #55433b;
   --hairline: #2a2a29;
   --hairline-subtle: #222220;
+  --hairline-strong: #383835;
   
   --error: #ffb4ab;
   --error-container: #93000a;
   --success: #768a7e;
 
-  /* Typography tokens */
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: 'Newsreader', Georgia, serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  /* Radii */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -232,11 +277,13 @@ html, body {
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
   padding: 18px;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .panel-card:hover {
   background-color: var(--surface-container);
-  border-color: rgba(217, 119, 70, 0.3);
+  border-color: rgba(200, 90, 43, 0.35);
+  box-shadow: var(--card-shadow-hover);
 }
 
 /* Primary Terracotta Action Buttons */

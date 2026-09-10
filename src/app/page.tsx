@@ -17,17 +17,21 @@ import {
 } from 'lucide-react';
 
 export default function LandingOrAuthPage() {
-  const { status, error, loginWithGoogle, loginAsDevUser } = useAuth();
+  const { status, error, loginWithGoogle, loginWithGoogleRedirect, loginAsDevUser } = useAuth();
   const router = useRouter();
   const [signingIn, setSigningIn] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [devUserId, setDevUserId] = useState('victim_user_alice_001');
 
   useEffect(() => {
     console.log('[Auth Lifecycle] Page: status changed to:', status);
     if (status === 'authenticated') {
-      if (typeof window !== 'undefined' && window.location.pathname === '/') {
-        console.log('[Auth Lifecycle] Page: status is authenticated and on root path, redirecting to /home');
-        router.replace('/home');
+      if (typeof window !== 'undefined') {
+        const p = window.location.pathname;
+        if (p === '/' || p === '/index.html' || p === '') {
+          console.log('[Auth Lifecycle] Page: status is authenticated, redirecting to /home');
+          router.replace('/home');
+        }
       }
     }
   }, [status, router]);
@@ -43,6 +47,19 @@ export default function LandingOrAuthPage() {
       console.warn('[Auth Lifecycle] Page: Google sign-in did not complete:', err instanceof Error ? err.message : err);
     } finally {
       console.log('[Auth Lifecycle] Page: reset signingIn = false');
+      setSigningIn(false);
+    }
+  };
+
+  const handleGoogleRedirectSignIn = async () => {
+    console.log('[Auth Lifecycle] Page: handleGoogleRedirectSignIn clicked');
+    try {
+      setRedirecting(true);
+      setSigningIn(true);
+      await loginWithGoogleRedirect();
+    } catch (err) {
+      console.warn('[Auth Lifecycle] Page: Google redirect sign-in failed:', err instanceof Error ? err.message : err);
+      setRedirecting(false);
       setSigningIn(false);
     }
   };
@@ -261,10 +278,15 @@ export default function LandingOrAuthPage() {
               transition: 'background-color 0.15s ease',
             }}
           >
-            {signingIn ? (
+            {signingIn && !redirecting ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
                 <span>Signing in...</span>
+              </>
+            ) : redirecting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Redirecting to Google...</span>
               </>
             ) : (
               <>
@@ -289,6 +311,25 @@ export default function LandingOrAuthPage() {
                 <span>Continue with Google</span>
               </>
             )}
+          </button>
+
+          <button
+            id="btn-google-redirect-sign-in"
+            type="button"
+            onClick={handleGoogleRedirectSignIn}
+            disabled={signingIn}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              fontSize: '12px',
+              textDecoration: 'underline',
+              cursor: signingIn ? 'not-allowed' : 'pointer',
+              padding: '2px 0',
+              marginTop: '-4px',
+            }}
+          >
+            Having popup issues? Use full-page Google sign in &rarr;
           </button>
 
           <button

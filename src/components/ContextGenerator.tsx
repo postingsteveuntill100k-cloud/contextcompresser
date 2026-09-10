@@ -24,10 +24,16 @@ export default function ContextGenerator({
   const [copied, setCopied] = useState(false);
   const [generatedPackage, setGeneratedPackage] = useState<ContextPackage | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [genStage, setGenStage] = useState('Finding relevant conversations and structured decisions...');
 
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
+    setGenStage('Finding relevant conversations and structured decisions...');
+
+    const t1 = setTimeout(() => setGenStage('Compressing context with Gemini...'), 1500);
+    const t2 = setTimeout(() => setGenStage('Synthesizing portable markdown package...'), 3500);
+
     try {
       const res = await fetchWithAuth('/api/generate-context', {
         method: 'POST',
@@ -48,12 +54,19 @@ export default function ContextGenerator({
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        setError(err.error || `Failed to generate context package (Status ${res.status})`);
+        setError(
+          err.error
+            ? `We couldn't finish that request. Your history is safe. (${err.error})`
+            : 'We couldn\'t finish generating that context package. Your history is safe. Please try again.'
+        );
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Generate context failed:', err);
-      setError('A network error occurred while synthesizing your context package.');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`We couldn't finish that request. Your history is safe. Please try again. (${msg})`);
     } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
       setGenerating(false);
     }
   };
@@ -342,6 +355,28 @@ export default function ContextGenerator({
                 }}
               >
                 {generatedPackage.markdownContent}
+              </div>
+            </div>
+          ) : generating ? (
+            <div
+              className="panel-card"
+              style={{
+                padding: '64px 32px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <Loader2 size={32} className="animate-spin" color="var(--primary)" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <h3 className="font-headline-sm" style={{ color: 'var(--on-surface)', margin: 0, fontWeight: 500 }}>
+                  {genStage}
+                </h3>
+                <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '420px', lineHeight: 1.5 }}>
+                  ContextOS is compressing your verified engineering history into a clean, reusable context package.
+                </p>
               </div>
             </div>
           ) : (

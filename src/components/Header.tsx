@@ -1,9 +1,8 @@
 'use client';
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Upload, Menu } from 'lucide-react';
+import { Upload, Menu, Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
   convoCount?: number;
@@ -12,6 +11,25 @@ interface HeaderProps {
 
 export default function Header({ convoCount = 0, onToggleMobileMenu }: HeaderProps) {
   const pathname = usePathname();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('contextos_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('contextos_theme', 'light');
+    }
+  };
 
   const getPageTitle = (path: string | null) => {
     if (!path || path === '/home') return 'Workspace Home';
@@ -127,6 +145,28 @@ export default function Header({ convoCount = 0, onToggleMobileMenu }: HeaderPro
           <Upload size={14} color="var(--primary-container)" />
           <span>Import History</span>
         </Link>
+
+        {/* Theme Toggle (Light / Dark) */}
+        <button
+          id="theme-toggle-btn"
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--surface-container-high)',
+            border: '1px solid var(--hairline)',
+            borderRadius: 'var(--radius-md)',
+            padding: '6px 8px',
+            color: 'var(--on-surface)',
+            cursor: 'pointer',
+            transition: 'background-color 0.15s ease',
+          }}
+        >
+          {isDark ? <Sun size={15} color="var(--primary)" /> : <Moon size={15} color="var(--primary)" />}
+        </button>
       </div>
     </header>
   );

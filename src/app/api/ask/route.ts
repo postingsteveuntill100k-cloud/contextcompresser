@@ -21,8 +21,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const conversations = await getConversations(userId);
-    const memory = await getMemory(userId);
+    const [conversations, memory] = await Promise.all([
+      getConversations(userId),
+      getMemory(userId),
+    ]);
 
     const askResponse = await askHistory(
       question.trim(),

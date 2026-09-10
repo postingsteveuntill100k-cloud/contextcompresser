@@ -9,6 +9,7 @@ import {
   setStoredUser,
   clearStoredAuth,
   signInWithGooglePopup,
+  signInWithGoogleRedirect,
   clientSignOut,
   authenticateClientIdentity,
   fetchWithAuth,
@@ -29,6 +30,7 @@ interface AuthContextType {
   status: AuthStatus;
   error: string | null;
   loginWithGoogle: () => Promise<void>;
+  loginWithGoogleRedirect: () => Promise<void>;
   loginAsDevUser: (userId: string, email?: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -41,6 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<AuthStatus>(() => {
     if (typeof window !== 'undefined') {
+      const isRedirecting = sessionStorage.getItem('contextos_redirect_in_progress') === 'true';
+      if (isRedirecting) return 'loading';
       const hasStored = getStoredToken() || getStoredUser();
       return hasStored ? 'loading' : 'unauthenticated';
     }
@@ -101,7 +105,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const auth = getClientAuth();
       if (auth) {
-        // 1. Immediately register onAuthStateChanged listener (official Firebase primary mechanism)
+        // 1. If returning from a redirect, handle the redirect result first
+        try {
+          console.log('[Auth Lifecycle] Checking getRedirectResult on mount...');
+          const redirectRes = await getRedirectResult(auth);
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('contextos_redirect_in_progress');
+          }
+          if (redirectRes && redirectRes.user && mounted) {
+            console.log('[Auth Lifecycle] getRedirectResult: resolved user', redirectRes.user.uid);
+            const idToken = await redirectRes.user.getIdToken();
+            if (!mounted) return;
+            setStoredToken(idToken);
+            setStoredUser(redirectRes.user.uid);
+            setToken(idToken);
+            const authUser: AuthUser = {
+              id: redirectRes.user.uid,
+              email: redirectRes.user.email || '',
+              displayName:
+                redirectRes.user.displayName ||
+                redirectRes.user.email?.split('@')[0] ||
+                `User (${redirectRes.user.uid.slice(0, 8)})`,
+            };
+            setUser(authUser);
+            setStatus('authenticated');
+            clearTimeout(safetyTimer);
+            void fetchUserProfile();
+            return;
+          }
+        } catch (redirectErr: unknown) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('contextos_redirect_in_progress');
+          }
+          console.warn('[Auth Lifecycle] getRedirectResult notice:', redirectErr);
+        }
+
+        // 2. Register onAuthStateChanged listener (official Firebase primary mechanism)
         const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
           if (!mounted) return;
           console.log('[Auth Lifecycle] onAuthStateChanged fired, fbUser =', fbUser ? fbUser.uid : 'null');
@@ -158,35 +197,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         });
         unsubscribeAuth = unsubscribe;
-
-        // 2. In parallel, inspect getRedirectResult without blocking onAuthStateChanged
-        getRedirectResult(auth)
-          .then(async (redirectRes) => {
-            if (!mounted) return;
-            if (redirectRes && redirectRes.user) {
-              console.log('[Auth Lifecycle] getRedirectResult: resolved user', redirectRes.user.uid);
-              const idToken = await redirectRes.user.getIdToken();
-              if (!mounted) return;
-              setStoredToken(idToken);
-              setStoredUser(redirectRes.user.uid);
-              setToken(idToken);
-              const authUser: AuthUser = {
-                id: redirectRes.user.uid,
-                email: redirectRes.user.email || '',
-                displayName:
-                  redirectRes.user.displayName ||
-                  redirectRes.user.email?.split('@')[0] ||
-                  `User (${redirectRes.user.uid.slice(0, 8)})`,
-              };
-              setUser(authUser);
-              setStatus('authenticated');
-              clearTimeout(safetyTimer);
-              void fetchUserProfile();
-            }
-          })
-          .catch((redirectErr) => {
-            console.warn('[Auth Lifecycle] getRedirectResult notice:', redirectErr?.message || redirectErr);
-          });
         return;
       }
 
@@ -257,6 +267,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginWithGoogleRedirect = async () => {
+    try {
+      console.log('[Auth Lifecycle] AuthContext: loginWithGoogleRedirect called');
+      setError(null);
+      setStatus('loading');
+      await signInWithGoogleRedirect();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[Auth Lifecycle] AuthContext: loginWithGoogleRedirect failed:', msg);
+      setError(msg);
+      setStatus('unauthenticated');
+      throw err;
+    }
+  };
+
   const loginAsDevUser = async (userId: string, email?: string, displayName?: string) => {
     try {
       setError(null);
@@ -298,6 +323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         status,
         error,
         loginWithGoogle,
+        loginWithGoogleRedirect,
         loginAsDevUser,
         logout,
         refreshUser,

@@ -91,8 +91,23 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
   }
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+
+  // 12-second watchdog timeout for browser environments with third-party cookie/popup partitioning
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timerId = setTimeout(() => {
+      const err = new Error('Popup communication timed out due to browser cross-origin policy');
+      (err as unknown as { code: string }).code = 'auth/popup-timeout';
+      reject(err);
+    }, 12000);
+  });
+
   try {
-    const result = await signInWithPopup(auth, provider);
+    const result = await Promise.race([
+      signInWithPopup(auth, provider),
+      timeoutPromise,
+    ]);
+    if (timerId) clearTimeout(timerId);
     console.log('[Auth Lifecycle] signInWithPopup: popup resolved successfully for uid:', result.user.uid);
     const idToken = await result.user.getIdToken();
     console.log('[Auth Lifecycle] getIdToken: ID token acquired');
@@ -100,16 +115,29 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
     setStoredUser(result.user.uid);
     return { idToken, user: result.user };
   } catch (err: unknown) {
+    if (timerId) clearTimeout(timerId);
     const errObj = err as { code?: string; message?: string };
     const msg = errObj?.message || String(err);
     const code = errObj?.code || '';
     console.warn('[Auth Lifecycle] signInWithPopup caught error: code =', code, 'message =', msg);
 
+    // Auto-fallback to redirect if popup communication was blocked or timed out
+    if (
+      code === 'auth/popup-timeout' ||
+      code === 'auth/popup-blocked' ||
+      code === 'auth/network-request-failed' ||
+      code === 'auth/internal-error'
+    ) {
+      console.log('[Auth Lifecycle] Falling back to signInWithRedirect due to:', code);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('contextos_redirect_in_progress', 'true');
+      }
+      await signInWithRedirect(auth, provider);
+      return new Promise<never>(() => {});
+    }
+
     if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
       throw new Error('Sign-in was cancelled: Google account window was closed before completing.');
-    }
-    if (code === 'auth/popup-blocked') {
-      throw new Error('Sign-in popup was blocked by browser. Please enable popups for this site and try again.');
     }
     throw err;
   }
@@ -124,6 +152,9 @@ export async function signInWithGoogleRedirect(): Promise<void> {
   }
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('contextos_redirect_in_progress', 'true');
+  }
   await signInWithRedirect(auth, provider);
 }
 
