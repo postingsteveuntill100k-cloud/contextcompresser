@@ -44,10 +44,10 @@ export default function ConversationsView({
             Knowledge / Conversations
           </div>
           <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
-            Historical Conversations
+            Conversations
           </h1>
           <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-            Browse and inspect your imported Gemini &amp; AI dialogue transcripts.
+            Browse and inspect your imported conversation history.
           </p>
         </div>
 

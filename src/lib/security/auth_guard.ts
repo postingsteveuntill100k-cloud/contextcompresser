@@ -73,7 +73,7 @@ export function createSignedSessionToken(uid: string, email?: string, expiresInS
   
   const payload = {
     uid,
-    email: email || `${uid}@geminicontext.internal`,
+    email: email || `${uid}@contextos.internal`,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + expiresInSec,
     isTestToken: true,

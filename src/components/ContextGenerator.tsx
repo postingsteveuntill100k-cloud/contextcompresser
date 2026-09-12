@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { fetchWithAuth } from '@/lib/security/client_auth';
 import { CanonicalConversation, ContextPackage } from '@/types';
 import ContextOSLoader from './ContextOSLoader';
-import { Sparkles, Copy, Check, Download, ExternalLink, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { Sparkles, Copy, Check, Download, ExternalLink, FileText, AlertCircle } from 'lucide-react';
 
 interface ContextGeneratorProps {
   initialTopic?: string;
@@ -119,7 +120,7 @@ export default function ContextGenerator({
               Generate Context
             </h1>
             <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              Turn accumulated AI conversations into a zero-loss portable markdown briefing for new AI sessions.
+              Turn accumulated AI conversations into a portable markdown briefing for new AI sessions.
             </p>
           </div>
 
@@ -216,6 +217,43 @@ export default function ContextGenerator({
             </div>
           </div>
 
+          {conversations.length === 0 && (
+            <div
+              id="generator-empty-onboarding"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'var(--surface-container-high)',
+                border: '1px dashed var(--hairline)',
+                fontSize: '12.5px',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.4,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--on-surface)', fontWeight: 500 }}>
+                <AlertCircle size={15} color="var(--primary)" />
+                <span>Import Required</span>
+              </div>
+              <div>No conversation history found in this workspace. Import your Takeout archive before generating context packages.</div>
+              <Link
+                href="/import"
+                className="btn-secondary"
+                style={{
+                  alignSelf: 'flex-start',
+                  fontSize: '12px',
+                  padding: '4px 10px',
+                  textDecoration: 'none',
+                  marginTop: '2px',
+                }}
+              >
+                Import History &rarr;
+              </Link>
+            </div>
+          )}
+
           {error && (
             <div
               style={{
@@ -235,8 +273,9 @@ export default function ContextGenerator({
           <button
             id="btn-generate-package"
             onClick={handleGenerate}
-            disabled={generating || !projectTitle.trim()}
+            disabled={generating || !projectTitle.trim() || conversations.length === 0}
             className="btn-primary"
+            title={conversations.length === 0 ? 'Please import conversation history first' : undefined}
             style={{
               padding: '12px 20px',
               fontSize: '14px',

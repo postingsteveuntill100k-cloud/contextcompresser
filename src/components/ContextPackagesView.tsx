@@ -54,7 +54,7 @@ export default function ContextPackagesView({
             Context Packages
           </h1>
           <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-            Portable, zero-loss architectural context dossiers generated from your historical records.
+            Portable context briefings generated from your conversation history.
           </p>
         </div>
 

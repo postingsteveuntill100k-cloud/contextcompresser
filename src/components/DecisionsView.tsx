@@ -99,13 +99,13 @@ export default function DecisionsView({
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
         <div>
           <div className="font-label-sm" style={{ textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>
-            Knowledge / Architectural Record
+            Knowledge / Decisions
           </div>
           <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
-            Saved Decisions &amp; Invariants
+            Decisions
           </h1>
           <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-            Verifiable architectural choices extracted from your conversations, tracking rationale and rejected alternatives.
+            Key architectural and technical choices extracted from your conversations.
           </p>
         </div>
 

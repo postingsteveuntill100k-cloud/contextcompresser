@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Download,
   AlertCircle,
-  Sparkles,
 } from 'lucide-react';
 
 export default function LandingOrAuthPage() {
@@ -346,37 +345,15 @@ export default function LandingOrAuthPage() {
             Having popup issues? Use full-page Google sign in &rarr;
           </button>
 
-          <button
-            id="btn-instant-alice"
-            onClick={handleDevSignIn}
-            disabled={signingIn}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '11px 16px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--surface-container-high)',
-              color: 'var(--on-surface)',
-              border: '1px solid var(--hairline-strong)',
-              fontSize: '13.5px',
-              fontWeight: 500,
-              cursor: signingIn ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.15s ease',
-            }}
-          >
-            <Sparkles size={16} color="var(--primary)" />
-            <span>Instant Access (Alice Workspace)</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', margin: '4px 0', gap: '10px' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--hairline)' }} />
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>or explore demo</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--hairline)' }} />
+          </div>
 
           {/* Instant Demo Workspace Option */}
           <div
             style={{
-              marginTop: '4px',
-              paddingTop: '16px',
-              borderTop: '1px solid var(--hairline)',
               display: 'flex',
               flexDirection: 'column',
               gap: '10px',
@@ -395,7 +372,7 @@ export default function LandingOrAuthPage() {
               >
                 Instant Demo Workspace
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pre-indexed</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Preloaded</span>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <select
@@ -413,9 +390,9 @@ export default function LandingOrAuthPage() {
                   cursor: 'pointer',
                 }}
               >
-                <option value="victim_user_alice_001">Alice (Lead Engineer - 100+ Conversations)</option>
-                <option value="adversary_user_bob_002">Bob (Security Auditor - Clean Sandbox)</option>
-                <option value="fresh_user_carol_003">Carol (Fresh Account)</option>
+                <option value="victim_user_alice_001">Alice (Lead Engineer — Preloaded History)</option>
+                <option value="adversary_user_bob_002">Bob (Security Auditor — Clean Sandbox)</option>
+                <option value="fresh_user_carol_003">Carol (Fresh Account — Empty State)</option>
               </select>
               <button
                 id="btn-dev-sign-in"
@@ -484,7 +461,7 @@ export default function LandingOrAuthPage() {
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)' }}>2. Understand</span>
             </div>
             <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              ContextOS extracts decisions, pivots, and project context without factual loss.
+              ContextOS extracts decisions, pivots, and project context across all conversations.
             </p>
           </div>
 

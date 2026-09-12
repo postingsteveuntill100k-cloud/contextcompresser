@@ -36,14 +36,14 @@ export default function Header({ convoCount = 0, onToggleMobileMenu }: HeaderPro
   };
 
   const getPageTitle = (path: string | null) => {
-    if (!path || path === '/home') return 'Workspace Home';
-    if (path.startsWith('/ask')) return 'Ask My History';
+    if (!path || path === '/home') return 'Home';
+    if (path.startsWith('/ask')) return 'Ask';
     if (path.startsWith('/conversations')) return 'Conversations';
     if (path.startsWith('/projects')) return 'Projects';
-    if (path.startsWith('/memory')) return 'Memory Synthesis';
-    if (path.startsWith('/decisions')) return 'Decisions & Contradictions';
+    if (path.startsWith('/memory')) return 'Memory';
+    if (path.startsWith('/decisions')) return 'Decisions';
     if (path.startsWith('/generate')) return 'Generate Context';
-    if (path.startsWith('/packages')) return 'Context Packages';
+    if (path.startsWith('/packages')) return 'Packages';
     if (path.startsWith('/developer')) return 'Developer Mode';
     if (path.startsWith('/import')) return 'Import History';
     if (path.startsWith('/security')) return 'Security & Privacy';

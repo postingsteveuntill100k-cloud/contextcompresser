@@ -40,6 +40,18 @@ export async function askHistory(
     };
   }
 
+  // Early check: if user has no imported conversations or structured decisions
+  if (conversations.length === 0 && (!memory?.decisions?.length) && (!memory?.failedApproaches?.length)) {
+    return {
+      answer: 'No imported conversations or decisions were found in your workspace. Please import your Google Takeout archive or use the preloaded demo to search your history.',
+      citations: [],
+      mode,
+      grounded: false,
+      model: DEFAULT_MODEL,
+      executionMs: Date.now() - startTime,
+    };
+  }
+
   // 1. Retrieve relevant conversation snippets using persistent index if available
   const searchResults = await hybridSearch(
     question,

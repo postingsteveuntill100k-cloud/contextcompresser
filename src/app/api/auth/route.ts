@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (!user) {
       user = {
         id: userId,
-        email: session.email || `${userId}@geminicontext.internal`,
+        email: session.email || `${userId}@contextos.internal`,
         displayName:
           userId === 'victim_user_alice_001'
             ? 'Alice (Principal Engineer)'
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       if (!user) {
         user = {
           id: targetUid,
-          email: email || `${targetUid}@geminicontext.internal`,
+          email: email || `${targetUid}@contextos.internal`,
           displayName:
             displayName ||
             (targetUid === 'user_gemini_main'
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const existingUser = await getUser(authenticatedUid);
     const updatedUser: User = {
       id: authenticatedUid,
-      email: email || existingUser?.email || `${authenticatedUid}@geminicontext.internal`,
+      email: email || existingUser?.email || `${authenticatedUid}@contextos.internal`,
       displayName: displayName || existingUser?.displayName || `User ${authenticatedUid}`,
       createdAt: existingUser?.createdAt || new Date().toISOString(),
     };

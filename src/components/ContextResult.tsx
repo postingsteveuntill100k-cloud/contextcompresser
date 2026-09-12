@@ -205,136 +205,158 @@ export default function ContextResult({
           </div>
         ) : (
           <article
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '36px',
-              fontFamily: 'var(--font-sans)',
-              color: 'var(--on-surface)',
-              lineHeight: 1.75,
-            }}
-          >
-            {/* 01. Context & Objective */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <span className="font-label-sm" style={{ fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em' }}>
-                  01
-                </span>
-                <h2 className="font-headline-md" style={{ color: 'var(--on-surface)', margin: 0 }}>
-                  Project Context &amp; Objective
-                </h2>
-              </div>
-              <p className="font-body-lg" style={{ color: 'var(--on-surface-variant)', margin: 0 }}>
-                ContextOS is engineered as a sovereign, local-first personal knowledge substrate. Its purpose is to bridge the continuous amnesia between disparate foundation model sessions by transforming raw, multi-year AI conversation transcripts into structured, queryable semantic memory without routing private thought records through third-party aggregators.
-              </p>
-              <p className="font-body-lg" style={{ color: 'var(--on-surface-variant)', margin: 0 }}>
-                Rather than functioning as a transient chat client or generic prompt organizer, ContextOS acts as an operating system kernel for human thought assembly—producing compact, highly grounded context packages that prime newly initiated model environments with instant domain fluency.
-              </p>
-            </section>
+            id="context-result-article"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+                fontFamily: 'var(--font-sans)',
+                color: 'var(--on-surface)',
+                lineHeight: 1.7,
+              }}
+            >
+              {content.split('\n\n').map((block, idx) => {
+                const trimmed = block.trim();
+                if (!trimmed) return null;
 
-            {/* 02. Architecture */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <span className="font-label-sm" style={{ fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em' }}>
-                  02
-                </span>
-                <h2 className="font-headline-md" style={{ color: 'var(--on-surface)', margin: 0 }}>
-                  Architecture
-                </h2>
-              </div>
-              <p className="font-body-lg" style={{ color: 'var(--on-surface-variant)', margin: 0 }}>
-                ContextOS implements a strictly client-orchestrated execution topology. The browser sandboxes both relational indexation and vector retrieval routines directly on user silicon:
-              </p>
-              <ul style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)' }}>
-                <li>
-                  <strong style={{ color: 'var(--on-surface)' }}>Storage Substrate:</strong> SQLite compiled to WebAssembly via OPFS for durable, zero-telemetry local transcript trees.
-                </li>
-                <li>
-                  <strong style={{ color: 'var(--on-surface)' }}>Retrieval Pipeline:</strong> Hybrid BM25 lexical search merged with dense cosine embeddings for sub-10ms prompt recall.
-                </li>
-                <li>
-                  <strong style={{ color: 'var(--on-surface)' }}>Security Model:</strong> Fail-closed cryptographic JWT token verification with hard isolation boundaries.
-                </li>
-              </ul>
-            </section>
+                // Main Heading (# Title)
+                if (trimmed.startsWith('# ')) {
+                  return (
+                    <h1
+                      key={idx}
+                      className="font-headline-md"
+                      style={{ color: 'var(--on-surface)', margin: '16px 0 8px 0', fontSize: '26px' }}
+                    >
+                      {trimmed.slice(2)}
+                    </h1>
+                  );
+                }
 
-            {/* 03. Key Technical Invariants */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <span className="font-label-sm" style={{ fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em' }}>
-                  03
-                </span>
-                <h2 className="font-headline-md" style={{ color: 'var(--on-surface)', margin: 0 }}>
-                  Key Technical Invariants
-                </h2>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ padding: '16px 20px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--hairline)' }}>
-                  <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 4px 0' }}>
-                    Stateless Firebase Auth Primitives
-                  </h3>
-                  <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                    Enforces standard public key verification without external database session state, ensuring instant restarts.
+                // Section Heading (## Subtitle)
+                if (trimmed.startsWith('## ')) {
+                  return (
+                    <div key={idx} style={{ marginTop: '16px' }}>
+                      <h2
+                        className="font-title"
+                        style={{ color: 'var(--primary)', margin: '0 0 12px 0', fontSize: '18px', fontWeight: 600 }}
+                      >
+                        {trimmed.slice(3)}
+                      </h2>
+                    </div>
+                  );
+                }
+
+                // Sub-heading (### Heading)
+                if (trimmed.startsWith('### ')) {
+                  return (
+                    <h3
+                      key={idx}
+                      className="font-title"
+                      style={{ color: 'var(--on-surface)', margin: '10px 0 6px 0', fontSize: '15px', fontWeight: 600 }}
+                    >
+                      {trimmed.slice(4)}
+                    </h3>
+                  );
+                }
+
+                // Code block (``` ... ```)
+                if (trimmed.startsWith('```')) {
+                  const lines = trimmed.split('\n');
+                  const code = lines.slice(1, -1).join('\n') || trimmed;
+                  return (
+                    <pre
+                      key={idx}
+                      style={{
+                        padding: '16px',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'var(--surface-container-lowest)',
+                        border: '1px solid var(--hairline)',
+                        overflowX: 'auto',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '13px',
+                        lineHeight: 1.5,
+                        color: 'var(--on-surface)',
+                      }}
+                    >
+                      <code>{code}</code>
+                    </pre>
+                  );
+                }
+
+                // Bullet or list block (- or *)
+                if (trimmed.split('\n').every((l) => l.trim().startsWith('- ') || l.trim().startsWith('* ') || l.trim().startsWith('• ') || /^\d+\.\s/.test(l.trim()))) {
+                  return (
+                    <ul
+                      key={idx}
+                      style={{
+                        paddingLeft: '22px',
+                        margin: '4px 0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        color: 'var(--text-secondary)',
+                        fontSize: '14.5px',
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {trimmed.split('\n').map((line, lIdx) => {
+                        const clean = line.trim().replace(/^[-*•]\s+|\d+\.\s+/, '');
+                        return <li key={lIdx}>{clean}</li>;
+                      })}
+                    </ul>
+                  );
+                }
+
+                // Blockquote (> Quote)
+                if (trimmed.startsWith('> ')) {
+                  return (
+                    <blockquote
+                      key={idx}
+                      style={{
+                        margin: '8px 0',
+                        padding: '12px 18px',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'var(--surface-container-low)',
+                        borderLeft: '3px solid var(--primary)',
+                        color: 'var(--text-secondary)',
+                        fontStyle: 'italic',
+                        fontSize: '14px',
+                      }}
+                    >
+                      {trimmed.replace(/^>\s+/gm, '')}
+                    </blockquote>
+                  );
+                }
+
+                // Standard paragraph
+                return (
+                  <p
+                    key={idx}
+                    className="font-body-lg"
+                    style={{ color: 'var(--on-surface-variant)', margin: 0, fontSize: '15px', lineHeight: 1.7 }}
+                  >
+                    {trimmed}
                   </p>
-                </div>
-                <div style={{ padding: '16px 20px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--hairline)' }}>
-                  <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 4px 0' }}>
-                    Human-Curated Editorial Prose Output
-                  </h3>
-                  <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                    Frontier LLMs retain significantly higher causal recall when supplied with prose context compared to rigid XML schemas.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* 04. Model Prompt Seed */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <span className="font-label-sm" style={{ fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em' }}>
-                  04
-                </span>
-                <h2 className="font-headline-md" style={{ color: 'var(--on-surface)', margin: 0 }}>
-                  Frontier Model Instruction Seed
-                </h2>
-              </div>
-              <div
-                style={{
-                  padding: '20px',
-                  borderRadius: 'var(--radius-lg)',
-                  backgroundColor: 'var(--surface-container-lowest)',
-                  border: '1px solid var(--hairline)',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '14px',
-                  color: 'var(--on-surface)',
-                  lineHeight: 1.6,
-                }}
-              >
-                &ldquo;You are an expert system designer joining the ContextOS team. Review the compiled architectural decisions and technical invariants above. How should we proceed with optimizing the streaming ingestion pipeline without degrading client UI responsiveness?&rdquo;
-              </div>
-            </section>
-          </article>
-        )}
+                );
+              })}
+            </article>
+          )}
       </div>
 
     </div>
   );
 }
 
-const DEFAULT_RESULT_CONTENT = `# ContextOS Architecture & Core Decisions
-Curated Handoff Dossier / Version 4.1
+const DEFAULT_RESULT_CONTENT = `# Context Briefing
+Curated Handoff Context
 
-## 01 Project Context & Objective
-ContextOS is engineered as a sovereign, local-first personal knowledge substrate. Its purpose is to bridge the continuous amnesia between disparate foundation model sessions by transforming raw, multi-year AI conversation transcripts into structured, queryable semantic memory.
+## 01 Project Summary
+ContextOS turns your past AI conversations into clear, usable context.
 
-## 02 Architecture
-ContextOS implements a strictly client-orchestrated execution topology. The browser sandboxes both relational indexation and vector retrieval routines directly on user silicon using SQLite-WASM backed by OPFS.
+## 02 Key Decisions & Invariants
+- Decisions and rationale extracted directly from your conversation history.
+- Structured so fresh AI instances understand previous context without repeating past discussions.
 
-## 03 Key Technical Invariants
-- Stateless Firebase Auth Primitives
-- Human-Curated Editorial Prose Output
-- Sub-10ms hybrid lexical + dense retrieval
-
-## 04 Frontier Model Instruction Seed
-"You are an expert system designer joining the ContextOS team. Review the compiled architectural decisions and technical invariants above."
+## 03 Past Attempts & Lessons
+- Review the decisions log and conversation details to explore historical attempts and lessons learned.
 `;

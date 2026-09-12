@@ -64,10 +64,10 @@ export default function ProjectsView({
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
         <div>
           <div className="font-label-sm" style={{ textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>
-            Knowledge / Organization
+            Knowledge / Projects
           </div>
           <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
-            Active Projects &amp; Workspaces
+            Projects
           </h1>
           <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
             Conversations grouped automatically by topic and project context.
@@ -75,7 +75,7 @@ export default function ProjectsView({
         </div>
 
         <span className="font-label-sm" style={{ color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
-          {projectMap.size} {projectMap.size === 1 ? 'Project Cluster' : 'Project Clusters'}
+          {projectMap.size} {projectMap.size === 1 ? 'Project' : 'Projects'}
         </span>
       </div>
 

@@ -34,7 +34,7 @@ export default function SettingsView() {
               Settings &amp; Preferences
             </h1>
             <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: '8px 0 0 0', lineHeight: 1.6 }}>
-              Configure your local-first context storage, Gemini reasoning engine parameters, vector sharding thresholds, and security boundaries.
+              Configure your context storage, model parameters, search settings, and security preferences.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export default function SettingsView() {
               </span>
             </div>
             <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '12.5px' }}>
-              Ultra-fast, quota-efficient multi-turn dialogue indexing, instant AST extraction, and sub-second prompt compilation.
+              Fast, responsive dialogue indexing and efficient summary generation.
             </p>
           </div>
 
@@ -211,10 +211,10 @@ export default function SettingsView() {
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
             <div>
               <div style={{ fontSize: '13.5px', color: 'var(--on-surface)', fontWeight: 500 }}>
-                SQLite-WASM OPFS Client Indexing Cache
+                Local Fast-Search Cache
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Cache inverted search indexes in the browser&rsquo;s Origin Private File System for sub-10ms query times.
+                Cache search indices locally in your browser for instant retrieval.
               </div>
             </div>
             <input
@@ -341,7 +341,7 @@ export default function SettingsView() {
             { href: '/memory', label: 'Memory Synthesis', desc: 'Core facts, constraints & patterns', icon: Brain },
             { href: '/decisions', label: 'Decisions Log', desc: 'Chronological pivots & rationale', icon: Scale },
             { href: '/security', label: 'Security & Privacy', desc: 'Tenant isolation & prompt firewalls', icon: ShieldCheck },
-            { href: '/developer', label: 'Developer Mode', desc: 'Raw telemetry & vector sharding', icon: Terminal },
+            { href: '/developer', label: 'Developer Mode', desc: 'Raw telemetry & system logs', icon: Terminal },
           ].map((tool) => {
             const ToolIcon = tool.icon;
             return (

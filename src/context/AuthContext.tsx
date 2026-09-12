@@ -296,7 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStoredUser(userId);
       setUser({
         id: userId,
-        email: email || `${userId}@geminicontext.internal`,
+        email: email || `${userId}@contextos.internal`,
         displayName: displayName || `User (${userId.slice(0, 8)})`,
       });
       setStatus('authenticated');
