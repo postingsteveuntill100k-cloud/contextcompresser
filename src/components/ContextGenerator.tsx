@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { fetchWithAuth } from '@/lib/security/client_auth';
 import { CanonicalConversation, ContextPackage } from '@/types';
-import { Loader2, Sparkles, Copy, Check, Download, ExternalLink, FileText } from 'lucide-react';
+import ContextOSLoader from './ContextOSLoader';
+import { Sparkles, Copy, Check, Download, ExternalLink, FileText } from 'lucide-react';
 
 interface ContextGeneratorProps {
   initialTopic?: string;
@@ -247,7 +248,7 @@ export default function ContextGenerator({
           >
             {generating ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <ContextOSLoader size={18} status="" />
                 <span>Synthesizing Context...</span>
               </>
             ) : (
@@ -366,18 +367,14 @@ export default function ContextGenerator({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '16px',
+                justifyContent: 'center',
               }}
             >
-              <Loader2 size={32} className="animate-spin" color="var(--primary)" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <h3 className="font-headline-sm" style={{ color: 'var(--on-surface)', margin: 0, fontWeight: 500 }}>
-                  {genStage}
-                </h3>
-                <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '420px', lineHeight: 1.5 }}>
-                  ContextOS is compressing your verified engineering history into a clean, reusable context package.
-                </p>
-              </div>
+              <ContextOSLoader
+                size={44}
+                status={genStage}
+                subtext="ContextOS is compressing your verified engineering history into a clean, reusable context package."
+              />
             </div>
           ) : (
             <div

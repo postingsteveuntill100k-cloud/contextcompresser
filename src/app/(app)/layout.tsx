@@ -5,8 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 import { DataProvider, useData } from '@/context/DataContext';
 import Navigation from '@/components/Navigation';
 import Header from '@/components/Header';
+import ContextOSLogo from '@/components/ContextOSLogo';
+import ContextOSLoader from '@/components/ContextOSLoader';
 import Link from 'next/link';
-import { Layers, LogIn, Loader2 } from 'lucide-react';
+import { LogIn, RotateCcw } from 'lucide-react';
 
 function AppShellContent({ children }: { children: React.ReactNode }) {
   const { conversations } = useData();
@@ -44,7 +46,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AuthenticatedAppLayout({ children }: { children: React.ReactNode }) {
-  const { status, loginAsDevUser } = useAuth();
+  const { status, error, retryAuth, loginAsDevUser } = useAuth();
   const [devUserChoice, setDevUserChoice] = useState('victim_user_alice_001');
 
   console.log('[Auth Lifecycle] AppLayout: current status =', status);
@@ -59,26 +61,89 @@ export default function AuthenticatedAppLayout({ children }: { children: React.R
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: 'var(--surface)',
-          gap: '16px',
+          padding: '24px',
+        }}
+      >
+        <ContextOSLoader size={44} status="Verifying session security..." />
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--surface)',
+          padding: '24px',
+          textAlign: 'center',
         }}
       >
         <div
           style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #d97746 0%, #b85d30 100%)',
+            maxWidth: '440px',
+            width: '100%',
+            backgroundColor: 'var(--surface-container-low)',
+            border: '1px solid var(--hairline)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '36px 28px',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(217, 119, 70, 0.3)',
+            gap: '20px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}
         >
-          <Layers size={22} color="#ffffff" strokeWidth={2.4} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-          <Loader2 size={16} className="animate-spin" />
-          <span>Verifying session security...</span>
+          <ContextOSLogo size={44} />
+
+          <div>
+            <h2
+              className="font-headline-sm"
+              style={{ color: 'var(--on-surface)', fontSize: '20px', margin: '0 0 8px 0' }}
+            >
+              Authentication Failed
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+              {error || "We couldn't sign you in. Please try again."}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+            <button
+              onClick={() => retryAuth()}
+              className="btn-primary"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                fontSize: '14px',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Retry Sign In</span>
+            </button>
+            <Link
+              href="/"
+              style={{
+                fontSize: '13px',
+                color: 'var(--text-muted)',
+                textDecoration: 'none',
+                marginTop: '4px',
+              }}
+            >
+              Return to Landing Page
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -113,20 +178,7 @@ export default function AuthenticatedAppLayout({ children }: { children: React.R
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}
         >
-          <div
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #d97746 0%, #b85d30 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(217, 119, 70, 0.35)',
-            }}
-          >
-            <Layers size={24} color="#ffffff" strokeWidth={2.4} />
-          </div>
+          <ContextOSLogo size={44} />
 
           <div>
             <h2

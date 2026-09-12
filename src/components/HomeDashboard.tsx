@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { CanonicalConversation, ContextPackage, StructuredMemory } from '@/types';
+import { deriveContextualQuestions } from '@/lib/retrieval/contextual_questions';
 import {
   Search,
   ArrowRight,
@@ -10,6 +11,7 @@ import {
   MessageSquare,
   FileText,
   Upload,
+  Sparkles,
 } from 'lucide-react';
 
 interface HomeDashboardProps {
@@ -24,6 +26,7 @@ interface HomeDashboardProps {
 
 export default function HomeDashboard({
   conversations = [],
+  memory = null,
   onAskQuery,
   onNavigateToImport,
 }: HomeDashboardProps) {
@@ -50,11 +53,7 @@ export default function HomeDashboard({
 
   const recentConversations = sortedConversations.slice(0, 4);
 
-  const suggestedQueries = [
-    'What architectural decisions did I make?',
-    'Which approaches failed and why?',
-    'What unresolved questions remain?',
-  ];
+  const suggestedQueries = deriveContextualQuestions(conversations, memory);
 
   return (
     <div
@@ -142,46 +141,83 @@ export default function HomeDashboard({
           </button>
         </div>
 
-        {/* Quiet Suggested Queries */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            alignItems: 'center',
-          }}
-        >
-          {suggestedQueries.map((queryText) => (
-            <button
-              key={queryText}
-              onClick={() => onAskQuery(queryText)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '5px 12px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--surface-container)',
-                border: '1px solid var(--hairline)',
-                color: 'var(--text-secondary)',
-                fontSize: '12.5px',
-                cursor: 'pointer',
-                transition: 'color 0.15s ease, background-color 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--on-surface)';
-                e.currentTarget.style.backgroundColor = 'var(--surface-container-high)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-secondary)';
-                e.currentTarget.style.backgroundColor = 'var(--surface-container)';
-              }}
-            >
-              <ArrowUpRight size={13} color="var(--primary-container)" />
-              <span>{queryText}</span>
-            </button>
-          ))}
-        </div>
+        {/* Onboarding State for Fresh Accounts vs Contextual Questions */}
+        {conversations.length === 0 ? (
+          <div
+            id="fresh-account-onboarding-banner"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              padding: '12px 18px',
+              backgroundColor: 'var(--surface-container-low)',
+              border: '1px dashed var(--hairline)',
+              borderRadius: 'var(--radius-lg)',
+              marginTop: '4px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Sparkles size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 450 }}>
+                Import your AI history to start asking questions about it.
+              </span>
+            </div>
+            {onNavigateToImport ? (
+              <button
+                onClick={onNavigateToImport}
+                className="btn-secondary"
+                style={{ fontSize: '12.5px', padding: '5px 12px', whiteSpace: 'nowrap' }}
+              >
+                Import History &rarr;
+              </button>
+            ) : (
+              <Link
+                href="/import"
+                className="btn-secondary"
+                style={{ fontSize: '12.5px', padding: '5px 12px', textDecoration: 'none', whiteSpace: 'nowrap' }}
+              >
+                Import History &rarr;
+              </Link>
+            )}
+          </div>
+        ) : (
+          /* Contextual Questions dynamically derived from user's history */
+          <div
+            id="contextual-questions-container"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              alignItems: 'center',
+            }}
+          >
+            {suggestedQueries.map((queryText) => (
+              <button
+                key={queryText}
+                onClick={() => onAskQuery(queryText)}
+                className="prompt-chip"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--surface-container)',
+                  border: '1px solid var(--hairline)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '12.5px',
+                  fontWeight: 450,
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease, background-color 0.15s ease',
+                }}
+              >
+                <ArrowUpRight size={13} color="var(--primary-container)" />
+                <span>{queryText}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* 2. SECONDARY ACTION: GENERATE CONTEXT */}

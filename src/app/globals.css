@@ -14,8 +14,8 @@
   
   --on-surface: #191817;
   --on-surface-variant: #494744;
-  --text-secondary: #575551;
-  --text-muted: #84827c;
+  --text-secondary: #474541;
+  --text-muted: #696761;
   
   --primary: #c85a2b;
   --primary-container: #c85a2b;
@@ -67,8 +67,8 @@ html.dark,
   
   --on-surface: #e5e2e0;
   --on-surface-variant: #dbc1b6;
-  --text-secondary: #b5b3ad;
-  --text-muted: #75746e;
+  --text-secondary: #c5c3bd;
+  --text-muted: #95938d;
   
   --primary: #ffb694;
   --primary-container: #d97746;
@@ -244,7 +244,7 @@ html, body {
   font-size: 13px;
   line-height: 20px;
   letter-spacing: 0.005em;
-  font-weight: 400;
+  font-weight: 450;
 }
 
 .font-label-md {
@@ -334,6 +334,7 @@ html, body {
   border: 1px solid var(--hairline);
   color: var(--text-secondary);
   font-size: 13px;
+  font-weight: 450;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -341,4 +342,47 @@ html, body {
   background-color: var(--surface-container);
   color: var(--on-surface);
   border-color: rgba(217, 119, 70, 0.4);
+}
+
+/* ContextOS Smooth Animations */
+@keyframes contextOSSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes contextOSPulse {
+  0%, 100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes contextOSShimmer {
+  0% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  svg,
+  .contextos-loader-container svg,
+  .contextos-skeleton {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

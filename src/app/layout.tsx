@@ -3,9 +3,17 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'ContextOS — Turn Your AI History into Usable Context',
+  title: {
+    default: 'ContextOS — Turn Your AI History into Usable Context',
+    template: '%s | ContextOS',
+  },
   description:
     'Turn your AI history into usable context. Import your Gemini activity, search with grounded provenance, track decisions over time, and generate durable context packages.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   keywords: [
     'ContextOS',
     'Gemini AI',
@@ -25,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

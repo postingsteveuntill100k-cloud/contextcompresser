@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AskResponse } from '@/types';
 import { fetchWithAuth } from '@/lib/security/client_auth';
+import { useData } from '@/context/DataContext';
+import { deriveContextualQuestions } from '@/lib/retrieval/contextual_questions';
+import ContextOSLoader from './ContextOSLoader';
 import {
   Search,
   ArrowUpRight,
-  Loader2,
   Copy,
   Check,
   BookOpen,
@@ -17,14 +19,9 @@ interface AskHistoryProps {
   onGenerateFromTopic?: (topic: string) => void;
 }
 
-const SAMPLE_QUERIES = [
-  'What database did I select, and why?',
-  'What approaches failed during testing, and what was the lesson?',
-  'What did I decide about authentication and user isolation?',
-  'What are my unresolved architectural questions?',
-];
-
 export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: AskHistoryProps) {
+  const { conversations, memory } = useData();
+  const dynamicQueries = deriveContextualQuestions(conversations, memory);
   const [query, setQuery] = useState(initialQuery);
   const [activeQuery, setActiveQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
@@ -82,7 +79,7 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
       clearTimeout(t2);
       setLoading(false);
     }
-  }, [query, searchMode]);
+  }, [query, searchMode, setSelectedSourceIndex]);
 
   useEffect(() => {
     if (initialQuery && initialQuery.trim()) {
@@ -193,42 +190,66 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
           </button>
         </div>
 
-        {/* Suggested Queries */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            justifyContent: 'center',
-            marginTop: '4px',
-          }}
-        >
-          {SAMPLE_QUERIES.map((sq) => (
-            <button
-              key={sq}
-              className="prompt-chip"
-              onClick={() => {
-                setQuery(sq);
-                executeQuery(sq);
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--surface-container-low)',
-                border: '1px solid var(--hairline)',
-                color: 'var(--text-secondary)',
-                fontSize: '12.5px',
-                cursor: 'pointer',
-              }}
-            >
-              <ArrowUpRight size={13} color="var(--primary)" />
-              <span>{sq}</span>
-            </button>
-          ))}
-        </div>
+        {/* Contextual Queries vs Empty Onboarding */}
+        {conversations.length === 0 ? (
+          <div
+            id="ask-empty-onboarding"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '10px 16px',
+              backgroundColor: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px dashed var(--hairline)',
+              marginTop: '4px',
+            }}
+          >
+            <Sparkles size={15} color="var(--primary)" />
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 450 }}>
+              Import your AI history to start asking questions about it.
+            </span>
+          </div>
+        ) : dynamicQueries.length > 0 ? (
+          <div
+            id="ask-contextual-queries"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center',
+              marginTop: '4px',
+            }}
+          >
+            {dynamicQueries.map((sq) => (
+              <button
+                key={sq}
+                className="prompt-chip"
+                onClick={() => {
+                  setQuery(sq);
+                  executeQuery(sq);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--surface-container-low)',
+                  border: '1px solid var(--hairline)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '12.5px',
+                  fontWeight: 450,
+                  cursor: 'pointer',
+                }}
+              >
+                <ArrowUpRight size={13} color="var(--primary)" />
+                <span>{sq}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       {/* Asymmetric 7-col / 5-col Workspace Layout */}
@@ -252,16 +273,14 @@ export default function AskHistory({ initialQuery = '', onGenerateFromTopic }: A
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '14px',
+                justifyContent: 'center',
               }}
             >
-              <Loader2 size={28} className="animate-spin" color="var(--primary)" />
-              <p className="font-body-md" style={{ color: 'var(--on-surface)', margin: 0, fontWeight: 500 }}>
-                {loadingStage}
-              </p>
-              <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                Searching verified conversation index and architectural records...
-              </p>
+              <ContextOSLoader
+                size={44}
+                status={loadingStage}
+                subtext="Searching verified conversation index and architectural records..."
+              />
             </div>
           ) : response ? (
             <div className="panel-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '28px' }}>

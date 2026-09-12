@@ -1,4 +1,3 @@
-// @ts-nocheck
 import puppeteer from 'puppeteer-core';
 import { getAdminAuth } from '../src/lib/firebase/admin';
 
@@ -38,8 +37,9 @@ async function testUiThemeAndRedirect() {
 
     // 2. Authenticate and enter workspace
     console.log('\n[Step 2] Authenticating test session to test workspace UI and Theme Toggle...');
-    const testUid = 'user-theme-test-' + Date.now();
     const adminAuth = getAdminAuth();
+    if (!adminAuth) throw new Error('Firebase Admin Auth not initialized');
+    const testUid = 'user-theme-test-' + Date.now();
     const customToken = await adminAuth.createCustomToken(testUid);
     const apiKey = 'AIzaSyDrWEa_Vm6OR3LwvJOceG6JWOiT97mme1E';
 
@@ -70,14 +70,14 @@ async function testUiThemeAndRedirect() {
 
     // 3. Test Theme Toggle
     console.log('\n[Step 3] Testing Light / Dark Mode Toggle interaction...');
-    let isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+    const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
     console.log('  Initial theme mode isDark:', isDark);
 
     // Click theme toggle
     await page.click('#theme-toggle-btn');
     await page.waitForFunction((prev) => document.documentElement.classList.contains('dark') !== prev, {}, isDark);
 
-    let nextDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+    const nextDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
     console.log('  Theme after toggle isDark:', nextDark);
     const storedTheme = await page.evaluate(() => localStorage.getItem('contextos_theme'));
     console.log('  Stored theme in localStorage:', storedTheme);

@@ -22,7 +22,7 @@ export interface AuthUser {
   displayName: string;
 }
 
-export type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated';
+export type AuthStatus = 'loading' | 'unauthenticated' | 'authenticated' | 'failed';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -34,6 +34,7 @@ interface AuthContextType {
   loginAsDevUser: (userId: string, email?: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  retryAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -261,8 +262,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn('[Auth Lifecycle] AuthContext: loginWithGoogle failed:', msg);
-      setError(msg);
-      setStatus('unauthenticated');
+      const isCancellation =
+        msg.toLowerCase().includes('cancelled') ||
+        msg.toLowerCase().includes('closed') ||
+        msg.toLowerCase().includes('popup-closed');
+      setError(isCancellation ? null : msg);
+      setStatus(isCancellation ? 'unauthenticated' : 'failed');
       throw err;
     }
   };
@@ -277,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const msg = err instanceof Error ? err.message : String(err);
       console.warn('[Auth Lifecycle] AuthContext: loginWithGoogleRedirect failed:', msg);
       setError(msg);
-      setStatus('unauthenticated');
+      setStatus('failed');
       throw err;
     }
   };
@@ -299,9 +304,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
-      setStatus('unauthenticated');
+      setStatus('failed');
       throw err;
     }
+  };
+
+  const retryAuth = async () => {
+    console.log('[Auth Lifecycle] AuthContext: retryAuth invoked');
+    setError(null);
+    setStatus('loading');
+    await loginWithGoogle();
   };
 
   const logout = async () => {
@@ -327,6 +339,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginAsDevUser,
         logout,
         refreshUser,
+        retryAuth,
       }}
     >
       {children}

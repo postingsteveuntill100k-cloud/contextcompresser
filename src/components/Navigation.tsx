@@ -4,12 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import ContextOSLogo from './ContextOSLogo';
 import {
   Home,
   Search,
   MessageSquare,
   Folder,
-  Layers,
   Download,
   Settings,
   LogOut,
@@ -81,22 +81,8 @@ export default function Navigation({ convoCount = 0, isOpen = false, onCloseMobi
             flexShrink: 0,
           }}
         >
-          {/* Stylized Terracotta Logo Mark */}
-          <div
-            style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '7px',
-              background: 'linear-gradient(135deg, #d97746 0%, #b85d30 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(217, 119, 70, 0.28)',
-              flexShrink: 0,
-            }}
-          >
-            <Layers size={16} color="#ffffff" strokeWidth={2.4} />
-          </div>
+          {/* Original ContextOS Logo Mark */}
+          <ContextOSLogo size={30} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span
               className="font-title"

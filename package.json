@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx tests/test_suite.ts"
+    "test": "tsx tests/test_suite.ts",
+    "sync:hosting": "mkdir -p .firebase/compresscontext/hosting/_next && cp -r .next/server/app/*.html .firebase/compresscontext/hosting/ && rm -rf .firebase/compresscontext/hosting/_next/static && cp -r .next/static .firebase/compresscontext/hosting/_next/ && cp -r public/* .firebase/compresscontext/hosting/",
+    "deploy:hosting": "npm run build && npm run sync:hosting && firebase deploy --only hosting:compresscontext --project gen-lang-client-0175818220"
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",

@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import ContextOSLogo from '@/components/ContextOSLogo';
+import ContextOSLoader from '@/components/ContextOSLoader';
 import {
-  Layers,
   Search,
   Brain,
   FileText,
   ShieldCheck,
   ArrowRight,
-  Loader2,
   Download,
   AlertCircle,
   Sparkles,
@@ -105,20 +105,7 @@ export default function LandingOrAuthPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #d97746 0%, #b85d30 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(217, 119, 70, 0.3)',
-            }}
-          >
-            <Layers size={18} color="#ffffff" strokeWidth={2.4} />
-          </div>
+          <ContextOSLogo size={34} />
           <span
             className="font-title"
             style={{ fontSize: '18px', fontWeight: 600, color: 'var(--on-surface)', letterSpacing: '-0.01em' }}
@@ -255,7 +242,34 @@ export default function LandingOrAuthPage() {
             gap: '14px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
           }}
-        >
+        >          {/* Auth Failure Alert */}
+          {(status === 'failed' || error) && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'rgba(186, 26, 26, 0.12)',
+                border: '1px solid rgba(186, 26, 26, 0.3)',
+                color: 'var(--on-surface)',
+                fontSize: '13px',
+                lineHeight: 1.4,
+                textAlign: 'left',
+              }}
+            >
+              <AlertCircle size={17} color="var(--error)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, color: 'var(--error)' }}>Authentication Notice</div>
+                <div style={{ marginTop: '2px', color: 'var(--text-secondary)' }}>
+                  {error || "We couldn't sign you in. Please check your connection and try again."}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Primary Action: Continue with Google */}
           <button
             id="btn-google-sign-in"
             type="button"
@@ -280,12 +294,12 @@ export default function LandingOrAuthPage() {
           >
             {signingIn && !redirecting ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <ContextOSLoader size={18} status="" />
                 <span>Signing in...</span>
               </>
             ) : redirecting ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <ContextOSLoader size={18} status="" />
                 <span>Redirecting to Google...</span>
               </>
             ) : (

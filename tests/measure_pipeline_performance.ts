@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getAdminAuth } from '../src/lib/firebase/admin';
 import { getConversations, getMemory, saveContextPackage } from '../src/lib/storage/store';
 import { hybridSearch } from '../src/lib/retrieval/hybrid';
@@ -45,6 +44,9 @@ async function measurePipeline() {
   const tRetStart = performance.now();
   const searchResults = await hybridSearch(query, conversations, { mode: 'deep', limit: 12 }, userId);
   const retrievalLatency = performance.now() - tRetStart;
+  if (searchResults.length > 0) {
+    console.log(`[Retrieval] Found ${searchResults.length} candidates.`);
+  }
 
   // 4. Grounded Ask / Gemini Synthesis Latency
   const tGeminiStart = performance.now();

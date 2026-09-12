@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RawImport } from '@/types';
 import { fetchWithAuth } from '@/lib/security/client_auth';
+import { useData } from '@/context/DataContext';
+import ContextOSLoader from './ContextOSLoader';
 import Link from 'next/link';
 import {
   Upload,
@@ -13,8 +15,8 @@ import {
   Clock,
   Search,
   MessageSquare,
-  Loader2,
   FileCode,
+  RotateCcw,
 } from 'lucide-react';
 
 interface ImportHubProps {
@@ -33,7 +35,9 @@ export default function ImportHub({
   onExploreConversations,
   onAskHistory,
 }: ImportHubProps) {
+  const { refreshData } = useData();
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   const [stage, setStage] = useState<Stage>('idle');
   const [stageMessage, setStageMessage] = useState<string>('');
   const [selectedFileName, setSelectedFileName] = useState<string>('');
@@ -48,6 +52,18 @@ export default function ImportHub({
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const preventWindowDrop = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('dragover', preventWindowDrop);
+    window.addEventListener('drop', preventWindowDrop);
+    return () => {
+      window.removeEventListener('dragover', preventWindowDrop);
+      window.removeEventListener('drop', preventWindowDrop);
+    };
+  }, []);
 
   const handleFileUpload = async (file: File) => {
     setSelectedFileName(file.name);
@@ -121,10 +137,54 @@ export default function ImportHub({
       if (onImportComplete) {
         onImportComplete();
       }
+      void refreshData();
     } catch (err: unknown) {
       setStage('error');
       const msg = err instanceof Error ? err.message : String(err);
-      setErrorMessage(msg);
+      setErrorMessage(
+        msg.includes('JSON') || msg.includes('parse')
+          ? "We couldn't read that file. Check the format and try again."
+          : msg
+      );
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      handleFileUpload(file);
     }
   };
 
@@ -297,32 +357,31 @@ export default function ImportHub({
         </div>
       </div>
 
-      {/* Clean Drag & Drop Zone */}
+      {/* Robust Drag & Drop Zone */}
       <div
         id="drop-zone"
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragging(false);
-          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFileUpload(e.dataTransfer.files[0]);
-          }
-        }}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onClick={() => {
           if (stage !== 'uploading' && stage !== 'parsing' && stage !== 'extracting') {
             fileInputRef.current?.click();
           }
         }}
         style={{
-          border: isDragging ? '2px dashed var(--primary-container)' : '1px dashed var(--hairline)',
+          border: isDragging
+            ? '2px dashed var(--primary)'
+            : stage === 'ready'
+            ? '1px solid var(--success)'
+            : '1px dashed var(--hairline)',
           borderRadius: 'var(--radius-xl)',
           padding: '48px 24px',
           textAlign: 'center',
-          backgroundColor: isDragging ? 'var(--surface-container-high)' : 'var(--surface-container-low)',
+          backgroundColor: isDragging
+            ? 'var(--surface-container-high)'
+            : 'var(--surface-container-low)',
+          boxShadow: isDragging ? '0 0 28px rgba(217, 119, 70, 0.28)' : 'none',
           cursor: stage === 'uploading' || stage === 'parsing' || stage === 'extracting' ? 'wait' : 'pointer',
           transition: 'all 0.2s ease',
           display: 'flex',
@@ -358,7 +417,7 @@ export default function ImportHub({
           }}
         >
           {stage === 'uploading' || stage === 'parsing' || stage === 'extracting' ? (
-            <Loader2 size={26} className="animate-spin" />
+            <ContextOSLoader size={26} status="" />
           ) : stage === 'ready' ? (
             <CheckCircle2 size={26} color="var(--success)" />
           ) : (
@@ -368,18 +427,18 @@ export default function ImportHub({
 
         <div>
           <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 6px 0', fontSize: '16px' }}>
-            {stage === 'uploading'
-              ? 'Uploading archive...'
-              : stage === 'parsing'
-              ? 'Parsing and verifying archive...'
-              : stage === 'extracting'
-              ? 'Extracting context & indexing...'
+            {isDragging
+              ? 'Drop your history here'
+              : stage === 'uploading' || stage === 'parsing' || stage === 'extracting'
+              ? 'Importing...'
               : stage === 'ready'
-              ? 'Archive processed successfully'
-              : 'Select your Gemini Archive to Import'}
+              ? 'Imported successfully'
+              : 'Drop your history here or click to browse'}
           </h3>
           <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            {stageMessage || 'Drag and drop your file here, or click to browse'}
+            {isDragging
+              ? 'Release to upload (.zip, .json, .md)'
+              : stageMessage || 'Drag and drop your Takeout archive (.zip, .json) or Markdown logs'}
           </p>
         </div>
 
@@ -569,13 +628,32 @@ export default function ImportHub({
           }}
         >
           <AlertCircle size={20} color="var(--error)" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div>
+          <div style={{ flex: 1 }}>
             <h4 style={{ color: 'var(--error)', margin: '0 0 4px 0', fontSize: '14px', fontWeight: 600 }}>
               Import could not be completed
             </h4>
-            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '13px', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '13px', lineHeight: 1.5 }}>
               {errorMessage}
             </p>
+            <button
+              onClick={() => {
+                setStage('idle');
+                setErrorMessage(null);
+                setSelectedFileName('');
+                setSelectedFileSize('');
+              }}
+              className="btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                fontSize: '12.5px',
+              }}
+            >
+              <RotateCcw size={13} />
+              <span>Try Another File</span>
+            </button>
           </div>
         </div>
       )}

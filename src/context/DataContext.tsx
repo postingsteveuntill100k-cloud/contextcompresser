@@ -60,17 +60,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [status]);
 
+  const lastUserIdRef = React.useRef<string | null>(null);
+
   useEffect(() => {
     let active = true;
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && user?.id) {
+      const userChanged = lastUserIdRef.current !== user.id;
+      if (userChanged) {
+        console.log('[Data Lifecycle] User changed to', user.id, '- resetting user workspace state');
+        lastUserIdRef.current = user.id;
+      }
       const timer = setTimeout(() => {
-        if (active) void refreshData();
+        if (!active) return;
+        if (userChanged) {
+          setConversations([]);
+          setRawImports([]);
+          setMemory(null);
+          setPackages([]);
+        }
+        void refreshData();
       }, 0);
       return () => {
         active = false;
         clearTimeout(timer);
       };
     } else {
+      lastUserIdRef.current = null;
       const timer = setTimeout(() => {
         if (active) {
           setConversations([]);

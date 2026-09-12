@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ContextOSLogo from './ContextOSLogo';
 import { Upload, Menu, Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
@@ -15,7 +16,10 @@ export default function Header({ convoCount = 0, onToggleMobileMenu }: HeaderPro
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsDark(document.documentElement.classList.contains('dark'));
+      const timer = setTimeout(() => {
+        setIsDark(document.documentElement.classList.contains('dark'));
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -86,7 +90,8 @@ export default function Header({ convoCount = 0, onToggleMobileMenu }: HeaderPro
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-          <span style={{ color: 'var(--text-muted)' }}>ContextOS</span>
+          <ContextOSLogo size={18} />
+          <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>ContextOS</span>
           <span style={{ color: 'var(--hairline)' }}>/</span>
           <span style={{ color: 'var(--on-surface)', fontWeight: 500 }}>{getPageTitle(pathname)}</span>
         </div>
