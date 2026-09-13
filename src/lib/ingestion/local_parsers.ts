@@ -332,7 +332,8 @@ export function parseGeminiJson(
       if (typeof item !== 'object' || !item) continue;
 
       const title = String(item.title || item.name || `Conversation ${i + 1}`);
-      const convoId = `conv_json_${i}_${Date.now().toString(36)}`;
+      const rawId = item.id || item.conversation_id || item.chat_id;
+      const convoId = rawId ? String(rawId) : `conv_json_${i}_${Date.now().toString(36)}`;
       const messages: CanonicalMessage[] = [];
 
       // A. ChatGPT mapping tree
@@ -348,10 +349,10 @@ export function parseGeminiJson(
           const rawM = nodes[mIdx];
           const author = (rawM.author as Record<string, string>)?.role || 'user';
           const role: Role = author === 'assistant' || author === 'model' ? 'model' : 'user';
-
           let content = '';
-          const contentObj = rawM.content as Record<string, unknown> | undefined;
-          if (contentObj && Array.isArray(contentObj.parts)) {
+
+          if (rawM.content && typeof rawM.content === 'object' && Array.isArray((rawM.content as Record<string, unknown>).parts)) {
+            const contentObj = rawM.content as { parts: unknown[] };
             content = contentObj.parts.filter((p) => typeof p === 'string').join('\n');
           } else if (typeof rawM.content === 'string') {
             content = rawM.content;
@@ -440,10 +441,24 @@ export function parseGeminiJson(
             content = rawM.parts
               .map((p: unknown) => (typeof p === 'string' ? p : (p as Record<string, string>)?.text || ''))
               .join('\n');
+          } else if (rawM.content && typeof rawM.content === 'object') {
+            const contentObj = rawM.content as Record<string, unknown>;
+            if (Array.isArray(contentObj.parts)) {
+              content = contentObj.parts
+                .map((p: unknown) => (typeof p === 'string' ? p : (p as Record<string, string>)?.text || ''))
+                .join('\n');
+            } else if (typeof contentObj.text === 'string') {
+              content = contentObj.text;
+            }
           }
 
-          // Handle Google Chat creator
-          let authorStr = String(rawM.role || rawM.author || '');
+          // Handle Google Chat creator or author object
+          let authorStr = '';
+          if (typeof rawM.role === 'string') authorStr = rawM.role;
+          else if (typeof rawM.author === 'string') authorStr = rawM.author;
+          else if (rawM.author && typeof rawM.author === 'object') {
+            authorStr = String((rawM.author as Record<string, string>).role || (rawM.author as Record<string, string>).name || '');
+          }
           if (!authorStr && rawM.creator && typeof rawM.creator === 'object') {
             authorStr = String((rawM.creator as Record<string, string>).name || 'user');
           }

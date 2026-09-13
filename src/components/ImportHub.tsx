@@ -6,6 +6,8 @@ import { fetchWithAuth } from '@/lib/security/client_auth';
 import { useData } from '@/context/DataContext';
 import ContextOSLoader from './ContextOSLoader';
 import Link from 'next/link';
+import GoogleTakeoutGuide from './GoogleTakeoutGuide';
+import { adaptiveExtractAndDiscover, ArchiveProfile } from '@/lib/ingestion/adaptive_importer';
 import { extractZipArchive, isZipArchive, ExtractedFileEntry } from '@/lib/ingestion/local_extractor';
 import { analyzeExtractedArchive, DiscoverySummary } from '@/lib/ingestion/source_classifier';
 import {
@@ -38,6 +40,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Sparkles,
 } from 'lucide-react';
 
 interface ImportHubProps {
@@ -122,13 +125,25 @@ export default function ImportHub({
     };
   }, []);
 
+  const [showGuide, setShowGuide] = useState<boolean>(false);
+  const [archiveProfile, setArchiveProfile] = useState<ArchiveProfile | null>(null);
+
   /**
-   * Handles local extraction and discovery on user device.
-   * Never uploads raw file to the server.
+   * Handles local extraction and discovery across one or multiple archive parts on user device.
+   * Never uploads raw file to the server. Uses adaptive memory strategy.
    */
-  const handleFileUpload = async (file: File) => {
-    setSelectedFileName(file.name);
-    setSelectedFileSize((file.size / (1024 * 1024)).toFixed(2) + ' MB');
+  const handleFilesUpload = async (files: File[]) => {
+    if (!files || files.length === 0) return;
+
+    if (files.length === 1) {
+      setSelectedFileName(files[0].name);
+      setSelectedFileSize((files[0].size / (1024 * 1024)).toFixed(2) + ' MB');
+    } else {
+      const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
+      setSelectedFileName(`${files.length} archive files (${files[0].name}, ...)`);
+      setSelectedFileSize((totalBytes / (1024 * 1024)).toFixed(2) + ' MB');
+    }
+
     setErrorMessage(null);
     setImportReport(null);
     setImportedCount(null);
@@ -137,136 +152,44 @@ export default function ImportHub({
     setStageMessage('Reading archive on this device...');
 
     try {
-      const isZip = await isZipArchive(file);
-      const lower = file.name.toLowerCase();
-
-      if (isZip) {
-        // Local ZIP extraction with security limits
-        const entries = await extractZipArchive(file, (msg) => {
+      const { summary, profile } = await adaptiveExtractAndDiscover(files, {
+        userId: currentUser || 'user_local',
+        importId: 'imp_local',
+        onProgress: (msg) => {
           setStageMessage(msg);
-        });
+        },
+      });
 
-        setStageMessage('Classifying data...');
-        const summary = await analyzeExtractedArchive(
-          entries,
-          currentUser || 'user_local',
-          'imp_local',
-          (msg) => setStageMessage(msg)
-        );
+      setArchiveProfile(profile);
 
-        const totalUsable =
-          summary.geminiConversations.length +
-          summary.youtubeRecords.length +
-          summary.browserRecords.length +
-          summary.customFiles.length;
+      const totalUsable =
+        summary.geminiConversations.length +
+        summary.youtubeRecords.length +
+        summary.browserRecords.length +
+        summary.customFiles.length;
 
-        if (totalUsable === 0 && summary.otherServices.length === 0) {
-          throw new Error('This archive contains no recognized history or document files (.json, .md, .txt, or .html).');
-        }
-
-        setDiscovery(summary);
-
-        // Initialize selections
-        setSelectedConvoIds(new Set(summary.geminiConversations.map((c) => c.id)));
-        setIncludeGemini(summary.geminiConversations.length > 0);
-
-        // Pre-select recommended research domains (github, stackoverflow, docs)
-        const defaultDomains = new Set<string>();
-        summary.browserDomains.forEach((d) => {
-          if (d.selected) defaultDomains.add(d.domain);
-        });
-        setSelectedDomains(defaultDomains);
-        setIncludeBrowser(false); // Opt-in by default for privacy
-        setIncludeYouTube(false); // Opt-in by default for privacy
-
-        setSelectedCustomPaths(new Set(summary.customFiles.map((c) => c.path)));
-        setIncludeCustom(summary.customFiles.length > 0);
-
-        setStage('source_selection');
-      } else if (lower.endsWith('.json')) {
-        setStageMessage('Classifying data...');
-        const text = await file.text();
-        const convos = parseGeminiJson(text, currentUser || 'user_local', 'imp_local');
-
-        const summary: DiscoverySummary = {
-          totalFiles: 1,
-          totalDecompressedBytes: file.size,
-          geminiConversations: convos,
-          youtubeRecords: [],
-          browserRecords: [],
-          browserDomains: [],
-          otherServices: [],
-          customFiles:
-            convos.length === 0
-              ? [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }]
-              : [],
-        };
-
-        setDiscovery(summary);
-        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
-        setIncludeGemini(convos.length > 0);
-        setSelectedCustomPaths(new Set([file.name]));
-        setIncludeCustom(convos.length === 0);
-        setStage('source_selection');
-      } else if (lower.endsWith('.html') || lower.endsWith('.htm')) {
-        setStageMessage('Classifying data...');
-        const text = await file.text();
-        let convos = parseGeminiScheduledActionsHtml(text, currentUser || 'user_local', 'imp_local');
-        if (convos.length === 0) {
-          convos = parseGeminiActivityHtml(text, currentUser || 'user_local', 'imp_local');
-        }
-        const ytRecords = (lower.includes('watch') || lower.includes('search') || lower.includes('youtube'))
-          ? parseYouTubeActivity(text, file.name)
-          : [];
-        const browserRecords = lower.includes('history') && !lower.includes('watch')
-          ? parseBrowserActivity(text, file.name)
-          : [];
-
-        const summary: DiscoverySummary = {
-          totalFiles: 1,
-          totalDecompressedBytes: file.size,
-          geminiConversations: convos,
-          youtubeRecords: ytRecords,
-          browserRecords,
-          browserDomains: [],
-          otherServices: [],
-          customFiles: convos.length === 0 && ytRecords.length === 0 && browserRecords.length === 0
-            ? [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }]
-            : [],
-        };
-
-        setDiscovery(summary);
-        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
-        setIncludeGemini(convos.length > 0);
-        setIncludeYouTube(ytRecords.length > 0);
-        setSelectedCustomPaths(new Set([file.name]));
-        setIncludeCustom(convos.length === 0 && ytRecords.length === 0);
-        setStage('source_selection');
-      } else if (lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt')) {
-        setStageMessage('Classifying data...');
-        const text = await file.text();
-        const convos = parseMarkdownConversation(text, currentUser || 'user_local', 'imp_local', file.name);
-
-        const summary: DiscoverySummary = {
-          totalFiles: 1,
-          totalDecompressedBytes: file.size,
-          geminiConversations: convos,
-          youtubeRecords: [],
-          browserRecords: [],
-          browserDomains: [],
-          otherServices: [],
-          customFiles: [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }],
-        };
-
-        setDiscovery(summary);
-        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
-        setIncludeGemini(convos.length > 0);
-        setSelectedCustomPaths(new Set([file.name]));
-        setIncludeCustom(true);
-        setStage('source_selection');
-      } else {
-        throw new Error('Unsupported file format. Please provide a Takeout ZIP archive, .json export, or .md transcript.');
+      if (totalUsable === 0 && summary.otherServices.length === 0) {
+        throw new Error('This archive contains no recognized history or document files (.json, .md, .txt, or .html).');
       }
+
+      setDiscovery(summary);
+
+      // Initialize selections
+      setSelectedConvoIds(new Set(summary.geminiConversations.map((c) => c.id)));
+      setIncludeGemini(summary.geminiConversations.length > 0);
+
+      const defaultDomains = new Set<string>();
+      summary.browserDomains.forEach((d) => {
+        if (d.selected) defaultDomains.add(d.domain);
+      });
+      setSelectedDomains(defaultDomains);
+      setIncludeBrowser(false); // Opt-in by default for privacy
+      setIncludeYouTube(false); // Opt-in by default for privacy
+
+      setSelectedCustomPaths(new Set(summary.customFiles.map((c) => c.path)));
+      setIncludeCustom(summary.customFiles.length > 0);
+
+      setStage('source_selection');
     } catch (err: unknown) {
       setStage('error');
       const msg = err instanceof Error ? err.message : String(err);
@@ -277,6 +200,8 @@ export default function ImportHub({
       );
     }
   };
+
+  const handleFileUpload = (file: File) => handleFilesUpload([file]);
 
   /**
    * Confirms user selection and transmits ONLY the selected normalized records.
@@ -404,79 +329,107 @@ export default function ImportHub({
       }
     }
 
-    try {
-      const payload = {
-        version: 1,
-        filename: 'selected_history.json',
-        content: JSON.stringify(allSelectedConvos),
-        selectedSources: [
-          ...(includeGemini && selectedConvos.length > 0 ? ['gemini'] : []),
-          ...(includeYouTube && selectedYt.length > 0 ? ['youtube'] : []),
-          ...(includeBrowser && selectedBrowser.length > 0 ? ['browser'] : []),
-          ...(includeCustom && selectedCustom.length > 0 ? ['custom'] : []),
-        ],
-        conversations: allSelectedConvos,
-        youtubeRecords: selectedYt,
-        browserRecords: selectedBrowser,
-        customFiles: selectedCustom.map((c) => ({ name: c.name, content: c.content })),
-        manifest: {
-          geminiCount: selectedConvos.length,
-          youtubeCount: selectedYt.length,
-          browserDomainCount: includeBrowser ? selectedDomains.size : 0,
-          browserRecordCount: selectedBrowser.length,
-          customFileCount: selectedCustom.length,
-          totalSelectedItems: totalSelected,
-          confirmedAt: new Date().toISOString(),
-        },
-      };
+    const BATCH_SIZE = 100;
+    const totalBatches = Math.max(1, Math.ceil(allSelectedConvos.length / BATCH_SIZE));
+    const persistentImportId = `imp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+    interface ApiImportResponse {
+      error?: string;
+      duplicate?: boolean;
+      conversationsImported?: number;
+      format?: string;
+      warnings?: string[];
+      structuredEntitiesExtracted?: {
+        decisions?: number;
+        technicalSpecs?: number;
+      };
+    }
+
+    try {
       setStageMessage('Preparing selected data...');
       await new Promise((r) => setTimeout(r, 60));
 
-      setStageMessage('Uploading selected data...');
+      let lastData: ApiImportResponse | null = null;
+      let totalImportedConvos = 0;
 
-      const res = await fetchWithAuth('/api/import', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      for (let b = 0; b < totalBatches; b++) {
+        const batchConvos = allSelectedConvos.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+        const isFirst = b === 0;
 
-      setStageMessage('Processing context & indexing decisions...');
+        setStageMessage(
+          totalBatches > 1
+            ? `Uploading selected data (batch ${b + 1} of ${totalBatches})...`
+            : 'Uploading selected data...'
+        );
 
-      interface ApiImportResponse {
-        error?: string;
-        duplicate?: boolean;
-        conversationsImported?: number;
-        format?: string;
-        warnings?: string[];
-        structuredEntitiesExtracted?: {
-          decisions?: number;
-          technicalSpecs?: number;
+        const payload = {
+          version: 1,
+          importId: persistentImportId,
+          batchIndex: b,
+          totalBatches,
+          filename: 'selected_history.json',
+          content: JSON.stringify(batchConvos),
+          selectedSources: [
+            ...(includeGemini && selectedConvos.length > 0 ? ['gemini'] : []),
+            ...(includeYouTube && selectedYt.length > 0 ? ['youtube'] : []),
+            ...(includeBrowser && selectedBrowser.length > 0 ? ['browser'] : []),
+            ...(includeCustom && selectedCustom.length > 0 ? ['custom'] : []),
+          ],
+          conversations: batchConvos,
+          youtubeRecords: isFirst ? selectedYt : [],
+          browserRecords: isFirst ? selectedBrowser : [],
+          customFiles: isFirst ? selectedCustom.map((c) => ({ name: c.name, content: c.content })) : [],
+          manifest: {
+            geminiCount: selectedConvos.length,
+            youtubeCount: selectedYt.length,
+            browserDomainCount: includeBrowser ? selectedDomains.size : 0,
+            browserRecordCount: selectedBrowser.length,
+            customFileCount: selectedCustom.length,
+            totalSelectedItems: totalSelected,
+            batchIndex: b,
+            totalBatches,
+            confirmedAt: new Date().toISOString(),
+          },
         };
-      }
 
-      const text = await res.text();
-      let data: ApiImportResponse;
-      try {
-        data = JSON.parse(text) as ApiImportResponse;
-      } catch {
-        throw new Error(`Server returned an unreadable response (HTTP ${res.status}).`);
-      }
+        const res = await fetchWithAuth('/api/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (!res.ok) {
-        throw new Error(data.error || `Processing failed with status ${res.status}`);
+        if (totalBatches > 1) {
+          setStageMessage(`Processing context & indexing memories (batch ${b + 1} of ${totalBatches})...`);
+        } else {
+          setStageMessage('Processing context & indexing decisions...');
+        }
+
+        const text = await res.text();
+        let data: ApiImportResponse;
+        try {
+          data = JSON.parse(text) as ApiImportResponse;
+        } catch {
+          throw new Error(`Server returned an unreadable response (HTTP ${res.status}).`);
+        }
+
+        if (!res.ok) {
+          throw new Error(data.error || `Processing failed with status ${res.status}`);
+        }
+
+        lastData = data;
+        totalImportedConvos += (data.conversationsImported ?? batchConvos.length);
       }
 
       setStage('ready');
-      const count = data.conversationsImported ?? selectedConvos.length;
+      const count = totalImportedConvos > 0 ? totalImportedConvos : selectedConvos.length;
       setImportedCount(count);
       setImportReport({
-        format: data.format || 'Selected History',
+        format: lastData?.format || 'Selected History',
         convoCount: count,
-        warnings: data.warnings,
-        entities: data.structuredEntitiesExtracted,
+        warnings: lastData?.warnings,
+        entities: lastData?.structuredEntitiesExtracted,
       });
 
       if (onImportComplete) {
@@ -523,8 +476,8 @@ export default function ImportHub({
     setIsDragging(false);
     dragCounterRef.current = 0;
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      handleFileUpload(file);
+      const files = Array.from(e.dataTransfer.files);
+      handleFilesUpload(files);
     }
   };
 
@@ -551,31 +504,65 @@ export default function ImportHub({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Top Header */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <span
-            className="font-label-sm"
-            style={{
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              color: 'var(--primary)',
-              fontWeight: 600,
-            }}
-          >
-            Privacy-First Ingestion
-          </span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>·</span>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Lock size={12} color="var(--primary)" /> Client-side extraction
-          </span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span
+              className="font-label-sm"
+              style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--primary)',
+                fontWeight: 600,
+              }}
+            >
+              Privacy-First Ingestion
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>·</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Lock size={12} color="var(--primary)" /> Client-side extraction
+            </span>
+          </div>
+          <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
+            Import AI & Research History
+          </h1>
+          <p className="font-body-md" style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+            ContextOS analyzes your Google Takeout archive locally on your device. You choose exactly which conversations and records are sent for processing.
+          </p>
         </div>
-        <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
-          Import AI & Research History
-        </h1>
-        <p className="font-body-md" style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-          ContextOS analyzes your Google Takeout archive locally on your device. You choose exactly which conversations and records are sent for processing.
-        </p>
+
+        <button
+          id="toggle-guide-btn"
+          onClick={() => setShowGuide((prev) => !prev)}
+          className="btn-secondary"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 16px',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+          }}
+        >
+          <FileArchive size={15} color="var(--primary)" />
+          <span>{showGuide ? 'Hide Takeout Guide' : 'Visual Takeout Guide'}</span>
+        </button>
       </div>
+
+      {/* Visual Google Takeout Guide (Toggleable) */}
+      {showGuide && (
+        <GoogleTakeoutGuide
+          onGoToDropZone={() => {
+            setShowGuide(false);
+            const dropEl = document.getElementById('drop-zone');
+            dropEl?.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => fileInputRef.current?.click(), 100);
+          }}
+          onClose={() => setShowGuide(false)}
+        />
+      )}
 
       {/* STAGE 1: IDLE DROP ZONE */}
       {stage === 'idle' && (
@@ -746,11 +733,14 @@ export default function ImportHub({
               id="archive-file-input"
               type="file"
               ref={fileInputRef}
-              accept=".zip,.json,.md,.txt"
+              multiple
+              accept=".zip,.json,.html,.htm,.md,.txt"
               style={{ display: 'none' }}
               onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleFileUpload(e.target.files[0]);
+                if (e.target.files && e.target.files.length > 0) {
+                  const files = Array.from(e.target.files);
+                  handleFilesUpload(files);
+                  e.target.value = '';
                 }
               }}
             />
@@ -773,12 +763,15 @@ export default function ImportHub({
 
             <div>
               <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 6px 0', fontSize: '16px' }}>
-                {isDragging ? 'Drop your history archive here' : 'Drop your history here or click to browse'}
+                {isDragging ? 'Drop your Takeout archive(s) here' : 'Drop your history here or click to browse'}
               </h3>
               <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
                 {isDragging
                   ? 'Release to inspect locally on your device'
-                  : 'Select your Google Takeout (.zip), Gemini export (.json), or Markdown notes'}
+                  : 'Select your Google Takeout (.zip), Gemini export (.json), or Markdown notes.'}
+              </p>
+              <p style={{ fontSize: '11.5px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                Multi-part archives supported: If Google split your Takeout into 2 GB files (e.g. 001.zip, 002.zip), select or drop them all together!
               </p>
             </div>
 
@@ -850,6 +843,27 @@ export default function ImportHub({
               {stageMessage || 'Reading archive files on this device...'}
             </p>
           </div>
+          {archiveProfile && (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                backgroundColor: 'var(--surface-container-high)',
+                border: '1px solid var(--hairline-strong)',
+                fontSize: '11.5px',
+                color: 'var(--primary)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              <Sparkles size={13} />
+              <span>
+                Adaptive Engine: {archiveProfile.strategy} Mode · {archiveProfile.strategyReason}
+              </span>
+            </div>
+          )}
           <div
             style={{
               display: 'inline-flex',
@@ -879,6 +893,47 @@ export default function ImportHub({
             gap: '24px',
           }}
         >
+          {/* Adaptive Importer Engine Status Pill */}
+          {archiveProfile && (
+            <div
+              style={{
+                padding: '10px 16px',
+                backgroundColor: 'var(--surface-container)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--hairline)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                fontSize: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={15} color="var(--primary)" />
+                <span style={{ color: 'var(--on-surface)' }}>
+                  <strong>Adaptive Engine:</strong> {archiveProfile.strategy} Strategy (
+                  {archiveProfile.totalFiles.toLocaleString()} files indexed,{' '}
+                  {(archiveProfile.totalCompressedBytes / (1024 * 1024)).toFixed(1)} MB
+                  {archiveProfile.isMultiPart ? ` across ${archiveProfile.partCount} parts` : ''})
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(217, 90, 48, 0.12)',
+                  color: 'var(--primary)',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                Memory Shield: Active
+              </span>
+            </div>
+          )}
+
           {/* Trust Banner */}
           <div
             style={{

@@ -38,6 +38,11 @@ export async function POST(request: NextRequest) {
     let isSelectiveImport = false;
     const selectiveConversations: CanonicalConversation[] = [];
 
+    let clientImportId: string | undefined;
+    let clientJobId: string | undefined;
+    let batchIndex = 0;
+    let totalBatches = 1;
+
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file') as File | null;
@@ -53,6 +58,18 @@ export async function POST(request: NextRequest) {
       if (body.version === 1) {
         isSelectiveImport = true;
         filename = body.filename || 'selected_history.json';
+        if (typeof body.importId === 'string' && body.importId.startsWith('imp_')) {
+          clientImportId = body.importId;
+        }
+        if (typeof body.jobId === 'string' && body.jobId.startsWith('job_')) {
+          clientJobId = body.jobId;
+        }
+        if (typeof body.batchIndex === 'number') {
+          batchIndex = body.batchIndex;
+        }
+        if (typeof body.totalBatches === 'number') {
+          totalBatches = body.totalBatches;
+        }
         const payloadStr = JSON.stringify(body);
         rawBytes = Buffer.from(payloadStr, 'utf8');
         rawContent = payloadStr;
@@ -263,8 +280,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const importId = `imp_${sha256.slice(0, 16)}`;
-    const jobId = resumeJobId || `job_${sha256.slice(0, 12)}_${crypto.randomUUID().slice(0, 8)}`;
+    const importId = clientImportId || `imp_${sha256.slice(0, 16)}`;
+    const jobId = resumeJobId || clientJobId || `job_${sha256.slice(0, 12)}_${crypto.randomUUID().slice(0, 8)}`;
 
     let storagePath = 'selected_user_data';
     let normResult: {
@@ -539,6 +556,8 @@ export async function POST(request: NextRequest) {
       status: finalStatus,
       importId,
       jobId,
+      batchIndex,
+      totalBatches,
       storagePath,
       format: detection.format,
       conversationsImported: normResult.conversations.length,

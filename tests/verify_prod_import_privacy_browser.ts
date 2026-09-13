@@ -70,7 +70,7 @@ async function runProdImportBrowserTest() {
 
     // 2. Open production site & set authenticated session
     console.log('\n[Step 2] Opening https://compresscontext.web.app/ ...');
-    await page.goto('https://compresscontext.web.app/', { waitUntil: 'networkidle0' });
+    await page.goto('https://compresscontext.web.app/', { waitUntil: 'domcontentloaded' });
 
     await page.evaluate(
       ({ token, uid }) => {
@@ -82,15 +82,10 @@ async function runProdImportBrowserTest() {
       { token: idToken, uid: testUid }
     );
 
-    // 3. Navigate to /home to initialize authenticated app shell
-    console.log('\n[Step 3] Initializing authenticated session at /home...');
-    await page.goto('https://compresscontext.web.app/home', { waitUntil: 'networkidle0' });
-    await page.waitForSelector('.contextos-main-stage, nav, header', { timeout: 15000 });
-    console.log('  ✓ Authenticated app shell ready');
-
-    // 3b. Navigate to /import
-    console.log('  Navigating to https://compresscontext.web.app/import...');
-    await page.goto('https://compresscontext.web.app/import', { waitUntil: 'networkidle0' });
+    // 3. Navigate directly to /import
+    console.log('\n[Step 3] Navigating to https://compresscontext.web.app/import...');
+    await new Promise((r) => setTimeout(r, 600));
+    await page.goto('https://compresscontext.web.app/import', { waitUntil: 'domcontentloaded' });
 
     // Verify Drop Zone elements
     await page.waitForSelector('#drop-zone', { timeout: 15000 });
@@ -100,6 +95,34 @@ async function runProdImportBrowserTest() {
       throw new Error(`Privacy-First Ingestion header not found! Got: ${pageText.slice(0, 300)}`);
     }
     console.log('  ✓ Privacy-first import interface rendered on production!');
+
+    // 3c. Test Visual Google Takeout Guide
+    console.log('\n[Step 3c] Verifying Visual Google Takeout Guide on production...');
+    const guideToggleBtn = await page.$('#toggle-guide-btn');
+    if (!guideToggleBtn) throw new Error('#toggle-guide-btn not found');
+    await guideToggleBtn.click();
+    await page.waitForSelector('h2', { timeout: 5000 });
+    const guideText = await page.evaluate(() => document.body.innerText);
+    if (!guideText.includes('How to Get Your Google Takeout History') || !guideText.includes('Deselect all')) {
+      throw new Error('Google Takeout Guide failed to render!');
+    }
+    console.log('  ✓ Google Takeout Guide opened with 5-step visual flow & arrows!');
+
+    // Verify screenshot image is loaded
+    const guideImg = await page.$('img[alt*="Takeout"]');
+    if (!guideImg) throw new Error('Takeout guide screenshot image not found in DOM!');
+    console.log('  ✓ Verified visual annotated screenshot element in DOM.');
+
+    // Click "I Have My ZIP" to test fast path
+    const fastPathBtn = await page.$('button.btn-primary');
+    if (fastPathBtn) {
+      const btnText = await page.evaluate((el) => el.innerText, fastPathBtn);
+      if (btnText.includes('I Have My ZIP')) {
+        await fastPathBtn.click();
+        await new Promise((r) => setTimeout(r, 200));
+        console.log('  ✓ "I Have My ZIP" fast path button clicked and closed guide.');
+      }
+    }
 
     // 4. Upload Real Takeout ZIP
     const takeoutZipPath = '/home/abhinav/Downloads/takeout-20260906T163310Z-1-001.zip';

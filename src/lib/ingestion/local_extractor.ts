@@ -15,9 +15,9 @@ export interface ExtractionLimits {
 }
 
 export const DEFAULT_EXTRACTION_LIMITS: Required<ExtractionLimits> = {
-  maxCompressedBytes: 100 * 1024 * 1024, // 100 MB
-  maxDecompressedBytes: 150 * 1024 * 1024, // 150 MB
-  maxFileCount: 3000,
+  maxCompressedBytes: 2500 * 1024 * 1024, // 2.5 GB (standard 2 GB Takeout files)
+  maxDecompressedBytes: 10 * 1024 * 1024 * 1024, // 10 GB
+  maxFileCount: 100000,
 };
 
 /**
