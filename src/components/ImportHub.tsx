@@ -6,9 +6,16 @@ import { fetchWithAuth } from '@/lib/security/client_auth';
 import { useData } from '@/context/DataContext';
 import ContextOSLoader from './ContextOSLoader';
 import Link from 'next/link';
-import { extractZipArchive, ExtractedFileEntry } from '@/lib/ingestion/local_extractor';
+import { extractZipArchive, isZipArchive, ExtractedFileEntry } from '@/lib/ingestion/local_extractor';
 import { analyzeExtractedArchive, DiscoverySummary } from '@/lib/ingestion/source_classifier';
-import { parseGeminiJson, parseMarkdownConversation } from '@/lib/ingestion/local_parsers';
+import {
+  parseGeminiJson,
+  parseMarkdownConversation,
+  parseGeminiScheduledActionsHtml,
+  parseGeminiActivityHtml,
+  parseYouTubeActivity,
+  parseBrowserActivity,
+} from '@/lib/ingestion/local_parsers';
 import {
   Upload,
   FileArchive,
@@ -130,15 +137,16 @@ export default function ImportHub({
     setStageMessage('Reading archive on this device...');
 
     try {
+      const isZip = await isZipArchive(file);
       const lower = file.name.toLowerCase();
 
-      if (lower.endsWith('.zip')) {
+      if (isZip) {
         // Local ZIP extraction with security limits
         const entries = await extractZipArchive(file, (msg) => {
           setStageMessage(msg);
         });
 
-        setStageMessage('Sorting discovered sources locally...');
+        setStageMessage('Classifying data...');
         const summary = await analyzeExtractedArchive(
           entries,
           currentUser || 'user_local',
@@ -153,7 +161,7 @@ export default function ImportHub({
           summary.customFiles.length;
 
         if (totalUsable === 0 && summary.otherServices.length === 0) {
-          throw new Error('We found files in the archive, but none are currently recognized.');
+          throw new Error('This archive contains no recognized history or document files (.json, .md, .txt, or .html).');
         }
 
         setDiscovery(summary);
@@ -176,6 +184,7 @@ export default function ImportHub({
 
         setStage('source_selection');
       } else if (lower.endsWith('.json')) {
+        setStageMessage('Classifying data...');
         const text = await file.text();
         const convos = parseGeminiJson(text, currentUser || 'user_local', 'imp_local');
 
@@ -199,7 +208,42 @@ export default function ImportHub({
         setSelectedCustomPaths(new Set([file.name]));
         setIncludeCustom(convos.length === 0);
         setStage('source_selection');
-      } else if (lower.endsWith('.md') || lower.endsWith('.txt')) {
+      } else if (lower.endsWith('.html') || lower.endsWith('.htm')) {
+        setStageMessage('Classifying data...');
+        const text = await file.text();
+        let convos = parseGeminiScheduledActionsHtml(text, currentUser || 'user_local', 'imp_local');
+        if (convos.length === 0) {
+          convos = parseGeminiActivityHtml(text, currentUser || 'user_local', 'imp_local');
+        }
+        const ytRecords = (lower.includes('watch') || lower.includes('search') || lower.includes('youtube'))
+          ? parseYouTubeActivity(text, file.name)
+          : [];
+        const browserRecords = lower.includes('history') && !lower.includes('watch')
+          ? parseBrowserActivity(text, file.name)
+          : [];
+
+        const summary: DiscoverySummary = {
+          totalFiles: 1,
+          totalDecompressedBytes: file.size,
+          geminiConversations: convos,
+          youtubeRecords: ytRecords,
+          browserRecords,
+          browserDomains: [],
+          otherServices: [],
+          customFiles: convos.length === 0 && ytRecords.length === 0 && browserRecords.length === 0
+            ? [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }]
+            : [],
+        };
+
+        setDiscovery(summary);
+        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
+        setIncludeGemini(convos.length > 0);
+        setIncludeYouTube(ytRecords.length > 0);
+        setSelectedCustomPaths(new Set([file.name]));
+        setIncludeCustom(convos.length === 0 && ytRecords.length === 0);
+        setStage('source_selection');
+      } else if (lower.endsWith('.md') || lower.endsWith('.markdown') || lower.endsWith('.txt')) {
+        setStageMessage('Classifying data...');
         const text = await file.text();
         const convos = parseMarkdownConversation(text, currentUser || 'user_local', 'imp_local', file.name);
 
@@ -221,7 +265,7 @@ export default function ImportHub({
         setIncludeCustom(true);
         setStage('source_selection');
       } else {
-        throw new Error('Unsupported file format. Please provide a .zip Takeout archive, .json export, or .md transcript.');
+        throw new Error('Unsupported file format. Please provide a Takeout ZIP archive, .json export, or .md transcript.');
       }
     } catch (err: unknown) {
       setStage('error');
@@ -386,7 +430,10 @@ export default function ImportHub({
         },
       };
 
-      setStageMessage('Building your context...');
+      setStageMessage('Preparing selected data...');
+      await new Promise((r) => setTimeout(r, 60));
+
+      setStageMessage('Uploading selected data...');
 
       const res = await fetchWithAuth('/api/import', {
         method: 'POST',
@@ -396,7 +443,7 @@ export default function ImportHub({
         body: JSON.stringify(payload),
       });
 
-      setStageMessage('Extracting decisions and indexing context...');
+      setStageMessage('Processing context & indexing decisions...');
 
       interface ApiImportResponse {
         error?: string;

@@ -163,7 +163,74 @@ export function parseGeminiActivityHtml(
 }
 
 /**
- * Parses Takeout Gemini JSON (conversations or chats list)
+ * Determines whether raw JSON data represents genuine conversation history
+ * rather than arbitrary metadata, settings, package files, or bookmarks.
+ */
+export function isConversationData(data: unknown): boolean {
+  if (!data || typeof data !== 'object') return false;
+
+  const record = data as Record<string, unknown>;
+
+  // Check object properties
+  if (Array.isArray(record.conversations) && record.conversations.length > 0) return true;
+  if (Array.isArray(record.chats) && record.chats.length > 0) return true;
+  if (Array.isArray(record.turns) && record.turns.length > 0) return true;
+  if (Array.isArray(record.contents) && record.contents.length > 0) return true;
+  if (Array.isArray(record.chat_messages) && record.chat_messages.length > 0) return true;
+  if (record.mapping && typeof record.mapping === 'object') return true;
+
+  if (Array.isArray(record.messages) && record.messages.length > 0) {
+    const first = record.messages[0];
+    if (first && typeof first === 'object') {
+      const msg = first as Record<string, unknown>;
+      if (msg.role || msg.author || msg.content || msg.parts || msg.creator || msg.text) {
+        return true;
+      }
+    }
+  }
+
+  // Check array of items
+  if (Array.isArray(data) && data.length > 0) {
+    for (let i = 0; i < Math.min(data.length, 5); i++) {
+      const item = data[i];
+      if (!item || typeof item !== 'object') continue;
+      const it = item as Record<string, unknown>;
+      if (Array.isArray(it.messages) || Array.isArray(it.turns) || Array.isArray(it.parts) || Array.isArray(it.contents)) {
+        return true;
+      }
+      if (Array.isArray(it.chat_messages)) return true;
+      if (it.mapping && typeof it.mapping === 'object') return true;
+      if (typeof it.header === 'string' && (it.header.includes('Gemini') || it.header.includes('Bard'))) {
+        return true;
+      }
+      if (typeof it.title === 'string' && (it.title.startsWith('Prompted') || it.title.startsWith('Asked'))) {
+        return true;
+      }
+      if (it.role && (it.content || it.text || it.parts)) return true;
+    }
+  }
+
+  return false;
+}
+
+export function isConversationJson(jsonContent: string): boolean {
+  try {
+    const parsed = JSON.parse(jsonContent);
+    return isConversationData(parsed);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Parses Takeout Gemini / AI JSON into CanonicalConversation format.
+ * Supports:
+ * - Google Takeout Gemini conversations & chats
+ * - Google Takeout My Activity JSON (Prompted: ...)
+ * - Google Chat Takeout (messages.json)
+ * - ChatGPT export (mapping tree)
+ * - Claude export (chat_messages)
+ * - Vertex / Gemini API export (contents)
  */
 export function parseGeminiJson(
   jsonContent: string,
@@ -177,54 +244,226 @@ export function parseGeminiJson(
     return [];
   }
 
+  if (!isConversationData(data)) {
+    return [];
+  }
+
   const conversations: CanonicalConversation[] = [];
   const record = data as Record<string, unknown> | null;
+
+  // 1. Google Takeout My Activity JSON format
+  if (Array.isArray(data) && data.length > 0 && typeof (data[0] as Record<string, unknown>)?.header === 'string') {
+    let convIdx = 0;
+    for (const item of data as Record<string, unknown>[]) {
+      if (!item || typeof item !== 'object') continue;
+      const header = String(item.header || '');
+      const rawTitle = String(item.title || '');
+      const time = String(item.time || new Date().toISOString());
+      const subtitles = Array.isArray(item.subtitles) ? item.subtitles : [];
+
+      if (!rawTitle.startsWith('Prompted') && !header.includes('Gemini') && !header.includes('Bard')) {
+        continue;
+      }
+
+      const promptText = rawTitle.replace(/^Prompted:?\s*/i, '').replace(/^Asked:?\s*/i, '').trim();
+      if (!promptText) continue;
+
+      const convoId = `conv_myactivity_${convIdx++}_${Date.now().toString(36)}`;
+      const messages: CanonicalMessage[] = [
+        {
+          id: `${convoId}_m1`,
+          conversationId: convoId,
+          role: 'user',
+          content: promptText,
+          timestamp: time,
+          tokenCount: estimateTokenCount(promptText),
+        },
+      ];
+
+      // If response text is included in subtitles
+      if (subtitles.length > 0 && subtitles[0]?.name) {
+        const answerText = String(subtitles[0].name).trim();
+        if (answerText) {
+          messages.push({
+            id: `${convoId}_m2`,
+            conversationId: convoId,
+            role: 'model',
+            content: answerText,
+            timestamp: time,
+            tokenCount: estimateTokenCount(answerText),
+          });
+        }
+      }
+
+      conversations.push({
+        id: convoId,
+        userId,
+        importId,
+        title: promptText.slice(0, 60),
+        createdAt: time,
+        updatedAt: time,
+        source: 'gemini',
+        messages,
+        summary: promptText.slice(0, 160),
+        tokenCount: messages.reduce((acc, m) => acc + m.tokenCount, 0),
+        tags: ['gemini_takeout', 'my_activity_json'],
+      });
+    }
+
+    if (conversations.length > 0) {
+      return conversations;
+    }
+  }
+
+  // 2. Standard arrays of conversations or single conversation wrapper
   const list = Array.isArray(data)
     ? data
     : Array.isArray(record?.conversations)
     ? record.conversations
     : Array.isArray(record?.chats)
     ? record.chats
-    : Array.isArray(record?.messages) || Array.isArray(record?.turns)
+    : Array.isArray(record?.messages) || Array.isArray(record?.turns) || record?.mapping || Array.isArray(record?.contents)
     ? [record]
     : [];
 
   if (Array.isArray(list)) {
     for (let i = 0; i < list.length; i++) {
-      const item = list[i];
+      const item = list[i] as Record<string, unknown> | null;
       if (typeof item !== 'object' || !item) continue;
-      const title = String(item.title || item.name || `Conversation ${i + 1}`);
-      const rawMsgs = Array.isArray(item.messages) ? item.messages : Array.isArray(item.turns) ? item.turns : [];
 
+      const title = String(item.title || item.name || `Conversation ${i + 1}`);
       const convoId = `conv_json_${i}_${Date.now().toString(36)}`;
       const messages: CanonicalMessage[] = [];
 
-      for (let mIdx = 0; mIdx < rawMsgs.length; mIdx++) {
-        const rawM = rawMsgs[mIdx];
-        if (typeof rawM !== 'object' || !rawM) continue;
+      // A. ChatGPT mapping tree
+      if (item.mapping && typeof item.mapping === 'object') {
+        const mapping = item.mapping as Record<string, { message?: Record<string, unknown> }>;
+        const nodes = Object.values(mapping)
+          .filter((n) => n && n.message && n.message.content)
+          .map((n) => n.message!);
 
-        let content = '';
-        if (typeof rawM.content === 'string') content = rawM.content;
-        else if (typeof rawM.text === 'string') content = rawM.text;
-        else if (Array.isArray(rawM.parts)) {
-          content = rawM.parts
-            .map((p: unknown) => (typeof p === 'string' ? p : (p as Record<string, string>)?.text || ''))
-            .join('\n');
+        nodes.sort((a, b) => (Number(a.create_time) || 0) - (Number(b.create_time) || 0));
+
+        for (let mIdx = 0; mIdx < nodes.length; mIdx++) {
+          const rawM = nodes[mIdx];
+          const author = (rawM.author as Record<string, string>)?.role || 'user';
+          const role: Role = author === 'assistant' || author === 'model' ? 'model' : 'user';
+
+          let content = '';
+          const contentObj = rawM.content as Record<string, unknown> | undefined;
+          if (contentObj && Array.isArray(contentObj.parts)) {
+            content = contentObj.parts.filter((p) => typeof p === 'string').join('\n');
+          } else if (typeof rawM.content === 'string') {
+            content = rawM.content;
+          }
+
+          if (content.trim()) {
+            const timeIso = rawM.create_time ? new Date(Number(rawM.create_time) * 1000).toISOString() : new Date().toISOString();
+            messages.push({
+              id: `${convoId}_m${mIdx + 1}`,
+              conversationId: convoId,
+              role,
+              content: content.trim(),
+              timestamp: timeIso,
+              tokenCount: estimateTokenCount(content),
+            });
+          }
         }
+      }
 
-        const roleStr = String(rawM.role || rawM.author || 'user').toLowerCase();
-        const role: Role = roleStr.includes('model') || roleStr.includes('gemini') || roleStr.includes('assistant') ? 'model' : 'user';
-        const timestamp = String(rawM.timestamp || rawM.created_at || rawM.date || new Date().toISOString());
+      // B. Claude chat_messages
+      else if (Array.isArray(item.chat_messages)) {
+        const chatMsgs = item.chat_messages as Record<string, unknown>[];
+        for (let mIdx = 0; mIdx < chatMsgs.length; mIdx++) {
+          const rawM = chatMsgs[mIdx];
+          const sender = String(rawM.sender || 'human').toLowerCase();
+          const role: Role = sender === 'assistant' || sender === 'model' ? 'model' : 'user';
+          const text = String(rawM.text || rawM.content || '').trim();
+          const timestamp = String(rawM.created_at || new Date().toISOString());
 
-        if (content.trim()) {
-          messages.push({
-            id: `${convoId}_m${mIdx + 1}`,
-            conversationId: convoId,
-            role,
-            content,
-            timestamp,
-            tokenCount: estimateTokenCount(content),
-          });
+          if (text) {
+            messages.push({
+              id: `${convoId}_m${mIdx + 1}`,
+              conversationId: convoId,
+              role,
+              content: text,
+              timestamp,
+              tokenCount: estimateTokenCount(text),
+            });
+          }
+        }
+      }
+
+      // C. Gemini API contents
+      else if (Array.isArray(item.contents)) {
+        const contents = item.contents as Record<string, unknown>[];
+        for (let mIdx = 0; mIdx < contents.length; mIdx++) {
+          const rawM = contents[mIdx];
+          const roleStr = String(rawM.role || 'user').toLowerCase();
+          const role: Role = roleStr.includes('model') ? 'model' : 'user';
+          let text = '';
+          if (Array.isArray(rawM.parts)) {
+            text = (rawM.parts as Record<string, string>[])
+              .map((p) => (typeof p === 'string' ? p : p.text || ''))
+              .join('\n')
+              .trim();
+          }
+          if (text) {
+            messages.push({
+              id: `${convoId}_m${mIdx + 1}`,
+              conversationId: convoId,
+              role,
+              content: text,
+              timestamp: new Date().toISOString(),
+              tokenCount: estimateTokenCount(text),
+            });
+          }
+        }
+      }
+
+      // D. Standard messages or turns or Google Chat messages
+      else {
+        const rawMsgs = Array.isArray(item.messages)
+          ? (item.messages as Record<string, unknown>[])
+          : Array.isArray(item.turns)
+          ? (item.turns as Record<string, unknown>[])
+          : [];
+
+        for (let mIdx = 0; mIdx < rawMsgs.length; mIdx++) {
+          const rawM = rawMsgs[mIdx];
+          if (typeof rawM !== 'object' || !rawM) continue;
+
+          let content = '';
+          if (typeof rawM.content === 'string') content = rawM.content;
+          else if (typeof rawM.text === 'string') content = rawM.text;
+          else if (Array.isArray(rawM.parts)) {
+            content = rawM.parts
+              .map((p: unknown) => (typeof p === 'string' ? p : (p as Record<string, string>)?.text || ''))
+              .join('\n');
+          }
+
+          // Handle Google Chat creator
+          let authorStr = String(rawM.role || rawM.author || '');
+          if (!authorStr && rawM.creator && typeof rawM.creator === 'object') {
+            authorStr = String((rawM.creator as Record<string, string>).name || 'user');
+          }
+          const roleStr = authorStr.toLowerCase();
+          const role: Role = roleStr.includes('model') || roleStr.includes('gemini') || roleStr.includes('assistant') || roleStr.includes('bot')
+            ? 'model'
+            : 'user';
+
+          const timestamp = String(rawM.timestamp || rawM.created_at || rawM.created_date || rawM.date || new Date().toISOString());
+
+          if (content.trim()) {
+            messages.push({
+              id: `${convoId}_m${mIdx + 1}`,
+              conversationId: convoId,
+              role,
+              content: content.trim(),
+              timestamp,
+              tokenCount: estimateTokenCount(content),
+            });
+          }
         }
       }
 

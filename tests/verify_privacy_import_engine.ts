@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import JSZip from 'jszip';
-import { extractZipArchive, sanitizeArchivePath } from '../src/lib/ingestion/local_extractor';
+import { extractZipArchive, sanitizeArchivePath, isZipArchive } from '../src/lib/ingestion/local_extractor';
 import {
   classifyFileSource,
   analyzeExtractedArchive,
@@ -276,6 +276,154 @@ async function runTestMatrix() {
   const directMd = '# Direct Markdown Log\n**User:** Testing direct markdown\n**Model:** Markdown works directly.';
   const mdDetection = detectFormat(directMd, 'chat.md');
   assert(mdDetection.isValid && mdDetection.format === 'markdown', 'Direct Markdown detected successfully');
+
+  // --- Group 11: 14 Realistic Takeout ZIP Scenarios ---
+  console.log('\n--- 11. 14 Realistic Takeout ZIP Scenarios ---');
+
+  // Scenario 1: ZIP with nested Gemini JSON
+  const zip1 = new JSZip();
+  zip1.file('Takeout/Gemini Apps/conversations/conv1.json', JSON.stringify({
+    title: 'Nested Gemini Convo',
+    messages: [{ role: 'user', content: 'Nested prompt' }, { role: 'model', content: 'Nested answer' }],
+  }));
+  const entries1 = await extractZipArchive(await zip1.generateAsync({ type: 'nodebuffer' }));
+  const sum1 = await analyzeExtractedArchive(entries1, 'u', 'i');
+  assert(sum1.geminiConversations.length === 1 && sum1.geminiConversations[0].title === 'Nested Gemini Convo', 'Scenario 1: Nested Gemini JSON extracted and parsed');
+
+  // Scenario 2: ZIP with multiple nested directories
+  const zip2 = new JSZip();
+  zip2.file('backup_2026/user_export/Takeout/Gemini/deep/chat.json', JSON.stringify([{
+    title: 'Deeply Nested Chat',
+    turns: [{ role: 'user', content: 'Deep turn' }],
+  }]));
+  const entries2 = await extractZipArchive(await zip2.generateAsync({ type: 'nodebuffer' }));
+  const sum2 = await analyzeExtractedArchive(entries2, 'u', 'i');
+  assert(sum2.geminiConversations.length === 1, 'Scenario 2: Deeply nested directory structure handled');
+
+  // Scenario 3: Mixed ZIP (Gemini + YouTube + Browser + unrelated files)
+  const zip3 = new JSZip();
+  zip3.file('Takeout/Gemini/actions.html', '<div><b>Name:</b> Action 1<br><b>Instructions:</b> Mixed test<br></div>');
+  zip3.file('Takeout/YouTube/watch-history.html', '<div class="content-cell"><a href="https://youtu.be/x">Video</a></div>');
+  zip3.file('Takeout/Chrome/BrowserHistory.json', JSON.stringify([{ url: 'https://github.com/test', title: 'GH' }]));
+  zip3.file('Takeout/Google Maps/Places.json', JSON.stringify({ places: [] }));
+  zip3.file('Takeout/Android/devices.json', JSON.stringify({ devices: [] }));
+  const entries3 = await extractZipArchive(await zip3.generateAsync({ type: 'nodebuffer' }));
+  const sum3 = await analyzeExtractedArchive(entries3, 'u', 'i');
+  assert(sum3.geminiConversations.length === 1 && sum3.youtubeRecords.length === 1 && sum3.browserRecords.length === 1, 'Scenario 3: Mixed sources classified into Gemini, YouTube, and Browser');
+  assert(sum3.otherServices.length >= 2, 'Scenario 3: Unrelated Google services segregated into Other Services');
+
+  // Scenario 4: ZIP with Markdown conversations
+  const zip4 = new JSZip();
+  zip4.file('conversations/architecture.md', '# ContextOS Design\n**User:** How does the privacy model work?\n**Model:** Local extraction in browser.');
+  const entries4 = await extractZipArchive(await zip4.generateAsync({ type: 'nodebuffer' }));
+  const sum4 = await analyzeExtractedArchive(entries4, 'u', 'i');
+  assert(sum4.geminiConversations.length === 1 && sum4.geminiConversations[0].title === 'ContextOS Design', 'Scenario 4: Markdown conversation inside ZIP parsed');
+
+  // Scenario 5: ZIP with standalone JSON
+  const zip5 = new JSZip();
+  zip5.file('chat_export.json', JSON.stringify({
+    title: 'Standalone JSON in root',
+    messages: [{ role: 'user', content: 'Root JSON test' }],
+  }));
+  const entries5 = await extractZipArchive(await zip5.generateAsync({ type: 'nodebuffer' }));
+  const sum5 = await analyzeExtractedArchive(entries5, 'u', 'i');
+  assert(sum5.geminiConversations.length === 1, 'Scenario 5: Standalone root JSON in ZIP recognized');
+
+  // Scenario 6: ZIP with multiple conversation files
+  const zip6 = new JSZip();
+  for (let k = 1; k <= 5; k++) {
+    zip6.file(`Takeout/Gemini/conversation_${k}.json`, JSON.stringify({
+      title: `Conversation ${k}`,
+      messages: [{ role: 'user', content: `Message from ${k}` }],
+    }));
+  }
+  const entries6 = await extractZipArchive(await zip6.generateAsync({ type: 'nodebuffer' }));
+  const sum6 = await analyzeExtractedArchive(entries6, 'u', 'i');
+  assert(sum6.geminiConversations.length === 5, 'Scenario 6: Multiple conversation files (5/5) discovered');
+
+  // Scenario 7: ZIP with malformed JSON
+  const zip7 = new JSZip();
+  zip7.file('Takeout/Gemini/good.json', JSON.stringify({ title: 'Good Convo', messages: [{ role: 'user', content: 'Good' }] }));
+  zip7.file('Takeout/Gemini/broken.json', '{ this is not valid json !!!');
+  const entries7 = await extractZipArchive(await zip7.generateAsync({ type: 'nodebuffer' }));
+  const sum7 = await analyzeExtractedArchive(entries7, 'u', 'i');
+  assert(sum7.geminiConversations.length === 1 && sum7.geminiConversations[0].title === 'Good Convo', 'Scenario 7: Malformed JSON handled gracefully without crashing import');
+
+  // Scenario 8: ZIP with unrelated JSON (must NOT classify package.json or settings.json as conversations)
+  const zip8 = new JSZip();
+  zip8.file('package.json', JSON.stringify({ name: 'my-project', version: '1.0.0', dependencies: { react: '19.0.0' } }));
+  zip8.file('Takeout/Chrome/Bookmarks.json', JSON.stringify({ roots: { bookmark_bar: { children: [] } } }));
+  const entries8 = await extractZipArchive(await zip8.generateAsync({ type: 'nodebuffer' }));
+  const sum8 = await analyzeExtractedArchive(entries8, 'u', 'i');
+  assert(sum8.geminiConversations.length === 0, 'Scenario 8: Unrelated JSON files NOT falsely classified as conversations');
+  assert(sum8.customFiles.length >= 1 || sum8.otherServices.length >= 1, 'Scenario 8: Unrelated JSON placed in custom/other');
+
+  // Scenario 9: ZIP with empty directories
+  const zip9 = new JSZip();
+  zip9.folder('Takeout/Gemini/EmptyFolder');
+  zip9.folder('Takeout/Photos/EmptyAlbum');
+  zip9.file('Takeout/Gemini/real.json', JSON.stringify({ title: 'Real Convo', messages: [{ role: 'user', content: 'Hi' }] }));
+  const entries9 = await extractZipArchive(await zip9.generateAsync({ type: 'nodebuffer' }));
+  const sum9 = await analyzeExtractedArchive(entries9, 'u', 'i');
+  assert(sum9.geminiConversations.length === 1, 'Scenario 9: Empty directories ignored safely');
+
+  // Scenario 10: ZIP with large file within safety limits
+  const zip10 = new JSZip();
+  const largeMsg = 'Architecture decision: '.padEnd(20000, 'X');
+  zip10.file('Takeout/Gemini/large.json', JSON.stringify({ title: 'Large Message Convo', messages: [{ role: 'user', content: largeMsg }] }));
+  const entries10 = await extractZipArchive(await zip10.generateAsync({ type: 'nodebuffer' }));
+  const sum10 = await analyzeExtractedArchive(entries10, 'u', 'i');
+  assert(sum10.geminiConversations.length === 1 && sum10.geminiConversations[0].messages[0].content.length >= 20000, 'Scenario 10: Large file within limits handled cleanly');
+
+  // Scenario 11: ZIP with many files
+  const zip11 = new JSZip();
+  for (let m = 0; m < 35; m++) {
+    zip11.file(`files/doc_${m}.md`, `# Note ${m}\n**User:** Content for note ${m}`);
+  }
+  const entries11 = await extractZipArchive(await zip11.generateAsync({ type: 'nodebuffer' }));
+  const sum11 = await analyzeExtractedArchive(entries11, 'u', 'i');
+  assert(sum11.totalFiles === 35, 'Scenario 11: Multi-file archive (35 files) parsed without dropping files');
+
+  // Scenario 12: ZIP with malicious/suspicious paths (Zip Slip containment)
+  const zip12 = new JSZip();
+  zip12.file('../../../../../etc/shadow', 'root:x:0:0:root:/root:/bin/bash');
+  zip12.file('Takeout/Gemini/legit.json', JSON.stringify({ title: 'Legit', messages: [{ role: 'user', content: 'Legit' }] }));
+  const entries12 = await extractZipArchive(await zip12.generateAsync({ type: 'nodebuffer' }));
+  assert(!entries12.some((e) => e.path.startsWith('../') || e.path.startsWith('/etc')), 'Scenario 12: Directory traversal paths sanitized');
+
+  // Scenario 13: ZIP with duplicate filenames in different directories
+  const zip13 = new JSZip();
+  zip13.file('folder_a/conversations.json', JSON.stringify([{ title: 'Convo A', messages: [{ role: 'user', content: 'A' }] }]));
+  zip13.file('folder_b/conversations.json', JSON.stringify([{ title: 'Convo B', messages: [{ role: 'user', content: 'B' }] }]));
+  const entries13 = await extractZipArchive(await zip13.generateAsync({ type: 'nodebuffer' }));
+  const sum13 = await analyzeExtractedArchive(entries13, 'u', 'i');
+  assert(sum13.geminiConversations.length === 2, 'Scenario 13: Duplicate filenames in separate directories preserved');
+
+  // Scenario 14: Unexpected but valid Takeout structure (My Activity JSON and Claude export)
+  const zip14 = new JSZip();
+  zip14.file('My Activity/Gemini Apps/MyActivity.json', JSON.stringify([
+    {
+      header: 'Gemini Apps',
+      title: 'Prompted: How does multi-tenancy work in ContextOS?',
+      time: '2026-09-01T12:00:00Z',
+      subtitles: [{ name: 'ContextOS uses scoped Firestore user documents.' }],
+    },
+  ]));
+  zip14.file('claude_export/conversations.json', JSON.stringify([
+    {
+      uuid: 'cl-1',
+      name: 'Claude Chat',
+      chat_messages: [{ sender: 'human', text: 'Claude prompt' }, { sender: 'assistant', text: 'Claude response' }],
+    },
+  ]));
+  const entries14 = await extractZipArchive(await zip14.generateAsync({ type: 'nodebuffer' }));
+  const sum14 = await analyzeExtractedArchive(entries14, 'u', 'i');
+  assert(sum14.geminiConversations.length === 2, 'Scenario 14: My Activity prompt JSON & Claude chat export parsed into canonical conversations');
+
+  // Filename independence check
+  const zipBufNoExt = await zip14.generateAsync({ type: 'nodebuffer' });
+  const detectedAsZip = await isZipArchive(zipBufNoExt);
+  assert(detectedAsZip, 'Filename independence: ZIP archive recognized from magic bytes without .zip extension');
 
   console.log('\n======================================================');
   console.log(`TEST RESULTS: ${passed}/${passed + failed} PASSED (${failed} FAILED)`);

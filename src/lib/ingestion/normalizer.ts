@@ -3,7 +3,7 @@ import { detectFormat } from './detector';
 import { sanitizeText } from './sanitizer';
 import crypto from 'crypto';
 import AdmZip from 'adm-zip';
-import { parseGeminiScheduledActionsHtml, parseGeminiActivityHtml } from './local_parsers';
+import { parseGeminiScheduledActionsHtml, parseGeminiActivityHtml, parseGeminiJson } from './local_parsers';
 
 export interface NormalizationResult {
   conversations: CanonicalConversation[];
@@ -78,9 +78,11 @@ export function normalizeImport(
 
   const nowIso = new Date().toISOString();
 
-  if (detection.format === 'zip_archive' || (detection.format === 'google_takeout' && (filename.toLowerCase().endsWith('.zip') || (Buffer.isBuffer(rawInput) && rawInput[0] === 0x50 && rawInput[1] === 0x4B)))) {
+  const rawBytes = Buffer.isBuffer(rawInput) ? rawInput : Buffer.from(rawInput, 'utf8');
+  const isZipMagic = rawBytes.length >= 4 && rawBytes[0] === 0x50 && rawBytes[1] === 0x4B && rawBytes[2] === 0x03 && rawBytes[3] === 0x04;
+
+  if (detection.format === 'zip_archive' || (detection.format === 'google_takeout' && (isZipMagic || filename.toLowerCase().endsWith('.zip')))) {
     try {
-      const rawBytes = Buffer.isBuffer(rawInput) ? rawInput : Buffer.from(rawInput, 'utf8');
       const zip = new AdmZip(rawBytes);
       const zipEntries = zip.getEntries();
 
@@ -91,18 +93,29 @@ export function normalizeImport(
         if (
           lowerName.endsWith('.json') ||
           lowerName.endsWith('.md') ||
+          lowerName.endsWith('.markdown') ||
           lowerName.endsWith('.txt') ||
           lowerName.endsWith('.html') ||
           lowerName.endsWith('.htm')
         ) {
           const entryData = entry.getData().toString('utf8');
           if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
-            if (lowerName.includes('scheduled_actions') || entryData.includes('<b>Name:</b>')) {
+            if (lowerName.includes('scheduled_actions') || lowerName.includes('gemini_gems') || entryData.includes('<b>Name:</b>')) {
               const convos = parseGeminiScheduledActionsHtml(entryData, userId, importId);
               conversations.push(...convos);
-            } else if (entryData.includes('content-cell')) {
+            } else if (entryData.includes('content-cell') || entryData.includes('Prompted')) {
               const convos = parseGeminiActivityHtml(entryData, userId, importId);
               conversations.push(...convos);
+            }
+          } else if (lowerName.endsWith('.json')) {
+            const jsonConvos = parseGeminiJson(entryData, userId, importId);
+            if (jsonConvos.length > 0) {
+              conversations.push(...jsonConvos);
+            } else {
+              const subResult = normalizeImport(entryData, userId, importId, entryName);
+              conversations.push(...subResult.conversations);
+              warnings.push(...subResult.warnings.map((w) => `[${entryName}] ${w}`));
+              errors.push(...subResult.errors.map((e) => `[${entryName}] ${e}`));
             }
           } else {
             const subResult = normalizeImport(entryData, userId, importId, entryName);

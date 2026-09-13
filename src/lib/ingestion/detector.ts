@@ -83,11 +83,21 @@ export function detectFormat(rawInput: string | Buffer, filename: string = ''): 
           itemCountEstimate: 0,
           confidence: 0.9,
           encoding: 'binary',
-          errorMessage: 'ZIP archive contains no recognized conversation files (.json, .md, or .html).',
+          errorMessage: 'This archive contains no recognized history or document files (.json, .md, .txt, or .html).',
         };
       }
 
-      const hasTakeoutPath = zipEntries.some((e) => e.entryName.toLowerCase().startsWith('takeout/'));
+      const hasTakeoutPath = zipEntries.some((e) => {
+        const lower = e.entryName.toLowerCase();
+        return (
+          lower.startsWith('takeout/') ||
+          lower.includes('/takeout/') ||
+          lower.includes('gemini') ||
+          lower.includes('bard') ||
+          lower.includes('my activity') ||
+          lower.includes('google chat')
+        );
+      });
       const format: DetectedFormat = hasTakeoutPath ? 'google_takeout' : 'zip_archive';
 
       return {

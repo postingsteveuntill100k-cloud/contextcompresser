@@ -43,6 +43,50 @@ export function sanitizeArchivePath(rawPath: string): string {
 }
 
 /**
+ * Detects whether data is a ZIP archive, checking filename, MIME type, and PK\x03\x04 magic bytes.
+ * Does NOT depend on the filename having a .zip extension.
+ */
+export async function isZipArchive(data: File | Blob | ArrayBuffer | Uint8Array): Promise<boolean> {
+  if (typeof File !== 'undefined' && data instanceof File) {
+    if (data.name.toLowerCase().endsWith('.zip')) return true;
+    if (data.type === 'application/zip' || data.type === 'application/x-zip-compressed' || data.type === 'multipart/x-zip') {
+      return true;
+    }
+    try {
+      const slice = data.slice(0, 4);
+      const buf = await slice.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      return bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
+    } catch {
+      return false;
+    }
+  }
+
+  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+    try {
+      const slice = data.slice(0, 4);
+      const buf = await slice.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      return bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
+    } catch {
+      return false;
+    }
+  }
+
+  if (data instanceof Uint8Array || (typeof Buffer !== 'undefined' && Buffer.isBuffer(data))) {
+    const bytes = data as Uint8Array;
+    return bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
+  }
+
+  if (data instanceof ArrayBuffer) {
+    const bytes = new Uint8Array(data);
+    return bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
+  }
+
+  return false;
+}
+
+/**
  * Safely extracts a ZIP archive in-memory on the client device.
  * Enforces strict limits against ZIP bombs, path traversal, and decompression exhaustion.
  */
@@ -112,9 +156,14 @@ export async function extractZipArchive(
       );
     }
 
-    if (onProgress && i % 25 === 0) {
+    if (i % 15 === 0) {
+      // Yield to browser event loop to keep animations and UI completely responsive
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    if (onProgress && (i % 15 === 0 || i === fileEntries.length - 1)) {
       onProgress(
-        `Inspecting files (${i + 1}/${fileEntries.length})...`,
+        `Discovering files (${i + 1}/${fileEntries.length})...`,
         Math.round(((i + 1) / fileEntries.length) * 100)
       );
     }
