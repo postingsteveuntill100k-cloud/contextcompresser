@@ -17,7 +17,7 @@ import {
 } from '@/lib/storage/store';
 import { indexConversationForRetrieval } from '@/lib/retrieval/hybrid';
 import { verifyAuthSession, AuthenticationError, AuthorizationError } from '@/lib/security/auth_guard';
-import { RawImport } from '@/types';
+import { RawImport, CanonicalConversation } from '@/types';
 
 // Maximum supported upload payload size: 50 MiB
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
     let resumeJobId: string | undefined;
 
     const contentType = request.headers.get('content-type') || '';
+    let isSelectiveImport = false;
+    const selectiveConversations: CanonicalConversation[] = [];
+
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file') as File | null;
@@ -47,10 +50,163 @@ export async function POST(request: NextRequest) {
       rawContent = rawBytes.toString('utf8');
     } else {
       const body = await request.json();
-      rawContent = body.content || '';
-      rawBytes = Buffer.from(rawContent, 'utf8');
-      filename = body.filename || filename;
-      resumeJobId = body.jobId;
+      if (body.version === 1) {
+        isSelectiveImport = true;
+        filename = body.filename || 'selected_history.json';
+        const payloadStr = JSON.stringify(body);
+        rawBytes = Buffer.from(payloadStr, 'utf8');
+        rawContent = payloadStr;
+
+        // 1. Validate and assemble selected Gemini conversations
+        if (Array.isArray(body.conversations)) {
+          for (const c of body.conversations) {
+            if (c && typeof c === 'object') {
+              const safeConvo: CanonicalConversation = {
+                id: String(c.id || `conv_${crypto.randomUUID().slice(0, 10)}`),
+                userId, // Enforce authenticated identity
+                importId: 'pending',
+                title: String(c.title || 'Conversation'),
+                createdAt: String(c.createdAt || new Date().toISOString()),
+                updatedAt: String(c.updatedAt || new Date().toISOString()),
+                source: 'gemini',
+                messages: Array.isArray(c.messages) ? c.messages : [],
+                summary: typeof c.summary === 'string' ? c.summary : undefined,
+                tokenCount: typeof c.tokenCount === 'number' ? c.tokenCount : undefined,
+                tags: Array.isArray(c.tags) ? c.tags : ['gemini_selected'],
+                topics: Array.isArray(c.topics) ? c.topics : [],
+              };
+              selectiveConversations.push(safeConvo);
+            }
+          }
+        }
+
+        // 2. Synthesize YouTube research context if provided and selected
+        if (Array.isArray(body.youtubeRecords) && body.youtubeRecords.length > 0) {
+          const ytConvoId = `conv_yt_${crypto.randomUUID().slice(0, 8)}`;
+          const ytItems = body.youtubeRecords.slice(0, 150);
+          const ytLines = ytItems
+            .map(
+              (y: { type?: string; title?: string; url?: string; timestamp?: string }, idx: number) =>
+                `${idx + 1}. [${y.type === 'search_history' ? 'Search' : 'Watched'}] ${y.title || 'Video'}${y.url ? ` - ${y.url}` : ''} (${y.timestamp || ''})`
+            )
+            .join('\n');
+          const tokenCount = Math.max(1, Math.ceil(ytLines.length / 4));
+          selectiveConversations.push({
+            id: ytConvoId,
+            userId,
+            importId: 'pending',
+            title: `YouTube Research Activity (${body.youtubeRecords.length} items)`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            source: 'youtube',
+            messages: [
+              {
+                id: `${ytConvoId}_m1`,
+                conversationId: ytConvoId,
+                role: 'user',
+                content: `Selected YouTube research and viewed topics:\n${ytLines}`,
+                timestamp: new Date().toISOString(),
+                tokenCount,
+              },
+              {
+                id: `${ytConvoId}_m2`,
+                conversationId: ytConvoId,
+                role: 'model',
+                content: `Acknowledged. I have indexed ${body.youtubeRecords.length} YouTube research items for contextual recall.`,
+                timestamp: new Date().toISOString(),
+                tokenCount: 20,
+              },
+            ],
+            summary: `YouTube research history (${body.youtubeRecords.length} items)`,
+            tokenCount,
+            tags: ['youtube', 'research_activity'],
+          });
+        }
+
+        // 3. Synthesize Browser research context if provided and selected
+        if (Array.isArray(body.browserRecords) && body.browserRecords.length > 0) {
+          const brConvoId = `conv_browser_${crypto.randomUUID().slice(0, 8)}`;
+          const brItems = body.browserRecords.slice(0, 200);
+          const brLines = brItems
+            .map(
+              (b: { domain?: string; title?: string; url?: string; timestamp?: string }, idx: number) =>
+                `${idx + 1}. [${b.domain || 'web'}] ${b.title || b.url || 'Page'}${b.url ? ` - ${b.url}` : ''} (${b.timestamp || ''})`
+            )
+            .join('\n');
+          const tokenCount = Math.max(1, Math.ceil(brLines.length / 4));
+          selectiveConversations.push({
+            id: brConvoId,
+            userId,
+            importId: 'pending',
+            title: `Web Research Activity (${body.browserRecords.length} items)`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            source: 'browser',
+            messages: [
+              {
+                id: `${brConvoId}_m1`,
+                conversationId: brConvoId,
+                role: 'user',
+                content: `Selected web research activity across approved domains:\n${brLines}`,
+                timestamp: new Date().toISOString(),
+                tokenCount,
+              },
+              {
+                id: `${brConvoId}_m2`,
+                conversationId: brConvoId,
+                role: 'model',
+                content: `Acknowledged. I have indexed ${body.browserRecords.length} web research items across selected domains for contextual recall.`,
+                timestamp: new Date().toISOString(),
+                tokenCount: 20,
+              },
+            ],
+            summary: `Web research activity (${body.browserRecords.length} items)`,
+            tokenCount,
+            tags: ['browser', 'web_activity'],
+          });
+        }
+
+        // 4. Custom files if provided and selected
+        if (Array.isArray(body.customFiles) && body.customFiles.length > 0) {
+          for (let i = 0; i < body.customFiles.length; i++) {
+            const cf = body.customFiles[i];
+            if (!cf || !cf.content) continue;
+            const cfId = `conv_custom_${i}_${crypto.randomUUID().slice(0, 8)}`;
+            const tokenCount = Math.max(1, Math.ceil(cf.content.length / 4));
+            selectiveConversations.push({
+              id: cfId,
+              userId,
+              importId: 'pending',
+              title: String(cf.name || `Custom Note ${i + 1}`),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              source: 'custom',
+              messages: [
+                {
+                  id: `${cfId}_m1`,
+                  conversationId: cfId,
+                  role: 'user',
+                  content: cf.content,
+                  timestamp: new Date().toISOString(),
+                  tokenCount,
+                },
+              ],
+              summary: cf.content.slice(0, 140),
+              tokenCount,
+              tags: ['custom_file'],
+            });
+          }
+        }
+
+        if (selectiveConversations.length === 0) {
+          return NextResponse.json({ error: 'No conversations or records were selected for import.' }, { status: 400 });
+        }
+      } else {
+        rawContent = body.content || '';
+        rawBytes = Buffer.from(rawContent, 'utf8');
+        filename = body.filename || filename;
+        resumeJobId = body.jobId;
+      }
     }
 
     // Handle job resumption if requested
@@ -78,7 +234,7 @@ export async function POST(request: NextRequest) {
     const sha256 = computeSha256(rawBytes);
 
     // Idempotency: Check if identical archive has already been imported
-    if (!resumeJobId) {
+    if (!resumeJobId && !isSelectiveImport) {
       const existingImports = await getRawImports(userId);
       const existingMatch = existingImports.find((i) => i.sha256 === sha256);
       if (existingMatch) {
@@ -93,7 +249,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Detect format
-    const detection = detectFormat(rawBytes, filename);
+    const detection = isSelectiveImport
+      ? { format: 'google_takeout' as const, isValid: true, sha256, itemCountEstimate: selectiveConversations.length, confidence: 1, encoding: 'utf-8' }
+      : detectFormat(rawBytes, filename);
+
     if (!detection.isValid && detection.errorMessage) {
       return NextResponse.json(
         {
@@ -107,11 +266,32 @@ export async function POST(request: NextRequest) {
     const importId = `imp_${sha256.slice(0, 16)}`;
     const jobId = resumeJobId || `job_${sha256.slice(0, 12)}_${crypto.randomUUID().slice(0, 8)}`;
 
-    // 1. Immutable Cloud Storage upload (exact raw archive preservation using raw bytes)
-    const storagePath = await saveRawArchiveToStorage(userId, importId, filename, rawBytes);
+    let storagePath = 'selected_user_data';
+    let normResult: {
+      conversations: CanonicalConversation[];
+      totalMessages: number;
+      warnings: string[];
+      errors: string[];
+      formatDetected: string;
+    };
 
-    // 2. Normalize into canonical internal model
-    const normResult = normalizeImport(rawBytes, userId, importId, filename);
+    if (isSelectiveImport) {
+      for (const c of selectiveConversations) {
+        c.importId = importId;
+      }
+      normResult = {
+        conversations: selectiveConversations,
+        totalMessages: selectiveConversations.reduce((acc, c) => acc + c.messages.length, 0),
+        warnings: [],
+        errors: [],
+        formatDetected: 'google_takeout',
+      };
+    } else {
+      // 1. Immutable Cloud Storage upload (direct raw archive preservation)
+      storagePath = await saveRawArchiveToStorage(userId, importId, filename, rawBytes);
+      // 2. Normalize into canonical internal model
+      normResult = normalizeImport(rawBytes, userId, importId, filename);
+    }
 
     if (normResult.errors.length > 0 && normResult.conversations.length === 0) {
       return NextResponse.json(
@@ -123,7 +303,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Save Raw Archive metadata record in Firestore with Cloud Storage reference
+    // 3. Save Raw Archive metadata record in Firestore
     const rawRecord: RawImport = {
       id: importId,
       userId,

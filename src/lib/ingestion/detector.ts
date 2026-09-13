@@ -46,14 +46,21 @@ export function detectFormat(rawInput: string | Buffer, filename: string = ''): 
 
   const lowerFilename = filename.toLowerCase();
 
-  // 1. Check for ZIP Archive (PK\x03\x04 magic bytes or .zip extension)
+  // 1. Check for ZIP Archive (PK\x03\x04 magic bytes, or .zip extension without leading JSON structure)
   const isZipMagic = rawBytes.length >= 4 && rawBytes[0] === 0x50 && rawBytes[1] === 0x4B && rawBytes[2] === 0x03 && rawBytes[3] === 0x04;
-  if (lowerFilename.endsWith('.zip') || isZipMagic) {
+  const startsWithJson = (rawBytes[0] === 0x7B /* '{' */ || rawBytes[0] === 0x5B /* '[' */);
+  if (isZipMagic || (lowerFilename.endsWith('.zip') && !startsWithJson)) {
     try {
       const zip = new AdmZip(rawBytes);
       const zipEntries = zip.getEntries();
       const relevantEntries = zipEntries.filter(
-        (e) => !e.isDirectory && (e.entryName.toLowerCase().endsWith('.json') || e.entryName.toLowerCase().endsWith('.md') || e.entryName.toLowerCase().endsWith('.txt'))
+        (e) =>
+          !e.isDirectory &&
+          (e.entryName.toLowerCase().endsWith('.json') ||
+            e.entryName.toLowerCase().endsWith('.md') ||
+            e.entryName.toLowerCase().endsWith('.txt') ||
+            e.entryName.toLowerCase().endsWith('.html') ||
+            e.entryName.toLowerCase().endsWith('.htm'))
       );
 
       if (zipEntries.length === 0) {
@@ -76,12 +83,15 @@ export function detectFormat(rawInput: string | Buffer, filename: string = ''): 
           itemCountEstimate: 0,
           confidence: 0.9,
           encoding: 'binary',
-          errorMessage: 'ZIP archive contains no recognized conversation files (.json or .md).',
+          errorMessage: 'ZIP archive contains no recognized conversation files (.json, .md, or .html).',
         };
       }
 
+      const hasTakeoutPath = zipEntries.some((e) => e.entryName.toLowerCase().startsWith('takeout/'));
+      const format: DetectedFormat = hasTakeoutPath ? 'google_takeout' : 'zip_archive';
+
       return {
-        format: 'zip_archive',
+        format,
         isValid: true,
         sha256,
         itemCountEstimate: relevantEntries.length,
@@ -106,13 +116,32 @@ export function detectFormat(rawInput: string | Buffer, filename: string = ''): 
   const rawContent = isBuf ? rawBytes.toString('utf8') : rawInput;
   const trimmed = rawContent.trim();
 
-  // 2. Reject HTML error pages and web documents
+  // 2. Check for Google Takeout HTML or reject web error pages
   if (
     trimmed.startsWith('<!DOCTYPE') ||
     trimmed.toLowerCase().startsWith('<html') ||
     lowerFilename.endsWith('.html') ||
     lowerFilename.endsWith('.htm')
   ) {
+    const isTakeoutHtml =
+      lowerFilename.includes('gemini') ||
+      trimmed.includes('gemini_scheduled_actions') ||
+      trimmed.includes('<b>Name:</b>') ||
+      trimmed.includes('<b>Instructions:</b>') ||
+      trimmed.includes('content-cell') ||
+      trimmed.includes('watch-history');
+
+    if (isTakeoutHtml) {
+      return {
+        format: 'google_takeout',
+        isValid: true,
+        sha256,
+        itemCountEstimate: 1,
+        confidence: 0.9,
+        encoding: 'utf-8',
+      };
+    }
+
     return {
       format: 'unknown',
       isValid: false,
@@ -120,7 +149,7 @@ export function detectFormat(rawInput: string | Buffer, filename: string = ''): 
       itemCountEstimate: 0,
       confidence: 0.9,
       encoding: 'utf-8',
-      errorMessage: 'HTML documents and web error pages are unsupported. Please provide a Gemini Takeout JSON export, Markdown transcript, or ZIP archive.',
+      errorMessage: 'HTML documents and web error pages are unsupported. Please provide a Google Takeout export, Gemini JSON export, Markdown transcript, or ZIP archive.',
     };
   }
 

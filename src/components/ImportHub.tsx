@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { RawImport } from '@/types';
+import { RawImport, CanonicalConversation } from '@/types';
 import { fetchWithAuth } from '@/lib/security/client_auth';
 import { useData } from '@/context/DataContext';
 import ContextOSLoader from './ContextOSLoader';
 import Link from 'next/link';
+import { extractZipArchive, ExtractedFileEntry } from '@/lib/ingestion/local_extractor';
+import { analyzeExtractedArchive, DiscoverySummary } from '@/lib/ingestion/source_classifier';
+import { parseGeminiJson, parseMarkdownConversation } from '@/lib/ingestion/local_parsers';
 import {
   Upload,
   FileArchive,
@@ -17,6 +20,17 @@ import {
   MessageSquare,
   FileCode,
   RotateCcw,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Video,
+  Bot,
+  FileText,
+  Lock,
+  ArrowRight,
+  ArrowLeft,
+  Check,
 } from 'lucide-react';
 
 interface ImportHubProps {
@@ -27,9 +41,17 @@ interface ImportHubProps {
   onAskHistory?: () => void;
 }
 
-type Stage = 'idle' | 'uploading' | 'parsing' | 'normalizing' | 'extracting' | 'indexing' | 'ready' | 'error';
+type Stage =
+  | 'idle'
+  | 'analyzing'
+  | 'source_selection'
+  | 'privacy_review'
+  | 'uploading'
+  | 'ready'
+  | 'error';
 
 export default function ImportHub({
+  currentUser,
   onImportComplete,
   rawImports,
   onExploreConversations,
@@ -38,6 +60,8 @@ export default function ImportHub({
   const { refreshData } = useData();
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
+
+  // Flow & State
   const [stage, setStage] = useState<Stage>('idle');
   const [stageMessage, setStageMessage] = useState<string>('');
   const [selectedFileName, setSelectedFileName] = useState<string>('');
@@ -49,7 +73,33 @@ export default function ImportHub({
     convoCount?: number;
     warnings?: string[];
     duplicate?: boolean;
+    entities?: {
+      decisions?: number;
+      technicalSpecs?: number;
+    };
   } | null>(null);
+
+  // Local Discovery State
+  const [discovery, setDiscovery] = useState<DiscoverySummary | null>(null);
+
+  // Source Selections
+  const [includeGemini, setIncludeGemini] = useState<boolean>(true);
+  const [selectedConvoIds, setSelectedConvoIds] = useState<Set<string>>(new Set());
+  const [convoSearch, setConvoSearch] = useState<string>('');
+
+  const [includeYouTube, setIncludeYouTube] = useState<boolean>(false);
+
+  const [includeBrowser, setIncludeBrowser] = useState<boolean>(false);
+  const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
+  const [domainSearch, setDomainSearch] = useState<string>('');
+
+  const [includeCustom, setIncludeCustom] = useState<boolean>(true);
+  const [selectedCustomPaths, setSelectedCustomPaths] = useState<Set<string>>(new Set());
+
+  // UI Expansion
+  const [geminiExpanded, setGeminiExpanded] = useState<boolean>(true);
+  const [browserExpanded, setBrowserExpanded] = useState<boolean>(false);
+  const [otherExpanded, setOtherExpanded] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +115,10 @@ export default function ImportHub({
     };
   }, []);
 
+  /**
+   * Handles local extraction and discovery on user device.
+   * Never uploads raw file to the server.
+   */
   const handleFileUpload = async (file: File) => {
     setSelectedFileName(file.name);
     setSelectedFileSize((file.size / (1024 * 1024)).toFixed(2) + ' MB');
@@ -72,67 +126,311 @@ export default function ImportHub({
     setImportReport(null);
     setImportedCount(null);
 
-    // Real progress stages based on actual processing
-    setStage('uploading');
-    setStageMessage(`Uploading ${file.name} (${(file.size / 1024).toFixed(1)} KB)...`);
+    setStage('analyzing');
+    setStageMessage('Reading archive on this device...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const lower = file.name.toLowerCase();
 
-      // Transition to server processing
-      setStage('parsing');
-      setStageMessage('Parsing archive structure and validating schema...');
+      if (lower.endsWith('.zip')) {
+        // Local ZIP extraction with security limits
+        const entries = await extractZipArchive(file, (msg) => {
+          setStageMessage(msg);
+        });
+
+        setStageMessage('Sorting discovered sources locally...');
+        const summary = await analyzeExtractedArchive(
+          entries,
+          currentUser || 'user_local',
+          'imp_local',
+          (msg) => setStageMessage(msg)
+        );
+
+        const totalUsable =
+          summary.geminiConversations.length +
+          summary.youtubeRecords.length +
+          summary.browserRecords.length +
+          summary.customFiles.length;
+
+        if (totalUsable === 0 && summary.otherServices.length === 0) {
+          throw new Error('We found files in the archive, but none are currently recognized.');
+        }
+
+        setDiscovery(summary);
+
+        // Initialize selections
+        setSelectedConvoIds(new Set(summary.geminiConversations.map((c) => c.id)));
+        setIncludeGemini(summary.geminiConversations.length > 0);
+
+        // Pre-select recommended research domains (github, stackoverflow, docs)
+        const defaultDomains = new Set<string>();
+        summary.browserDomains.forEach((d) => {
+          if (d.selected) defaultDomains.add(d.domain);
+        });
+        setSelectedDomains(defaultDomains);
+        setIncludeBrowser(false); // Opt-in by default for privacy
+        setIncludeYouTube(false); // Opt-in by default for privacy
+
+        setSelectedCustomPaths(new Set(summary.customFiles.map((c) => c.path)));
+        setIncludeCustom(summary.customFiles.length > 0);
+
+        setStage('source_selection');
+      } else if (lower.endsWith('.json')) {
+        const text = await file.text();
+        const convos = parseGeminiJson(text, currentUser || 'user_local', 'imp_local');
+
+        const summary: DiscoverySummary = {
+          totalFiles: 1,
+          totalDecompressedBytes: file.size,
+          geminiConversations: convos,
+          youtubeRecords: [],
+          browserRecords: [],
+          browserDomains: [],
+          otherServices: [],
+          customFiles:
+            convos.length === 0
+              ? [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }]
+              : [],
+        };
+
+        setDiscovery(summary);
+        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
+        setIncludeGemini(convos.length > 0);
+        setSelectedCustomPaths(new Set([file.name]));
+        setIncludeCustom(convos.length === 0);
+        setStage('source_selection');
+      } else if (lower.endsWith('.md') || lower.endsWith('.txt')) {
+        const text = await file.text();
+        const convos = parseMarkdownConversation(text, currentUser || 'user_local', 'imp_local', file.name);
+
+        const summary: DiscoverySummary = {
+          totalFiles: 1,
+          totalDecompressedBytes: file.size,
+          geminiConversations: convos,
+          youtubeRecords: [],
+          browserRecords: [],
+          browserDomains: [],
+          otherServices: [],
+          customFiles: [{ path: file.name, name: file.name, size: file.size, content: text, selected: true }],
+        };
+
+        setDiscovery(summary);
+        setSelectedConvoIds(new Set(convos.map((c) => c.id)));
+        setIncludeGemini(convos.length > 0);
+        setSelectedCustomPaths(new Set([file.name]));
+        setIncludeCustom(true);
+        setStage('source_selection');
+      } else {
+        throw new Error('Unsupported file format. Please provide a .zip Takeout archive, .json export, or .md transcript.');
+      }
+    } catch (err: unknown) {
+      setStage('error');
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(
+        msg.includes('corrupted') || msg.includes('read this ZIP')
+          ? "We couldn't read this ZIP file. It may be corrupted or malformed."
+          : msg
+      );
+    }
+  };
+
+  /**
+   * Confirms user selection and transmits ONLY the selected normalized records.
+   */
+  const handleConfirmAndUpload = async () => {
+    if (!discovery) return;
+
+    // Filter to strictly selected records
+    const selectedConvos = includeGemini
+      ? discovery.geminiConversations.filter((c) => selectedConvoIds.has(c.id))
+      : [];
+
+    const selectedYt = includeYouTube ? discovery.youtubeRecords : [];
+
+    const selectedBrowser = includeBrowser
+      ? discovery.browserRecords.filter((b) => selectedDomains.has(b.domain))
+      : [];
+
+    const selectedCustom = includeCustom
+      ? discovery.customFiles.filter((f) => selectedCustomPaths.has(f.path))
+      : [];
+
+    const totalSelected =
+      selectedConvos.length + selectedYt.length + selectedBrowser.length + selectedCustom.length;
+
+    if (totalSelected === 0) {
+      setErrorMessage('Please select at least one conversation or record to import.');
+      return;
+    }
+
+    setStage('uploading');
+    setStageMessage('Sending selected data to secure processing...');
+
+    const allSelectedConvos: CanonicalConversation[] = [...selectedConvos];
+
+    if (includeYouTube && selectedYt.length > 0) {
+      const ytLines = selectedYt
+        .slice(0, 100)
+        .map(
+          (y, idx) =>
+            `${idx + 1}. [${y.type === 'search_history' ? 'Search' : 'Watched'}] ${y.title}${y.url ? ` - ${y.url}` : ''} (${y.timestamp})`
+        )
+        .join('\n');
+      allSelectedConvos.push({
+        id: `conv_yt_${Date.now()}`,
+        userId: currentUser || 'user_local',
+        importId: 'imp_local',
+        title: `YouTube Research Activity (${selectedYt.length} items)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        source: 'youtube',
+        messages: [
+          {
+            id: `m_yt_1`,
+            conversationId: `conv_yt_${Date.now()}`,
+            role: 'user',
+            content: `Selected YouTube research activity:\n${ytLines}`,
+            timestamp: new Date().toISOString(),
+            tokenCount: Math.ceil(ytLines.length / 4),
+          },
+        ],
+        summary: `YouTube activity (${selectedYt.length} records)`,
+        tokenCount: Math.ceil(ytLines.length / 4),
+        tags: ['youtube', 'research_activity'],
+      });
+    }
+
+    if (includeBrowser && selectedBrowser.length > 0) {
+      const brLines = selectedBrowser
+        .slice(0, 150)
+        .map(
+          (b, idx) =>
+            `${idx + 1}. [${b.domain}] ${b.title || b.url}${b.url ? ` - ${b.url}` : ''} (${b.timestamp})`
+        )
+        .join('\n');
+      allSelectedConvos.push({
+        id: `conv_browser_${Date.now()}`,
+        userId: currentUser || 'user_local',
+        importId: 'imp_local',
+        title: `Web Research Activity (${selectedBrowser.length} items across ${selectedDomains.size} domains)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        source: 'browser',
+        messages: [
+          {
+            id: `m_br_1`,
+            conversationId: `conv_browser_${Date.now()}`,
+            role: 'user',
+            content: `Selected web activity across approved domains:\n${brLines}`,
+            timestamp: new Date().toISOString(),
+            tokenCount: Math.ceil(brLines.length / 4),
+          },
+        ],
+        summary: `Web activity across ${selectedDomains.size} domains`,
+        tokenCount: Math.ceil(brLines.length / 4),
+        tags: ['browser', 'web_activity'],
+      });
+    }
+
+    if (includeCustom && selectedCustom.length > 0) {
+      for (let i = 0; i < selectedCustom.length; i++) {
+        const cf = selectedCustom[i];
+        allSelectedConvos.push({
+          id: `conv_custom_${i}_${Date.now()}`,
+          userId: currentUser || 'user_local',
+          importId: 'imp_local',
+          title: cf.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          source: 'custom',
+          messages: [
+            {
+              id: `m_cf_${i}`,
+              conversationId: `conv_custom_${i}_${Date.now()}`,
+              role: 'user',
+              content: cf.content,
+              timestamp: new Date().toISOString(),
+              tokenCount: Math.ceil(cf.content.length / 4),
+            },
+          ],
+          summary: cf.content.slice(0, 140),
+          tokenCount: Math.ceil(cf.content.length / 4),
+          tags: ['custom_file'],
+        });
+      }
+    }
+
+    try {
+      const payload = {
+        version: 1,
+        filename: 'selected_history.json',
+        content: JSON.stringify(allSelectedConvos),
+        selectedSources: [
+          ...(includeGemini && selectedConvos.length > 0 ? ['gemini'] : []),
+          ...(includeYouTube && selectedYt.length > 0 ? ['youtube'] : []),
+          ...(includeBrowser && selectedBrowser.length > 0 ? ['browser'] : []),
+          ...(includeCustom && selectedCustom.length > 0 ? ['custom'] : []),
+        ],
+        conversations: allSelectedConvos,
+        youtubeRecords: selectedYt,
+        browserRecords: selectedBrowser,
+        customFiles: selectedCustom.map((c) => ({ name: c.name, content: c.content })),
+        manifest: {
+          geminiCount: selectedConvos.length,
+          youtubeCount: selectedYt.length,
+          browserDomainCount: includeBrowser ? selectedDomains.size : 0,
+          browserRecordCount: selectedBrowser.length,
+          customFileCount: selectedCustom.length,
+          totalSelectedItems: totalSelected,
+          confirmedAt: new Date().toISOString(),
+        },
+      };
+
+      setStageMessage('Building your context...');
 
       const res = await fetchWithAuth('/api/import', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
-      setStage('extracting');
-      setStageMessage('Extracting decisions, technical context, and indexing for retrieval...');
+      setStageMessage('Extracting decisions and indexing context...');
 
-      // Handle non-JSON or server error safely without letting syntax error leak
       interface ApiImportResponse {
         error?: string;
         duplicate?: boolean;
-        conversationCount?: number;
         conversationsImported?: number;
-        conversations?: unknown[];
         format?: string;
-        message?: string;
         warnings?: string[];
+        structuredEntitiesExtracted?: {
+          decisions?: number;
+          technicalSpecs?: number;
+        };
       }
-      let data: ApiImportResponse;
+
       const text = await res.text();
+      let data: ApiImportResponse;
       try {
         data = JSON.parse(text) as ApiImportResponse;
       } catch {
-        throw new Error(`Server returned an unreadable response (HTTP ${res.status}). Please verify server logs.`);
+        throw new Error(`Server returned an unreadable response (HTTP ${res.status}).`);
       }
 
       if (!res.ok) {
-        throw new Error(data.error || `Import failed with status ${res.status}`);
+        throw new Error(data.error || `Processing failed with status ${res.status}`);
       }
 
-      if (data.duplicate) {
-        setStage('ready');
-        setImportedCount(data.conversationCount || 0);
-        setImportReport({
-          duplicate: true,
-          convoCount: data.conversationCount || 0,
-          warnings: data.message ? [data.message] : [],
-        });
-      } else {
-        setStage('ready');
-        const count = data.conversationsImported ?? (data.conversations ? data.conversations.length : 0);
-        setImportedCount(count);
-        setImportReport({
-          format: data.format,
-          convoCount: count,
-          warnings: data.warnings,
-        });
-      }
+      setStage('ready');
+      const count = data.conversationsImported ?? selectedConvos.length;
+      setImportedCount(count);
+      setImportReport({
+        format: data.format || 'Selected History',
+        convoCount: count,
+        warnings: data.warnings,
+        entities: data.structuredEntitiesExtracted,
+      });
 
       if (onImportComplete) {
         onImportComplete();
@@ -142,8 +440,8 @@ export default function ImportHub({
       setStage('error');
       const msg = err instanceof Error ? err.message : String(err);
       setErrorMessage(
-        msg.includes('JSON') || msg.includes('parse')
-          ? "We couldn't read that file. Check the format and try again."
+        msg.includes('Network') || msg.includes('Failed to fetch')
+          ? 'Your selected data could not be uploaded. Nothing else from the archive was sent.'
           : msg
       );
     }
@@ -158,353 +456,1157 @@ export default function ImportHub({
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'copy';
-    }
-    setIsDragging(true);
-  };
-
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     dragCounterRef.current -= 1;
-    if (dragCounterRef.current <= 0) {
-      dragCounterRef.current = 0;
+    if (dragCounterRef.current === 0) {
       setIsDragging(false);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    dragCounterRef.current = 0;
     setIsDragging(false);
+    dragCounterRef.current = 0;
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       handleFileUpload(file);
     }
   };
 
+  // Filtered Gemini conversations
+  const filteredConvos = (discovery?.geminiConversations || []).filter((c) =>
+    c.title.toLowerCase().includes(convoSearch.toLowerCase())
+  );
+
+  // Filtered Browser domains
+  const filteredDomains = (discovery?.browserDomains || []).filter((d) =>
+    d.domain.toLowerCase().includes(domainSearch.toLowerCase())
+  );
+
+  // Calculate selected counts for privacy manifest
+  const selectedGeminiCount = includeGemini ? selectedConvoIds.size : 0;
+  const selectedYtCount = includeYouTube ? (discovery?.youtubeRecords.length || 0) : 0;
+  const selectedBrowserRecordCount = includeBrowser
+    ? (discovery?.browserRecords || []).filter((b) => selectedDomains.has(b.domain)).length
+    : 0;
+  const selectedCustomCount = includeCustom ? selectedCustomPaths.size : 0;
+  const totalSelectedCount =
+    selectedGeminiCount + selectedYtCount + selectedBrowserRecordCount + selectedCustomCount;
+
   return (
-    <div style={{ maxWidth: '980px', margin: '0 auto', padding: '36px 24px 80px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
-      
-      {/* Header */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <span
-          className="font-label-sm"
-          style={{
-            color: 'var(--primary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontWeight: 600,
-          }}
-        >
-          Data Ingestion
-        </span>
-        <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0, fontSize: '32px', fontWeight: 400 }}>
-          Import AI History
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* Top Header */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <span
+            className="font-label-sm"
+            style={{
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--primary)',
+              fontWeight: 600,
+            }}
+          >
+            Privacy-First Ingestion
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>·</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Lock size={12} color="var(--primary)" /> Client-side extraction
+          </span>
+        </div>
+        <h1 className="font-headline-lg" style={{ color: 'var(--on-surface)', margin: 0 }}>
+          Import AI & Research History
         </h1>
-        <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6, maxWidth: '680px' }}>
-          Connect your Google Gemini history archive. ContextOS preserves your raw archives verbatim as immutable evidence, extracts decisions and context, and indexes everything for instant retrieval.
+        <p className="font-body-md" style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+          ContextOS analyzes your Google Takeout archive locally on your device. You choose exactly which conversations and records are sent for processing.
         </p>
-      </section>
-
-      {/* Step-by-Step Onboarding Guide for Google Takeout */}
-      <div
-        style={{
-          backgroundColor: 'var(--surface-container-low)',
-          border: '1px solid var(--hairline)',
-          borderRadius: 'var(--radius-xl)',
-          padding: '28px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h2 className="font-title" style={{ color: 'var(--on-surface)', margin: 0, fontSize: '16px' }}>
-              How to obtain your Gemini history
-            </h2>
-            <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-              Follow these simple steps to export your data directly from Google.
-            </p>
-          </div>
-
-          <a
-            id="link-google-takeout"
-            href="https://takeout.google.com/takeout/custom/gemini"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--surface-container-high)',
-              border: '1px solid var(--hairline)',
-              color: 'var(--on-surface)',
-              fontSize: '13px',
-              fontWeight: 500,
-              textDecoration: 'none',
-              transition: 'background-color 0.15s ease',
-            }}
-          >
-            <span>Open Google Takeout</span>
-            <ExternalLink size={14} color="var(--primary-container)" />
-          </a>
-        </div>
-
-        {/* 4 Steps */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '14px',
-          }}
-        >
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: 'var(--surface-container)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--hairline)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
-              Step 1
-            </span>
-            <h3 style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--on-surface)', margin: 0 }}>
-              Export Gemini Activity
-            </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
-              Visit Google Takeout with Gemini pre-selected. Click &ldquo;Next Step&rdquo;.
-            </p>
-          </div>
-
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: 'var(--surface-container)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--hairline)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
-              Step 2
-            </span>
-            <h3 style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--on-surface)', margin: 0 }}>
-              Download Archive
-            </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
-              When your export is ready, download the <code style={{ color: 'var(--primary)' }}>.zip</code> or <code style={{ color: 'var(--primary)' }}>.json</code> file.
-            </p>
-          </div>
-
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: 'var(--surface-container)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--hairline)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
-              Step 3
-            </span>
-            <h3 style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--on-surface)', margin: 0 }}>
-              Upload Archive
-            </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
-              Select or drag your archive into the drop zone below.
-            </p>
-          </div>
-
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: 'var(--surface-container)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--hairline)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
-              Step 4
-            </span>
-            <h3 style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--on-surface)', margin: 0 }}>
-              Automatic Indexing
-            </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
-              ContextOS indexes all conversations and extracts key decisions automatically.
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* Robust Drag & Drop Zone */}
-      <div
-        id="drop-zone"
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => {
-          if (stage !== 'uploading' && stage !== 'parsing' && stage !== 'extracting') {
-            fileInputRef.current?.click();
-          }
-        }}
-        style={{
-          border: isDragging
-            ? '2px dashed var(--primary)'
-            : stage === 'ready'
-            ? '1px solid var(--success)'
-            : '1px dashed var(--hairline)',
-          borderRadius: 'var(--radius-xl)',
-          padding: '48px 24px',
-          textAlign: 'center',
-          backgroundColor: isDragging
-            ? 'var(--surface-container-high)'
-            : 'var(--surface-container-low)',
-          boxShadow: isDragging ? '0 0 28px rgba(217, 119, 70, 0.28)' : 'none',
-          cursor: stage === 'uploading' || stage === 'parsing' || stage === 'extracting' ? 'wait' : 'pointer',
-          transition: 'all 0.2s ease',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
-        <input
-          id="archive-file-input"
-          type="file"
-          ref={fileInputRef}
-          accept=".zip,.json,.md"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-              handleFileUpload(e.target.files[0]);
-            }
-          }}
-        />
+      {/* STAGE 1: IDLE DROP ZONE */}
+      {stage === 'idle' && (
+        <>
+          {/* Quick Guide */}
+          <div
+            style={{
+              backgroundColor: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--hairline)',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileArchive size={18} color="var(--primary)" />
+                <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--on-surface)', margin: 0 }}>
+                  How to export from Google Takeout
+                </h2>
+              </div>
+              <a
+                href="https://takeout.google.com"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '13px',
+                  color: 'var(--primary)',
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                }}
+              >
+                <span>Open Google Takeout</span>
+                <ExternalLink size={13} />
+              </a>
+            </div>
 
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '12px',
+              }}
+            >
+              <div
+                style={{
+                  padding: '14px',
+                  backgroundColor: 'var(--surface-container)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--hairline)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
+                  Step 1
+                </span>
+                <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)', margin: 0 }}>
+                  Select Services
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  Deselect all, then check <strong style={{ color: 'var(--on-surface)' }}>Gemini</strong>, <strong style={{ color: 'var(--on-surface)' }}>YouTube</strong>, or <strong style={{ color: 'var(--on-surface)' }}>Chrome</strong>.
+                </p>
+              </div>
+
+              <div
+                style={{
+                  padding: '14px',
+                  backgroundColor: 'var(--surface-container)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--hairline)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
+                  Step 2
+                </span>
+                <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)', margin: 0 }}>
+                  Download Archive
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  Receive the <code style={{ color: 'var(--primary)' }}>.zip</code> archive from Google.
+                </p>
+              </div>
+
+              <div
+                style={{
+                  padding: '14px',
+                  backgroundColor: 'var(--surface-container)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--hairline)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
+                  Step 3
+                </span>
+                <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)', margin: 0 }}>
+                  Local Inspection
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  Drop your file below. ContextOS inspects it locally without uploading.
+                </p>
+              </div>
+
+              <div
+                style={{
+                  padding: '14px',
+                  backgroundColor: 'var(--surface-container)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--hairline)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>
+                  Step 4
+                </span>
+                <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)', margin: 0 }}>
+                  Select & Process
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  Choose only the data you want. Only approved items leave your browser.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Drag & Drop Zone */}
+          <div
+            id="drop-zone"
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border: isDragging
+                ? '2px dashed var(--primary)'
+                : '1px dashed var(--hairline)',
+              borderRadius: 'var(--radius-xl)',
+              padding: '48px 24px',
+              textAlign: 'center',
+              backgroundColor: isDragging
+                ? 'var(--surface-container-high)'
+                : 'var(--surface-container-low)',
+              boxShadow: isDragging ? '0 0 28px rgba(217, 119, 70, 0.28)' : 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+            }}
+          >
+            <input
+              id="archive-file-input"
+              type="file"
+              ref={fileInputRef}
+              accept=".zip,.json,.md,.txt"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  handleFileUpload(e.target.files[0]);
+                }
+              }}
+            />
+
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--surface-container)',
+                border: '1px solid var(--hairline)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--primary-container)',
+              }}
+            >
+              <Upload size={26} />
+            </div>
+
+            <div>
+              <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 6px 0', fontSize: '16px' }}>
+                {isDragging ? 'Drop your history archive here' : 'Drop your history here or click to browse'}
+              </h3>
+              <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                {isDragging
+                  ? 'Release to inspect locally on your device'
+                  : 'Select your Google Takeout (.zip), Gemini export (.json), or Markdown notes'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-container)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                .ZIP (Google Takeout)
+              </span>
+              <span
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-container)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                .JSON (Gemini Export)
+              </span>
+              <span
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--surface-container)',
+                  color: 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                .MD (Markdown Notes)
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>· Processed strictly locally first</span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* STAGE 2: LOCAL EXTRACTION & ANALYSIS (LOOPING ANIMATION) */}
+      {stage === 'analyzing' && (
         <div
+          id="analyzing-card"
           style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--surface-container)',
+            backgroundColor: 'var(--surface-container-low)',
+            borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--hairline)',
+            padding: '48px 24px',
+            textAlign: 'center',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--primary-container)',
+            gap: '20px',
           }}
         >
-          {stage === 'uploading' || stage === 'parsing' || stage === 'extracting' ? (
-            <ContextOSLoader size={26} status="" />
-          ) : stage === 'ready' ? (
-            <CheckCircle2 size={26} color="var(--success)" />
-          ) : (
-            <Upload size={26} />
-          )}
-        </div>
-
-        <div>
-          <h3 className="font-title" style={{ color: 'var(--on-surface)', margin: '0 0 6px 0', fontSize: '16px' }}>
-            {isDragging
-              ? 'Drop your history here'
-              : stage === 'uploading' || stage === 'parsing' || stage === 'extracting'
-              ? 'Importing...'
-              : stage === 'ready'
-              ? 'Imported successfully'
-              : 'Drop your history here or click to browse'}
-          </h3>
-          <p className="font-body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            {isDragging
-              ? 'Release to upload (.zip, .json, .md)'
-              : stageMessage || 'Drag and drop your Takeout archive (.zip, .json) or Markdown logs'}
-          </p>
-        </div>
-
-        {/* Supported Formats & File Limits */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span
-            style={{
-              padding: '3px 8px',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: 'var(--surface-container)',
-              color: 'var(--text-secondary)',
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            .ZIP (Takeout Archive)
-          </span>
-          <span
-            style={{
-              padding: '3px 8px',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: 'var(--surface-container)',
-              color: 'var(--text-secondary)',
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            .JSON (Gemini Export)
-          </span>
-          <span
-            style={{
-              padding: '3px 8px',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: 'var(--surface-container)',
-              color: 'var(--text-secondary)',
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            .MD (Markdown Log)
-          </span>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>· Up to 50 MB</span>
-        </div>
-
-        {selectedFileName && (
+          <ContextOSLoader size={36} status="" />
+          <div>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--on-surface)', margin: '0 0 6px 0' }}>
+              Analyzing your archive locally...
+            </h3>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: 0 }}>
+              {stageMessage || 'Reading archive files on this device...'}
+            </p>
+          </div>
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '4px 10px',
-              borderRadius: '4px',
+              padding: '6px 14px',
+              borderRadius: '20px',
               backgroundColor: 'var(--surface-container-high)',
               fontSize: '12px',
-              color: 'var(--on-surface)',
-              fontFamily: 'var(--font-mono)',
+              color: 'var(--primary)',
+              fontWeight: 500,
             }}
           >
-            <FileCode size={13} />
-            <span>{selectedFileName}</span>
-            {selectedFileSize && <span style={{ color: 'var(--text-muted)' }}>({selectedFileSize})</span>}
+            <ShieldCheck size={14} />
+            <span>Zero bytes leave your device during analysis</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Completion Banner */}
+      {/* STAGE 3: SOURCE SELECTION */}
+      {stage === 'source_selection' && discovery && (
+        <div
+          id="source-selection-container"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+          }}
+        >
+          {/* Trust Banner */}
+          <div
+            style={{
+              padding: '16px 20px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(217, 119, 70, 0.08)',
+              border: '1px solid rgba(217, 119, 70, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ShieldCheck size={20} color="var(--primary)" />
+              <div>
+                <span style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                  Archive analyzed locally on this device
+                </span>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                  Choose exactly what ContextOS is allowed to process. Unselected data stays strictly on your device.
+                </p>
+              </div>
+            </div>
+            <span
+              style={{
+                fontSize: '11.5px',
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              {discovery.totalFiles} files inspected ({((discovery.totalDecompressedBytes || 0) / (1024 * 1024)).toFixed(1)} MB)
+            </span>
+          </div>
+
+          {/* 1. GEMINI CONVERSATIONS */}
+          <div
+            id="source-card-gemini"
+            style={{
+              backgroundColor: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-lg)',
+              border: includeGemini ? '1px solid var(--primary)' : '1px solid var(--hairline)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: 'var(--surface-container)',
+                borderBottom: geminiExpanded ? '1px solid var(--hairline)' : 'none',
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={includeGemini}
+                  onChange={(e) => setIncludeGemini(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Bot size={18} color="var(--primary)" />
+                  <span style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                    Gemini Conversations
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: 'var(--surface-container-high)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {discovery.geminiConversations.length}
+                  </span>
+                </div>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setGeminiExpanded(!geminiExpanded)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12.5px',
+                }}
+              >
+                <span>{geminiExpanded ? 'Hide' : 'Review'}</span>
+                {geminiExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            </div>
+
+            {geminiExpanded && includeGemini && (
+              <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
+                    <Search
+                      size={14}
+                      color="var(--text-muted)"
+                      style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search conversations..."
+                      value={convoSearch}
+                      onChange={(e) => setConvoSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px 6px 30px',
+                        fontSize: '12.5px',
+                        backgroundColor: 'var(--surface-container)',
+                        border: '1px solid var(--hairline)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--on-surface)',
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedConvoIds(new Set(discovery.geminiConversations.map((c) => c.id)))}
+                      className="btn-ghost"
+                      style={{ padding: '4px 8px', fontSize: '11.5px' }}
+                    >
+                      Select all ({discovery.geminiConversations.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedConvoIds(new Set())}
+                      className="btn-ghost"
+                      style={{ padding: '4px 8px', fontSize: '11.5px' }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    maxHeight: '260px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--hairline)',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--surface-container-lowest)',
+                  }}
+                >
+                  {filteredConvos.length > 0 ? (
+                    filteredConvos.map((c) => {
+                      const isSelected = selectedConvoIds.has(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px',
+                            padding: '10px 14px',
+                            borderBottom: '1px solid var(--hairline)',
+                            cursor: 'pointer',
+                            backgroundColor: isSelected ? 'rgba(217, 119, 70, 0.04)' : 'transparent',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const next = new Set(selectedConvoIds);
+                              if (e.target.checked) next.add(c.id);
+                              else next.delete(c.id);
+                              setSelectedConvoIds(next);
+                            }}
+                            style={{ marginTop: '3px', accentColor: 'var(--primary)' }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--on-surface)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {c.title}
+                              </span>
+                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', flexShrink: 0 }}>
+                                {c.messages.length} messages
+                              </span>
+                            </div>
+                            {c.summary && (
+                              <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '2px 0 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {c.summary}
+                              </p>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                      No conversations match &ldquo;{convoSearch}&rdquo;
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. YOUTUBE ACTIVITY */}
+          <div
+            id="source-card-youtube"
+            style={{
+              backgroundColor: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-lg)',
+              border: includeYouTube ? '1px solid var(--primary)' : '1px solid var(--hairline)',
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={includeYouTube}
+                onChange={(e) => setIncludeYouTube(e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Video size={18} color="var(--primary)" />
+                <span style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                  YouTube Activity
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--surface-container-high)',
+                    color: 'var(--text-secondary)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {discovery.youtubeRecords.length} records
+                </span>
+              </div>
+            </label>
+
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Watch & search history for research context
+            </span>
+          </div>
+
+          {/* 3. BROWSER & WEB ACTIVITY */}
+          <div
+            id="source-card-browser"
+            style={{
+              backgroundColor: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-lg)',
+              border: includeBrowser ? '1px solid var(--primary)' : '1px solid var(--hairline)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: 'var(--surface-container)',
+                borderBottom: browserExpanded ? '1px solid var(--hairline)' : 'none',
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={includeBrowser}
+                  onChange={(e) => setIncludeBrowser(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Globe size={18} color="var(--primary)" />
+                  <span style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                    Browser / Web Activity
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: 'var(--surface-container-high)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {discovery.browserRecords.length} records across {discovery.browserDomains.length} domains
+                  </span>
+                </div>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setBrowserExpanded(!browserExpanded)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12.5px',
+                }}
+              >
+                <span>{browserExpanded ? 'Hide domains' : 'Filter domains'}</span>
+                {browserExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            </div>
+
+            {browserExpanded && includeBrowser && (
+              <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
+                    <Search
+                      size={14}
+                      color="var(--text-muted)"
+                      style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search domains (e.g. github.com)..."
+                      value={domainSearch}
+                      onChange={(e) => setDomainSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px 6px 30px',
+                        fontSize: '12.5px',
+                        backgroundColor: 'var(--surface-container)',
+                        border: '1px solid var(--hairline)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--on-surface)',
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDomains(new Set(discovery.browserDomains.map((d) => d.domain)))}
+                      className="btn-ghost"
+                      style={{ padding: '4px 8px', fontSize: '11.5px' }}
+                    >
+                      Select all
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDomains(new Set())}
+                      className="btn-ghost"
+                      style={{ padding: '4px 8px', fontSize: '11.5px' }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--hairline)',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--surface-container-lowest)',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: '1px',
+                  }}
+                >
+                  {filteredDomains.length > 0 ? (
+                    filteredDomains.map((d) => {
+                      const isSelected = selectedDomains.has(d.domain);
+                      return (
+                        <label
+                          key={d.domain}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            backgroundColor: isSelected ? 'rgba(217, 119, 70, 0.05)' : 'transparent',
+                            borderBottom: '1px solid var(--hairline)',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const next = new Set(selectedDomains);
+                              if (e.target.checked) next.add(d.domain);
+                              else next.delete(d.domain);
+                              setSelectedDomains(next);
+                            }}
+                            style={{ accentColor: 'var(--primary)' }}
+                          />
+                          <span style={{ fontSize: '12.5px', fontWeight: 500, color: 'var(--on-surface)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {d.domain}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                            {d.count}
+                          </span>
+                        </label>
+                      );
+                    })
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                      No domains match &ldquo;{domainSearch}&rdquo;
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 4. CUSTOM FILES */}
+          {discovery.customFiles.length > 0 && (
+            <div
+              id="source-card-custom"
+              style={{
+                backgroundColor: 'var(--surface-container-low)',
+                borderRadius: 'var(--radius-lg)',
+                border: includeCustom ? '1px solid var(--primary)' : '1px solid var(--hairline)',
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={includeCustom}
+                  onChange={(e) => setIncludeCustom(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={18} color="var(--primary)" />
+                  <span style={{ fontSize: '14.5px', fontWeight: 600, color: 'var(--on-surface)' }}>
+                    Custom Notes & Documents
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: 'var(--surface-container-high)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {discovery.customFiles.length} files
+                  </span>
+                </div>
+              </label>
+
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Markdown & custom text files
+              </span>
+            </div>
+          )}
+
+          {/* 5. OTHER GOOGLE SERVICES (SAFELY IGNORED / INFORMATIONAL) */}
+          {discovery.otherServices.length > 0 && (
+            <div
+              id="source-card-other"
+              style={{
+                backgroundColor: 'var(--surface-container-low)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--hairline)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                onClick={() => setOtherExpanded(!otherExpanded)}
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  backgroundColor: 'var(--surface-container)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={16} color="var(--success)" />
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--on-surface)' }}>
+                    Other Takeout services safely ignored ({discovery.otherServices.length})
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  <span>{otherExpanded ? 'Hide' : 'Show'}</span>
+                  {otherExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </div>
+              </div>
+
+              {otherExpanded && (
+                <div style={{ padding: '14px 16px', fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  <p style={{ margin: '0 0 10px 0' }}>
+                    ContextOS specializes in AI conversations and research history. The following services detected in your Takeout archive are <strong style={{ color: 'var(--on-surface)' }}>never uploaded</strong>:
+                  </p>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {discovery.otherServices.map((s) => (
+                      <span
+                        key={s.service}
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          backgroundColor: 'var(--surface-container-high)',
+                          fontSize: '11.5px',
+                          color: 'var(--on-surface)',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                      >
+                        {s.service} ({s.fileCount} files)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action Bar */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: '8px',
+              borderTop: '1px solid var(--hairline)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setStage('idle');
+                setDiscovery(null);
+              }}
+              className="btn-ghost"
+              style={{ padding: '8px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <ArrowLeft size={14} />
+              <span>Choose different archive</span>
+            </button>
+
+            <button
+              id="btn-review-selection"
+              type="button"
+              onClick={() => {
+                if (totalSelectedCount === 0) {
+                  setErrorMessage('Please select at least one item to continue.');
+                  return;
+                }
+                setErrorMessage(null);
+                setStage('privacy_review');
+              }}
+              className="btn-primary"
+              style={{
+                padding: '10px 20px',
+                fontSize: '13.5px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: 600,
+              }}
+            >
+              <span>Review Selected Data ({totalSelectedCount} items)</span>
+              <ArrowRight size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 4: PRIVACY CONFIRMATION & MANIFEST */}
+      {stage === 'privacy_review' && discovery && (
+        <div
+          id="privacy-review-card"
+          style={{
+            backgroundColor: 'var(--surface-container-low)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--primary)',
+            padding: '32px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(217, 119, 70, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--primary)',
+                flexShrink: 0,
+              }}
+            >
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h3 style={{ color: 'var(--on-surface)', margin: 0, fontSize: '17px', fontWeight: 600 }}>
+                Privacy Confirmation: Only your selected data will be sent
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '13.5px', lineHeight: 1.5 }}>
+                Your complete Takeout archive stays on your computer. ContextOS will upload only the normalized records you explicitly approved below.
+              </p>
+            </div>
+          </div>
+
+          {/* Manifest Table */}
+          <div
+            style={{
+              backgroundColor: 'var(--surface-container)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--hairline)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '12px 16px',
+                borderBottom: '1px solid var(--hairline)',
+                fontWeight: 600,
+                fontSize: '13px',
+                color: 'var(--on-surface)',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>Selected Source Breakdown</span>
+              <span style={{ color: 'var(--primary)', fontFamily: 'var(--font-mono)' }}>Ready to transmit</span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: 'var(--on-surface)' }}>Gemini Conversations</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: selectedGeminiCount > 0 ? 'var(--on-surface)' : 'var(--text-muted)' }}>
+                  {selectedGeminiCount} conversations
+                </span>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: 'var(--on-surface)' }}>YouTube Research Activity</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: selectedYtCount > 0 ? 'var(--on-surface)' : 'var(--text-muted)' }}>
+                  {selectedYtCount > 0 ? `${selectedYtCount} records` : 'None selected'}
+                </span>
+              </div>
+
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: 'var(--on-surface)' }}>Browser Web Activity</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: selectedBrowserRecordCount > 0 ? 'var(--on-surface)' : 'var(--text-muted)' }}>
+                  {selectedBrowserRecordCount > 0 ? `${selectedBrowserRecordCount} records across ${selectedDomains.size} domains` : 'None selected'}
+                </span>
+              </div>
+
+              <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: 'var(--on-surface)' }}>Custom Files</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: selectedCustomCount > 0 ? 'var(--on-surface)' : 'var(--text-muted)' }}>
+                  {selectedCustomCount > 0 ? `${selectedCustomCount} files` : 'None selected'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={() => setStage('source_selection')}
+              className="btn-ghost"
+              style={{ padding: '8px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <ArrowLeft size={14} />
+              <span>Back to Edit Selection</span>
+            </button>
+
+            <button
+              id="btn-confirm-upload"
+              type="button"
+              onClick={handleConfirmAndUpload}
+              className="btn-primary"
+              style={{
+                padding: '10px 24px',
+                fontSize: '14px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Check size={16} />
+              <span>Confirm & Build Context</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 5: UPLOADING & CLOUD CONTEXT EXTRACTION */}
+      {stage === 'uploading' && (
+        <div
+          id="uploading-progress-card"
+          style={{
+            backgroundColor: 'var(--surface-container-low)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--hairline)',
+            padding: '48px 24px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px',
+          }}
+        >
+          <ContextOSLoader size={36} status="" />
+          <div>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--on-surface)', margin: '0 0 6px 0' }}>
+              Building your context...
+            </h3>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: 0 }}>
+              {stageMessage || 'Extracting decisions, technical specs, and indexing context...'}
+            </p>
+          </div>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Processing only your approved items
+          </span>
+        </div>
+      )}
+
+      {/* STAGE 6: READY BANNER */}
       {stage === 'ready' && importedCount !== null && (
         <div
           id="import-complete-card"
@@ -512,34 +1614,37 @@ export default function ImportHub({
             backgroundColor: 'var(--surface-container-low)',
             border: '1px solid var(--success)',
             borderRadius: 'var(--radius-lg)',
-            padding: '24px',
+            padding: '28px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
+            gap: '20px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '40px',
+                height: '40px',
                 borderRadius: '50%',
                 backgroundColor: 'rgba(118, 138, 126, 0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--success)',
+                flexShrink: 0,
               }}
             >
-              <CheckCircle2 size={20} />
+              <CheckCircle2 size={24} />
             </div>
             <div>
-              <h3 style={{ color: 'var(--on-surface)', margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                Import complete
+              <h3 style={{ color: 'var(--on-surface)', margin: 0, fontSize: '17px', fontWeight: 600 }}>
+                Your context is ready
               </h3>
-              <p style={{ color: 'var(--text-secondary)', margin: '2px 0 0 0', fontSize: '13.5px' }}>
-                {importedCount} {importedCount === 1 ? 'conversation' : 'conversations'} imported and indexed.
-                {importReport?.format ? ` (Source: ${importReport.format})` : ''}
+              <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '13.5px' }}>
+                {importedCount} {importedCount === 1 ? 'item' : 'items'} processed and indexed.
+                {importReport?.entities?.decisions
+                  ? ` Extracted ${importReport.entities.decisions} decisions and ${importReport.entities.technicalSpecs || 0} specifications.`
+                  : ''}
               </p>
             </div>
           </div>
@@ -609,12 +1714,36 @@ export default function ImportHub({
                 <span>Ask my history</span>
               </Link>
             )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setStage('idle');
+                setDiscovery(null);
+                setSelectedFileName('');
+                setSelectedFileSize('');
+                setImportedCount(null);
+              }}
+              className="btn-ghost"
+              style={{
+                padding: '8px 16px',
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                border: '1px solid var(--hairline)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <RotateCcw size={14} />
+              <span>Import Another Archive</span>
+            </button>
           </div>
         </div>
       )}
 
-      {/* Human-Readable Error Banner */}
-      {errorMessage && (
+      {/* ERROR BANNER */}
+      {errorMessage && stage !== 'source_selection' && (
         <div
           id="import-error-card"
           style={{
@@ -641,6 +1770,7 @@ export default function ImportHub({
                 setErrorMessage(null);
                 setSelectedFileName('');
                 setSelectedFileSize('');
+                setDiscovery(null);
               }}
               className="btn-secondary"
               style={{
@@ -658,7 +1788,7 @@ export default function ImportHub({
         </div>
       )}
 
-      {/* Previously Imported Raw Archives */}
+      {/* Audit Trail: Previously Imported Archives */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <div>
@@ -729,7 +1859,7 @@ export default function ImportHub({
               fontSize: '13px',
             }}
           >
-            No archives imported yet. Export your Takeout archive to get started.
+            No archives imported yet. Select or drop your archive above to begin.
           </div>
         )}
       </section>

@@ -3,6 +3,7 @@ import { detectFormat } from './detector';
 import { sanitizeText } from './sanitizer';
 import crypto from 'crypto';
 import AdmZip from 'adm-zip';
+import { parseGeminiScheduledActionsHtml, parseGeminiActivityHtml } from './local_parsers';
 
 export interface NormalizationResult {
   conversations: CanonicalConversation[];
@@ -77,7 +78,7 @@ export function normalizeImport(
 
   const nowIso = new Date().toISOString();
 
-  if (detection.format === 'zip_archive') {
+  if (detection.format === 'zip_archive' || (detection.format === 'google_takeout' && (filename.toLowerCase().endsWith('.zip') || (Buffer.isBuffer(rawInput) && rawInput[0] === 0x50 && rawInput[1] === 0x4B)))) {
     try {
       const rawBytes = Buffer.isBuffer(rawInput) ? rawInput : Buffer.from(rawInput, 'utf8');
       const zip = new AdmZip(rawBytes);
@@ -87,12 +88,28 @@ export function normalizeImport(
         if (entry.isDirectory) continue;
         const entryName = entry.entryName;
         const lowerName = entryName.toLowerCase();
-        if (lowerName.endsWith('.json') || lowerName.endsWith('.md') || lowerName.endsWith('.txt')) {
+        if (
+          lowerName.endsWith('.json') ||
+          lowerName.endsWith('.md') ||
+          lowerName.endsWith('.txt') ||
+          lowerName.endsWith('.html') ||
+          lowerName.endsWith('.htm')
+        ) {
           const entryData = entry.getData().toString('utf8');
-          const subResult = normalizeImport(entryData, userId, importId, entryName);
-          conversations.push(...subResult.conversations);
-          warnings.push(...subResult.warnings.map((w) => `[${entryName}] ${w}`));
-          errors.push(...subResult.errors.map((e) => `[${entryName}] ${e}`));
+          if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
+            if (lowerName.includes('scheduled_actions') || entryData.includes('<b>Name:</b>')) {
+              const convos = parseGeminiScheduledActionsHtml(entryData, userId, importId);
+              conversations.push(...convos);
+            } else if (entryData.includes('content-cell')) {
+              const convos = parseGeminiActivityHtml(entryData, userId, importId);
+              conversations.push(...convos);
+            }
+          } else {
+            const subResult = normalizeImport(entryData, userId, importId, entryName);
+            conversations.push(...subResult.conversations);
+            warnings.push(...subResult.warnings.map((w) => `[${entryName}] ${w}`));
+            errors.push(...subResult.errors.map((e) => `[${entryName}] ${e}`));
+          }
         }
       }
     } catch (e: unknown) {
@@ -111,6 +128,24 @@ export function normalizeImport(
   }
 
   const rawContent = Buffer.isBuffer(rawInput) ? rawInput.toString('utf8') : rawInput;
+
+  if (detection.format === 'google_takeout' && (filename.toLowerCase().endsWith('.html') || filename.toLowerCase().endsWith('.htm') || rawContent.includes('<b>Name:</b>') || rawContent.includes('content-cell'))) {
+    if (filename.toLowerCase().includes('scheduled_actions') || rawContent.includes('<b>Name:</b>')) {
+      const convos = parseGeminiScheduledActionsHtml(rawContent, userId, importId);
+      conversations.push(...convos);
+    } else if (rawContent.includes('content-cell')) {
+      const convos = parseGeminiActivityHtml(rawContent, userId, importId);
+      conversations.push(...convos);
+    }
+    const totalMessages = conversations.reduce((acc, c) => acc + c.messages.length, 0);
+    return {
+      conversations,
+      totalMessages,
+      warnings,
+      errors,
+      formatDetected: detection.format,
+    };
+  }
 
   if (detection.format === 'markdown') {
     // Parse markdown sections
