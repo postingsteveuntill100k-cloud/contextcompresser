@@ -8,16 +8,7 @@ import ContextOSLoader from './ContextOSLoader';
 import Link from 'next/link';
 import GoogleTakeoutGuide from './GoogleTakeoutGuide';
 import { adaptiveExtractAndDiscover, ArchiveProfile } from '@/lib/ingestion/adaptive_importer';
-import { extractZipArchive, isZipArchive, ExtractedFileEntry } from '@/lib/ingestion/local_extractor';
-import { analyzeExtractedArchive, DiscoverySummary } from '@/lib/ingestion/source_classifier';
-import {
-  parseGeminiJson,
-  parseMarkdownConversation,
-  parseGeminiScheduledActionsHtml,
-  parseGeminiActivityHtml,
-  parseYouTubeActivity,
-  parseBrowserActivity,
-} from '@/lib/ingestion/local_parsers';
+import { DiscoverySummary } from '@/lib/ingestion/source_classifier';
 import {
   Upload,
   FileArchive,
@@ -27,7 +18,6 @@ import {
   Clock,
   Search,
   MessageSquare,
-  FileCode,
   RotateCcw,
   ShieldCheck,
   ChevronDown,
@@ -200,8 +190,6 @@ export default function ImportHub({
       );
     }
   };
-
-  const handleFileUpload = (file: File) => handleFilesUpload([file]);
 
   /**
    * Confirms user selection and transmits ONLY the selected normalized records.
@@ -564,8 +552,8 @@ export default function ImportHub({
         />
       )}
 
-      {/* STAGE 1: IDLE DROP ZONE */}
-      {stage === 'idle' && (
+      {/* STAGE 1: IDLE / ERROR DROP ZONE */}
+      {(stage === 'idle' || stage === 'error') && (
         <>
           {/* Quick Guide */}
           <div
@@ -842,6 +830,11 @@ export default function ImportHub({
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', margin: 0 }}>
               {stageMessage || 'Reading archive files on this device...'}
             </p>
+            {selectedFileName && (
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0', fontFamily: 'var(--font-mono)' }}>
+                {selectedFileName} {selectedFileSize ? `(${selectedFileSize})` : ''}
+              </p>
+            )}
           </div>
           {archiveProfile && (
             <div

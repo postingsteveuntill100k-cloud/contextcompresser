@@ -122,8 +122,8 @@ export async function profileArchives(
     const name = fileNames[fIdx] || (file instanceof File ? file.name : `archive_${fIdx + 1}.zip`);
 
     let byteLength = 0;
-    if (file && typeof (file as any).size === 'number') {
-      byteLength = (file as any).size;
+    if (file && typeof (file as { size?: unknown }).size === 'number') {
+      byteLength = (file as { size: number }).size;
     } else if (file instanceof ArrayBuffer || file instanceof Uint8Array) {
       byteLength = file.byteLength;
     }

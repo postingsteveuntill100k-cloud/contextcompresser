@@ -228,7 +228,7 @@ export default function ConversationsView({
               No conversations imported yet
             </h3>
             <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '440px', lineHeight: 1.5 }}>
-              Import a Google Takeout JSON export or a Markdown chat transcript to start exploring your AI history.
+              Import your Google Takeout archive (.zip) or AI transcripts to start exploring your AI history.
             </p>
           </div>
 

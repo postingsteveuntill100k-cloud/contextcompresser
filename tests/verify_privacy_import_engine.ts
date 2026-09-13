@@ -1,24 +1,16 @@
 import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
 import JSZip from 'jszip';
 import { extractZipArchive, sanitizeArchivePath, isZipArchive } from '../src/lib/ingestion/local_extractor';
 import {
-  classifyFileSource,
   analyzeExtractedArchive,
 } from '../src/lib/ingestion/source_classifier';
 import {
   parseGeminiScheduledActionsHtml,
-  parseGeminiActivityHtml,
-  parseGeminiJson,
-  parseYouTubeActivity,
-  parseBrowserActivity,
-  parseMarkdownConversation,
   extractDomainFromUrl,
 } from '../src/lib/ingestion/local_parsers';
 import { detectFormat } from '../src/lib/ingestion/detector';
 import { normalizeImport } from '../src/lib/ingestion/normalizer';
-import { saveConversations, getConversations, getMemory, saveMemory } from '../src/lib/storage/store';
+import { saveConversations, getConversations } from '../src/lib/storage/store';
 
 let passed = 0;
 let failed = 0;
@@ -54,8 +46,9 @@ async function runTestMatrix() {
   try {
     await extractZipArchive(emptyBuf);
     assert(false, 'Empty ZIP should throw error');
-  } catch (err: any) {
-    assert(err.message.includes('empty'), 'Empty ZIP throws useful error');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    assert(msg.includes('empty'), 'Empty ZIP throws useful error');
   }
 
   // B. Corrupted ZIP
@@ -63,8 +56,9 @@ async function runTestMatrix() {
   try {
     await extractZipArchive(corruptBuf);
     assert(false, 'Corrupted ZIP should throw error');
-  } catch (err: any) {
-    assert(err.message.includes("couldn't read this ZIP"), 'Corrupted ZIP throws useful human error');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    assert(msg.includes("couldn't read this ZIP"), 'Corrupted ZIP throws useful human error');
   }
 
   // C. Zip with Unicode Filenames and Nested Directories
@@ -84,15 +78,17 @@ async function runTestMatrix() {
   try {
     await extractZipArchive(unicodeBuf, undefined, { maxFileCount: 2 });
     assert(false, 'Excessive file count should throw error');
-  } catch (err: any) {
-    assert(err.message.includes('too many files'), 'File count limit enforced safely');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    assert(msg.includes('too many files'), 'File count limit enforced safely');
   }
 
   try {
     await extractZipArchive(unicodeBuf, undefined, { maxDecompressedBytes: 50 });
     assert(false, 'Excessive decompressed size should throw error');
-  } catch (err: any) {
-    assert(err.message.includes('exceeds maximum safe limit'), 'Decompressed size limit enforced safely');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    assert(msg.includes('exceeds maximum safe limit'), 'Decompressed size limit enforced safely');
   }
 
   // --- Group 3: Local Source Classification & Discovery Engine ---

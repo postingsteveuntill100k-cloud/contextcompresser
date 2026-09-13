@@ -29,6 +29,22 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)}
       />
 
+      {/* Mobile Navigation Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="mobile-nav-backdrop"
+          aria-label="Close navigation menu"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 45,
+            backdropFilter: 'blur(2px)',
+          }}
+        />
+      )}
+
       {/* Main Content Stage */}
       <main
         className="contextos-main-stage"

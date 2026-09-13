@@ -1,6 +1,5 @@
 import puppeteer from 'puppeteer-core';
 import { getAdminAuth } from '../src/lib/firebase/admin';
-import path from 'path';
 
 async function runProdImportBrowserTest() {
   console.log('================================================================');
@@ -39,7 +38,7 @@ async function runProdImportBrowserTest() {
         try {
           const body = await res.text();
           console.log(`  [Response body preview]:`, body.slice(0, 300));
-        } catch (e) {
+        } catch {
           // ignore
         }
       }

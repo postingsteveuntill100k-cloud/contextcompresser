@@ -227,7 +227,7 @@ export default function ProjectsView({
               No projects indexed yet
             </h3>
             <p className="font-body-md" style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '440px', lineHeight: 1.5 }}>
-              Import a Google Takeout JSON archive or Markdown transcript to see your project threads organized automatically.
+              Import your Google Takeout archive (.zip) or AI transcripts to see your project threads organized automatically.
             </p>
           </div>
 

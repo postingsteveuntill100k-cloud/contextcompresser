@@ -3,8 +3,6 @@ import JSZip from 'jszip';
 import {
   profileArchives,
   adaptiveExtractAndDiscover,
-  ArchiveProfile,
-  AdaptiveStrategy,
 } from '../src/lib/ingestion/adaptive_importer';
 import { sanitizeArchivePath } from '../src/lib/ingestion/local_extractor';
 

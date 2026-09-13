@@ -10,6 +10,7 @@ import {
   Search,
   MessageSquare,
   Folder,
+  Layers,
   Download,
   Settings,
   LogOut,
@@ -34,6 +35,7 @@ export default function Navigation({ convoCount = 0, isOpen = false, onCloseMobi
         { href: '/ask', label: 'Ask', icon: Search, id: 'nav-ask' },
         { href: '/conversations', label: 'Conversations', icon: MessageSquare, id: 'nav-conversations', count: convoCount },
         { href: '/projects', label: 'Projects', icon: Folder, id: 'nav-projects' },
+        { href: '/packages', label: 'Packages', icon: Layers, id: 'nav-packages' },
       ],
     },
     {
@@ -261,6 +263,7 @@ export default function Navigation({ convoCount = 0, isOpen = false, onCloseMobi
             id="btn-sign-out"
             onClick={logout}
             title="Sign Out"
+            aria-label="Sign Out"
             style={{
               background: 'transparent',
               border: 'none',

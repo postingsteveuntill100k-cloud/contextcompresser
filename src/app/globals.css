@@ -386,3 +386,43 @@ html, body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN (Mobile & Narrow Viewports <= 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .contextos-nav {
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+  }
+
+  .contextos-nav.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .contextos-header {
+    left: 0 !important;
+    padding: 0 16px !important;
+  }
+
+  .contextos-main-stage {
+    margin-left: 0 !important;
+    padding-top: 64px !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Compact padding on mobile */
+  #source-selection-container,
+  #drop-zone,
+  .panel-card {
+    padding: 16px !important;
+  }
+}
+

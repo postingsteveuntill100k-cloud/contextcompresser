@@ -6,12 +6,9 @@ import {
   ExternalLink,
   ArrowRight,
   ArrowLeft,
-  CheckCircle2,
   ShieldCheck,
-  FileArchive,
   Info,
-  ChevronRight,
-  Sparkles,
+  X,
 } from 'lucide-react';
 
 interface GoogleTakeoutGuideProps {
@@ -164,6 +161,23 @@ export default function GoogleTakeoutGuide({ onClose, onGoToDropZone }: GoogleTa
               }}
             >
               <span>I Have My ZIP &rarr;</span>
+            </button>
+          )}
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="btn-secondary"
+              aria-label="Close guide"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <X size={15} />
             </button>
           )}
         </div>
