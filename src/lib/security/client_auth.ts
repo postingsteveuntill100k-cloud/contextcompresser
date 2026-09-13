@@ -92,14 +92,14 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
-  // 12-second watchdog timeout for browser environments with third-party cookie/popup partitioning
+  // 10-second watchdog timeout for browser environments with third-party cookie/popup partitioning
   let timerId: ReturnType<typeof setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timerId = setTimeout(() => {
       const err = new Error('Popup communication timed out due to browser cross-origin policy');
       (err as unknown as { code: string }).code = 'auth/popup-timeout';
       reject(err);
-    }, 12000);
+    }, 10000);
   });
 
   try {
@@ -121,14 +121,9 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
     const code = errObj?.code || '';
     console.warn('[Auth Lifecycle] signInWithPopup caught error: code =', code, 'message =', msg);
 
-    // Auto-fallback to redirect if popup communication was blocked or timed out
-    if (
-      code === 'auth/popup-timeout' ||
-      code === 'auth/popup-blocked' ||
-      code === 'auth/network-request-failed' ||
-      code === 'auth/internal-error'
-    ) {
-      console.log('[Auth Lifecycle] Falling back to signInWithRedirect due to:', code);
+    // Auto-fallback to redirect ONLY if popup was actively blocked by browser popup blocker
+    if (code === 'auth/popup-blocked') {
+      console.log('[Auth Lifecycle] Popup blocked by browser, falling back to signInWithRedirect');
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('contextos_redirect_in_progress', 'true');
       }
@@ -136,7 +131,11 @@ export async function signInWithGooglePopup(): Promise<{ idToken: string; user: 
       return new Promise<never>(() => {});
     }
 
-    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    if (
+      code === 'auth/popup-closed-by-user' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/popup-timeout'
+    ) {
       throw new Error('Sign-in was cancelled: Google account window was closed before completing.');
     }
     throw err;
